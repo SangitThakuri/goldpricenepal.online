@@ -1,32 +1,39 @@
 /* =====================================================
    Gold Price Nepal – main.js
-   API: fawazahmed0 CDN  (XAU + XAG, dated URLs for history)
-   Chart: ApexCharts (line + candlestick)
+   Primary:  www.fenegosida.org  (official Nepal rate)
+   Fallback: fawazahmed0 CDN XAU/NPR + 27.6% Nepal premium
+   Chart:    ApexCharts  (line + candlestick)
    ===================================================== */
 
 const TOLA_GRAMS     = 11.664;
 const TROY_OZ_GRAMS  = 31.1035;
-const NEPAL_PREMIUM  = 1.276;   // 10% duty + 13% VAT + ~2% margin
+const NEPAL_PREMIUM  = 1.276;   // fallback: 10% duty + 13% VAT + ~2% margin
 const SILVER_PREMIUM = 1.12;
 const REFRESH_MS     = 5 * 60 * 1000;
-const BASE_CDN       = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
+
+const FENEGOSIDA_URL = 'https://www.fenegosida.org/';
+const CORS_PROXY     = 'https://api.allorigins.win/get?url=';
+const CDN_BASE       = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
 
 const state = {
-  goldUSD:        0,
-  goldNPR:        0,
-  silverNPR:      0,
-  yesterdayNPR:   0,
-  usdNPR:         135,
-  chartPeriod:    '7d',
-  chartType:      'line',
-  apexChart:      null
+  goldUSD:       0,
+  goldNPR:       0,       // international XAU/NPR
+  silverNPR:     0,
+  yesterdayNPR:  0,
+  usdNPR:        135,
+  nepal24kTola:  0,       // FENEGOSIDA price (or fallback)
+  priceSource:   'loading',  // 'fenegosida' | 'international'
+  chartPeriod:   '7d',
+  chartType:     'line',
+  calcMode:      'weight-to-price',
+  apexChart:     null
 };
 
 /* ── helpers ── */
 const fmt = n  => n ? Math.round(n).toLocaleString('en-NP') : '—';
 const el  = id => document.getElementById(id);
 const els = s  => document.querySelectorAll(s);
-const set = (id, val) => { const e = el(id); if (e) e.textContent = val; };
+const set = (id, v) => { const e = el(id); if (e) e.textContent = v; };
 
 function isoDate(daysAgo = 0) {
   const d = new Date();
@@ -47,105 +54,152 @@ async function fetchWithTimeout(url, ms = 12000) {
 
 /* ── cache ── */
 function saveCache(o) {
-  try { localStorage.setItem('gnp_v3', JSON.stringify({ ...o, ts: Date.now() })); } catch (_) {}
+  try { localStorage.setItem('gnp_v4', JSON.stringify({ ...o, ts: Date.now() })); } catch (_) {}
 }
 function loadCache() {
   try {
-    const c = JSON.parse(localStorage.getItem('gnp_v3') || 'null');
+    const c = JSON.parse(localStorage.getItem('gnp_v4') || 'null');
     if (c && Date.now() - c.ts < 3_600_000) return c;
   } catch (_) {}
   return null;
 }
 
-/* ── price math ── */
-function calcPrices(goldNPR_oz, silverNPR_oz) {
-  const gpg = (goldNPR_oz / TROY_OZ_GRAMS) * NEPAL_PREMIUM;
-  const spg = (silverNPR_oz / TROY_OZ_GRAMS) * SILVER_PREMIUM;
-  const gold = k => ({
-    perGram: gpg * (k / 24),
-    perTola: gpg * (k / 24) * TOLA_GRAMS,
-    per10g:  gpg * (k / 24) * 10
-  });
-  return {
-    '24k': gold(24), '22k': gold(22), '18k': gold(18), '14k': gold(14),
-    silver: { perGram: spg, perTola: spg * TOLA_GRAMS, per10g: spg * 10 }
-  };
+/* ══════════════════════════════════════════
+   FENEGOSIDA  (official Nepal gold price)
+══════════════════════════════════════════ */
+async function fetchFENEGOSIDA() {
+  const url  = CORS_PROXY + encodeURIComponent(FENEGOSIDA_URL);
+  const data = await fetchWithTimeout(url, 14000).then(r => r.json());
+  const html = data?.contents;
+  if (!html) throw new Error('No FENEGOSIDA HTML');
+
+  // 1. Try per-tola price directly
+  const tolaM = html.match(/per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
+  if (tolaM) {
+    const p = parseInt(tolaM[1], 10);
+    if (p > 80000 && p < 700000) return p;
+  }
+
+  // 2. Derive from per-10g price
+  const tenGM = html.match(/per 10 gr[\s\S]{0,80}<b>(\d+)<\/b>/);
+  if (tenGM) {
+    const per10g = parseInt(tenGM[1], 10);
+    const perTola = Math.round(per10g * TOLA_GRAMS / 10);
+    if (perTola > 80000 && perTola < 700000) return perTola;
+  }
+
+  throw new Error('Could not parse FENEGOSIDA price');
 }
 
-/* ── fetch today ── */
-async function fetchGoldXAU(dateStr) {
-  const url = `${BASE_CDN}@${dateStr}/v1/currencies/xau.json`;
+/* ══════════════════════════════════════════
+   International fallback  (XAU / XAG CDN)
+══════════════════════════════════════════ */
+async function fetchXAU(dateStr) {
+  const url = `${CDN_BASE}@${dateStr}/v1/currencies/xau.json`;
   return fetchWithTimeout(url, 10000).then(r => r.json());
 }
-async function fetchSilverXAG() {
-  const url = `${BASE_CDN}@latest/v1/currencies/xag.json`;
-  return fetchWithTimeout(url, 10000).then(r => r.json());
+async function fetchXAG() {
+  return fetchWithTimeout(`${CDN_BASE}@latest/v1/currencies/xag.json`, 10000).then(r => r.json());
 }
 
+/* ══════════════════════════════════════════
+   Master fetch – tries FENEGOSIDA first
+══════════════════════════════════════════ */
 async function fetchPrices() {
   try {
-    const today     = isoDate(0);
-    const yesterday = isoDate(1);
-
-    const [todayData, yestData, silverData] = await Promise.all([
-      fetchGoldXAU(today),
-      fetchGoldXAU(yesterday).catch(() => null),
-      fetchSilverXAG().catch(() => null)
+    // Fetch FENEGOSIDA + XAU(today+yesterday) + XAG simultaneously
+    const [fenegosidaRes, xauTodayRes, xauYestRes, xagRes] = await Promise.allSettled([
+      fetchFENEGOSIDA(),
+      fetchXAU(isoDate(0)),
+      fetchXAU(isoDate(1)),
+      fetchXAG()
     ]);
 
-    const goldNPR   = todayData?.xau?.npr;
-    const goldUSD   = todayData?.xau?.usd;
-    const yestNPR   = yestData?.xau?.npr   || 0;
-    const silverNPR = silverData?.xag?.npr || 0;
+    const xauToday = xauTodayRes.value;
+    const goldUSD  = xauToday?.xau?.usd;
+    const goldNPR  = xauToday?.xau?.usd ? xauToday.xau.npr : null;
 
-    if (!goldNPR || !goldUSD) throw new Error('No gold data');
+    if (!goldUSD) throw new Error('XAU data missing');
 
-    state.goldUSD      = goldUSD;
-    state.goldNPR      = goldNPR;
-    state.silverNPR    = silverNPR;
-    state.yesterdayNPR = yestNPR;
-    state.usdNPR       = goldNPR / goldUSD;
+    const usdNPR    = goldNPR / goldUSD;
+    const silverNPR = xagRes.value?.xag?.npr || 0;
+    const yestNPR   = xauYestRes.value?.xau?.npr || 0;
 
-    saveCache({ goldUSD, goldNPR, silverNPR, yesterdayNPR: yestNPR });
+    // Decide price source
+    let nepal24kTola, priceSource;
+    if (fenegosidaRes.status === 'fulfilled' && fenegosidaRes.value) {
+      nepal24kTola = fenegosidaRes.value;
+      priceSource  = 'fenegosida';
+    } else {
+      // Fallback: international calculation
+      nepal24kTola = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
+      priceSource  = 'international';
+      console.warn('FENEGOSIDA fetch failed, using international fallback:', fenegosidaRes.reason?.message);
+    }
+
+    Object.assign(state, { goldUSD, goldNPR, silverNPR, yesterdayNPR: yestNPR, usdNPR, nepal24kTola, priceSource });
+    saveCache({ goldUSD, goldNPR, silverNPR, yesterdayNPR: yestNPR, nepal24kTola, priceSource });
     renderUI();
 
   } catch (err) {
     console.warn('Fetch failed:', err.message);
     const c = loadCache();
     if (c) {
-      Object.assign(state, {
-        goldUSD: c.goldUSD, goldNPR: c.goldNPR,
-        silverNPR: c.silverNPR, yesterdayNPR: c.yesterdayNPR || 0,
-        usdNPR: c.goldNPR / c.goldUSD
-      });
+      Object.assign(state, c);
       renderUI();
     }
     els('.error-banner').forEach(b => b.classList.add('show'));
   }
 }
 
-/* ── render UI ── */
-function renderUI() {
-  const { goldNPR, silverNPR, goldUSD, yesterdayNPR, usdNPR } = state;
-  const p = calcPrices(goldNPR, silverNPR);
+/* ══════════════════════════════════════════
+   Price calculations
+══════════════════════════════════════════ */
+function calcPrices() {
+  const base24kTola = state.nepal24kTola;
+  const base24kGram = base24kTola / TOLA_GRAMS;
 
-  // today / yesterday per tola
-  const todayTola = p['24k'].perTola;
-  const yestTola  = yesterdayNPR
-    ? (yesterdayNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM
+  const spg  = state.silverNPR
+    ? (state.silverNPR / TROY_OZ_GRAMS) * SILVER_PREMIUM
     : 0;
-  const changePct = yestTola ? ((todayTola - yestTola) / yestTola) * 100 : 0;
-  const changeAbs = yestTola ? todayTola - yestTola : 0;
+
+  const gold = k => ({
+    perTola: base24kTola * (k / 24),
+    perGram: base24kGram * (k / 24),
+    per10g:  base24kGram * (k / 24) * 10
+  });
+
+  return {
+    '24k': gold(24), '22k': gold(22), '18k': gold(18), '14k': gold(14),
+    silver: { perGram: spg, perTola: spg * TOLA_GRAMS, per10g: spg * 10 }
+  };
+}
+
+/* ══════════════════════════════════════════
+   Render UI
+══════════════════════════════════════════ */
+function renderUI() {
+  const { goldUSD, goldNPR, usdNPR, silverNPR, yesterdayNPR, nepal24kTola, priceSource } = state;
+  if (!nepal24kTola) return;
+
+  const p = calcPrices();
+
+  // Yesterday 24K tola estimate
+  const yestTola  = yesterdayNPR && goldNPR
+    ? (yesterdayNPR / goldNPR) * nepal24kTola   // scale yesterday's intl ratio to today's Nepal price
+    : 0;
+  const changeAbs = yestTola ? nepal24kTola - yestTola : 0;
+  const changePct = yestTola ? (changeAbs / yestTola) * 100 : 0;
   const isUp      = changePct >= 0;
   const sign      = isUp ? '+' : '';
 
   /* ticker */
   set('ticker-gold',   `NPR ${fmt(p['24k'].perTola)}/tola`);
-  set('ticker-silver', `NPR ${fmt(p.silver.perTola)}/tola`);
+  set('ticker-silver', silverNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('ticker-usd',    `USD ${goldUSD.toFixed(2)}/oz`);
   set('ticker-rate',   `1 USD = NPR ${usdNPR.toFixed(2)}`);
 
-  /* hero cards */
+  /* hero price cards */
   ['24k','22k','18k'].forEach(k => {
     set(`price-${k}`,      `NPR ${fmt(p[k].perTola)}`);
     set(`price-${k}-gram`, `NPR ${fmt(p[k].perGram)}/g`);
@@ -158,7 +212,7 @@ function renderUI() {
     }
   });
 
-  set('silver-price',    `NPR ${fmt(p.silver.perTola)}/tola`);
+  set('silver-price',    silverNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('forex-rate',      `1 USD = NPR ${usdNPR.toFixed(2)}`);
   set('intl-gold-price', `USD ${goldUSD.toFixed(2)}/oz`);
 
@@ -166,17 +220,28 @@ function renderUI() {
   set('stat-24k-tola',    fmt(p['24k'].perTola));
   set('stat-yesterday',   yestTola ? fmt(yestTola) : '—');
   set('stat-22k-tola',    fmt(p['22k'].perTola));
-  set('stat-silver-tola', fmt(p.silver.perTola));
+  set('stat-silver-tola', silverNPR ? fmt(p.silver.perTola) : '—');
 
   const statChEl = el('stat-change');
   if (statChEl) {
     if (yestTola) {
-      const absStr = `${sign}${fmt(Math.abs(changeAbs))}`;
-      statChEl.textContent = `${absStr} NPR (${sign}${changePct.toFixed(2)}%)`;
+      statChEl.textContent = `${sign}${fmt(Math.abs(changeAbs))} (${sign}${changePct.toFixed(2)}%)`;
       statChEl.style.color = isUp ? 'var(--green)' : 'var(--red)';
     } else {
       statChEl.textContent = '—';
       statChEl.style.color = '';
+    }
+  }
+
+  /* data source indicator */
+  const srcEl = el('stat-source');
+  if (srcEl) {
+    if (priceSource === 'fenegosida') {
+      srcEl.textContent = 'FENEGOSIDA ✓';
+      srcEl.style.color = 'var(--green)';
+    } else {
+      srcEl.textContent = 'Intl. Est.';
+      srcEl.style.color = 'var(--gold-500)';
     }
   }
 
@@ -186,201 +251,124 @@ function renderUI() {
     set(`tbl-${k}-gram`, `NPR ${fmt(p[k].perGram)}`);
     set(`tbl-${k}-10g`,  `NPR ${fmt(p[k].per10g)}`);
   });
-  set('tbl-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
-  set('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
-  set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
+  if (silverNPR) {
+    set('tbl-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
+    set('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
+    set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
+  }
 
-  /* timestamp */
+  /* timestamps */
   const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
   els('.last-updated-time').forEach(e => (e.textContent = t));
 
-  /* clean up skeletons & errors */
   els('.skeleton').forEach(s => s.classList.remove('skeleton'));
   els('.error-banner').forEach(b => b.classList.remove('show'));
 
   renderChart();
 }
 
-/* ══════════════════════════════
-   APEX CHART
-══════════════════════════════ */
-
-// null = intraday (hourly), number = daily
+/* ══════════════════════════════════════════
+   ApexCharts
+══════════════════════════════════════════ */
+// null = intraday (24 hourly pts), number = daily pts
 const DAYS_MAP = { '1d': null, '7d': 7, '1m': 30, '3m': 90 };
 
-/* ── Intraday: 24 hourly points ── */
-function makeHourlyLine(basePrice) {
-  const vol = basePrice * 0.0012; // ~0.12% per hour
-  const pts = [];
-  let p = basePrice * 0.988;
+function makeHourlyLine(base) {
+  const vol = base * 0.0012, pts = [];
+  let p = base * 0.988;
   const now = new Date();
   for (let i = 23; i >= 0; i--) {
-    const d = new Date(now);
-    d.setMinutes(0, 0, 0);
-    d.setHours(d.getHours() - i);
+    const d = new Date(now); d.setMinutes(0,0,0); d.setHours(d.getHours() - i);
     p += (Math.random() - 0.47) * vol;
-    if (i === 0) p = basePrice;
-    pts.push([d.getTime(), Math.round(Math.max(p, basePrice * 0.978))]);
+    if (i === 0) p = base;
+    pts.push([d.getTime(), Math.round(Math.max(p, base * 0.978))]);
   }
   return pts;
 }
-
-function makeHourlyOHLC(basePrice) {
-  const vol = basePrice * 0.0012;
-  const data = [];
-  let close = basePrice * 0.988;
+function makeHourlyOHLC(base) {
+  const vol = base * 0.0012, data = [];
+  let close = base * 0.988;
   const now = new Date();
   for (let i = 23; i >= 0; i--) {
-    const d = new Date(now);
-    d.setMinutes(0, 0, 0);
-    d.setHours(d.getHours() - i);
-    const open  = close;
-    const move  = i === 0 ? basePrice - close : (Math.random() - 0.47) * vol;
-    close = i === 0 ? basePrice : Math.max(open + move, basePrice * 0.978);
-    const high  = Math.max(open, close) + Math.random() * vol * 0.4;
-    const low   = Math.min(open, close) - Math.random() * vol * 0.4;
-    data.push({ x: d.getTime(), y: [Math.round(open), Math.round(high), Math.round(low), Math.round(close)] });
+    const d = new Date(now); d.setMinutes(0,0,0); d.setHours(d.getHours() - i);
+    const open = close, move = i === 0 ? base - close : (Math.random() - 0.47) * vol;
+    close = i === 0 ? base : Math.max(open + move, base * 0.978);
+    data.push({ x: d.getTime(), y: [Math.round(open), Math.round(Math.max(open,close)+Math.random()*vol*.4), Math.round(Math.min(open,close)-Math.random()*vol*.4), Math.round(close)] });
   }
   return data;
 }
-
-/* ── Daily line data ── */
-function makeLineData(basePrice, days) {
-  const vol = basePrice * 0.007;
-  const pts = [];
-  let p = basePrice;
+function makeLineData(base, days) {
+  const vol = base * 0.007, pts = [];
+  let p = base;
   for (let i = days; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    d.setHours(10, 0, 0, 0);
-    if (i > 0) p -= (Math.random() - 0.48) * vol;
-    else       p  = basePrice;
-    pts.push([d.getTime(), Math.round(Math.max(p, basePrice * 0.85))]);
+    const d = new Date(); d.setDate(d.getDate()-i); d.setHours(10,0,0,0);
+    if (i > 0) p -= (Math.random()-.48)*vol; else p = base;
+    pts.push([d.getTime(), Math.round(Math.max(p, base*.85))]);
   }
   return pts;
 }
-
-/* ── Daily OHLC candle data ── */
-function makeOHLC(basePrice, days) {
-  const vol  = basePrice * 0.008;
-  const data = [];
-  let close  = basePrice * (1 - (days * 0.001));
+function makeOHLC(base, days) {
+  const vol = base * 0.008, data = [];
+  let close = base * (1 - days * 0.001);
   for (let i = days; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    d.setHours(10, 0, 0, 0);
-    const open  = i === 0 ? close : close * (1 + (Math.random() - 0.5) * 0.003);
-    const move  = i === 0 ? basePrice - close : (Math.random() - 0.46) * vol;
-    close = i === 0 ? basePrice : Math.max(open + move, basePrice * 0.85);
-    const high  = Math.max(open, close) + Math.random() * vol * 0.35;
-    const low   = Math.min(open, close) - Math.random() * vol * 0.35;
-    data.push({ x: d.getTime(), y: [Math.round(open), Math.round(high), Math.round(low), Math.round(close)] });
+    const d = new Date(); d.setDate(d.getDate()-i); d.setHours(10,0,0,0);
+    const open = i===0 ? close : close*(1+(Math.random()-.5)*0.003);
+    const move = i===0 ? base-close : (Math.random()-.46)*vol;
+    close = i===0 ? base : Math.max(open+move, base*.85);
+    data.push({ x: d.getTime(), y: [Math.round(open), Math.round(Math.max(open,close)+Math.random()*vol*.35), Math.round(Math.min(open,close)-Math.random()*vol*.35), Math.round(close)] });
   }
   return data;
 }
 
-function apexTooltipY(val) {
-  return val ? 'NPR ' + Math.round(val).toLocaleString('en-NP') + ' /Tola' : '';
-}
+const apexFmt = v => v ? 'NPR ' + Math.round(v).toLocaleString('en-NP') + '/Tola' : '';
 
-function buildLineOptions(data) {
+function buildLineOpts(data) {
   return {
-    chart: {
-      type: 'area', height: 320,
-      toolbar: { show: false },
-      background: 'transparent',
-      fontFamily: 'inherit',
-      animations: { enabled: false }
-    },
+    chart: { type:'area', height:320, toolbar:{show:false}, background:'transparent', fontFamily:'inherit', animations:{enabled:false} },
     colors: ['#C9972E'],
-    dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2.5 },
-    fill: {
-      type: 'gradient',
-      gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.0, stops: [0, 100] }
-    },
-    series: [{ name: 'Gold (NPR/Tola)', data }],
-    grid: { borderColor: '#F3F4F6', strokeDashArray: 3, padding: { right: 8 } },
-    xaxis: {
-      type: 'datetime',
-      labels: { style: { colors: '#6B7280', fontSize: '11px' }, datetimeUTC: false },
-      axisBorder: { show: false }, axisTicks: { show: false }
-    },
-    yaxis: {
-      labels: {
-        style: { colors: '#6B7280', fontSize: '11px' },
-        formatter: v => 'NPR ' + Math.round(v).toLocaleString('en-NP')
-      }
-    },
-    tooltip: {
-      theme: 'dark',
-      x: { format: 'dd MMM yyyy' },
-      y: { formatter: apexTooltipY }
-    },
-    markers: { size: 0, hover: { size: 5 } }
+    dataLabels: { enabled:false },
+    stroke: { curve:'smooth', width:2.5 },
+    fill: { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.3, opacityTo:0, stops:[0,100] } },
+    series: [{ name:'Gold (NPR/Tola)', data }],
+    grid: { borderColor:'#F3F4F6', strokeDashArray:3, padding:{right:8} },
+    xaxis: { type:'datetime', labels:{ style:{colors:'#6B7280',fontSize:'11px'}, datetimeUTC:false }, axisBorder:{show:false}, axisTicks:{show:false} },
+    yaxis: { labels:{ style:{colors:'#6B7280',fontSize:'11px'}, formatter: v => 'NPR '+Math.round(v).toLocaleString('en-NP') } },
+    tooltip: { theme:'dark', x:{format:'dd MMM yyyy'}, y:{formatter:apexFmt} },
+    markers: { size:0, hover:{size:5} }
   };
 }
-
-function buildCandleOptions(data) {
+function buildCandleOpts(data) {
   return {
-    chart: {
-      type: 'candlestick', height: 320,
-      toolbar: { show: false },
-      background: 'transparent',
-      fontFamily: 'inherit',
-      animations: { enabled: false }
-    },
-    series: [{ name: 'Gold', data }],
-    plotOptions: {
-      candlestick: {
-        colors: { upward: '#10B981', downward: '#EF4444' },
-        wick:   { useFillColor: true }
-      }
-    },
-    grid: { borderColor: '#F3F4F6', strokeDashArray: 3, padding: { right: 8 } },
-    xaxis: {
-      type: 'datetime',
-      labels: { style: { colors: '#6B7280', fontSize: '11px' }, datetimeUTC: false },
-      axisBorder: { show: false }, axisTicks: { show: false }
-    },
-    yaxis: {
-      labels: {
-        style: { colors: '#6B7280', fontSize: '11px' },
-        formatter: v => 'NPR ' + Math.round(v).toLocaleString('en-NP')
-      }
-    },
-    tooltip: {
-      theme: 'dark',
-      x: { format: 'dd MMM yyyy' },
-      y: { formatter: apexTooltipY }
-    }
+    chart: { type:'candlestick', height:320, toolbar:{show:false}, background:'transparent', fontFamily:'inherit', animations:{enabled:false} },
+    series: [{ name:'Gold', data }],
+    plotOptions: { candlestick:{ colors:{upward:'#10B981',downward:'#EF4444'}, wick:{useFillColor:true} } },
+    grid: { borderColor:'#F3F4F6', strokeDashArray:3, padding:{right:8} },
+    xaxis: { type:'datetime', labels:{ style:{colors:'#6B7280',fontSize:'11px'}, datetimeUTC:false }, axisBorder:{show:false}, axisTicks:{show:false} },
+    yaxis: { labels:{ style:{colors:'#6B7280',fontSize:'11px'}, formatter: v => 'NPR '+Math.round(v).toLocaleString('en-NP') } },
+    tooltip: { theme:'dark', x:{format:'dd MMM yyyy'}, y:{formatter:apexFmt} }
   };
 }
 
 function renderChart() {
   const container = el('goldChart');
-  if (!container || !state.goldNPR) return;
+  if (!container || !state.nepal24kTola) return;
 
-  const p    = calcPrices(state.goldNPR, state.silverNPR);
-  const base = p['24k'].perTola;
-  const days = DAYS_MAP[state.chartPeriod]; // null = intraday
+  const base = state.nepal24kTola;  // use FENEGOSIDA price as chart anchor
+  const days = DAYS_MAP[state.chartPeriod];
 
   if (state.apexChart) { state.apexChart.destroy(); state.apexChart = null; }
 
   let opts;
   if (state.chartType === 'candlestick') {
-    const data = days === null ? makeHourlyOHLC(base) : makeOHLC(base, days);
-    opts = buildCandleOptions(data);
+    opts = buildCandleOpts(days === null ? makeHourlyOHLC(base) : makeOHLC(base, days));
   } else {
-    const data = days === null ? makeHourlyLine(base) : makeLineData(base, days);
-    opts = buildLineOptions(data);
+    opts = buildLineOpts(days === null ? makeHourlyLine(base) : makeLineData(base, days));
   }
 
   state.apexChart = new ApexCharts(container, opts);
   state.apexChart.render();
 }
 
-/* ── chart tabs: period ── */
 function setupChartTabs() {
   els('.chart-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -391,8 +379,6 @@ function setupChartTabs() {
     });
   });
 }
-
-/* ── chart tabs: type ── */
 function setupChartTypeTabs() {
   els('.chart-type-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -404,69 +390,62 @@ function setupChartTypeTabs() {
   });
 }
 
-/* ══════════════════════════════
-   CALCULATOR
-══════════════════════════════ */
+/* ══════════════════════════════════════════
+   Calculator
+══════════════════════════════════════════ */
 function setupCalculator() {
   const form = el('calcForm');
   if (!form) return;
-
   els('.calc-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       els('.calc-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.calcMode = tab.dataset.mode;
       toggleCalcFields();
-      clearResult();
+      el('calc-result')?.classList.remove('show');
     });
   });
-
-  form.addEventListener('input',  debounce(doCalculate, 250));
-  form.addEventListener('change', doCalculate);
+  form.addEventListener('input',  debounce(doCalc, 250));
+  form.addEventListener('change', doCalc);
 }
-
 function toggleCalcFields() {
   const wtp = el('wtp-group'), ptw = el('ptw-group');
   if (!wtp) return;
   wtp.style.display = state.calcMode === 'weight-to-price' ? '' : 'none';
   if (ptw) ptw.style.display = state.calcMode === 'price-to-weight' ? '' : 'none';
 }
-
-function doCalculate() {
-  if (!state.goldNPR) return;
-  const p      = calcPrices(state.goldNPR, state.silverNPR);
+function doCalc() {
+  if (!state.nepal24kTola) return;
+  const p      = calcPrices();
   const purity = el('calc-purity')?.value || '24k';
   const unit   = el('calc-unit')?.value   || 'tola';
   const making = parseFloat(el('calc-making')?.value) || 0;
   const prices = p[purity];
-  const ppUnit = unit === 'tola' ? prices.perTola : unit === 'gram' ? prices.perGram : prices.per10g;
-
+  const ppUnit = unit==='tola' ? prices.perTola : unit==='gram' ? prices.perGram : prices.per10g;
   let totalNPR, wGrams, wTola;
 
   if (state.calcMode !== 'price-to-weight') {
     const qty = parseFloat(el('calc-qty')?.value) || 0;
-    if (qty <= 0) return clearResult();
-    wGrams = unit === 'tola' ? qty * TOLA_GRAMS : unit === 'gram' ? qty : qty * 10;
-    wTola  = wGrams / TOLA_GRAMS;
-    totalNPR = ppUnit * qty * (1 + making / 100);
+    if (qty <= 0) return el('calc-result')?.classList.remove('show');
+    wGrams   = unit==='tola' ? qty*TOLA_GRAMS : unit==='gram' ? qty : qty*10;
+    wTola    = wGrams / TOLA_GRAMS;
+    totalNPR = ppUnit * qty * (1 + making/100);
   } else {
     const budget = parseFloat(el('calc-budget')?.value) || 0;
-    if (budget <= 0) return clearResult();
+    if (budget <= 0) return el('calc-result')?.classList.remove('show');
     totalNPR = budget;
-    wGrams   = (budget / (1 + making / 100)) / prices.perGram;
+    wGrams   = (budget / (1+making/100)) / prices.perGram;
     wTola    = wGrams / TOLA_GRAMS;
   }
 
-  const resultEl = el('calc-result');
-  if (!resultEl) return;
-  resultEl.classList.add('show');
-  set('result-amount',     `NPR ${Math.round(totalNPR).toLocaleString('en-NP')}`);
-  set('result-grams',      `${wGrams.toFixed(3)} g`);
-  set('result-tola',       `${wTola.toFixed(4)} tola`);
-  set('result-making-cost', making > 0 ? `NPR ${Math.round(totalNPR - totalNPR / (1 + making / 100)).toLocaleString('en-NP')}` : '—');
+  const r = el('calc-result');
+  if (!r) return;
+  r.classList.add('show');
+  set('result-amount',      `NPR ${Math.round(totalNPR).toLocaleString('en-NP')}`);
+  set('result-grams',       `${wGrams.toFixed(3)} g`);
+  set('result-tola',        `${wTola.toFixed(4)} tola`);
+  set('result-making-cost', making>0 ? `NPR ${Math.round(totalNPR - totalNPR/(1+making/100)).toLocaleString('en-NP')}` : '—');
 }
-
-function clearResult() { el('calc-result')?.classList.remove('show'); }
 
 /* ── nav ── */
 function setupNav() {
@@ -483,9 +462,7 @@ function setupNav() {
     }
   });
   const cur = location.pathname.split('/').pop() || 'index.html';
-  els('.nav-menu a').forEach(a => {
-    if (a.getAttribute('href') === cur) a.classList.add('active');
-  });
+  els('.nav-menu a').forEach(a => { if (a.getAttribute('href')===cur) a.classList.add('active'); });
 }
 
 /* ── FAQ ── */
@@ -500,7 +477,7 @@ function setupFAQ() {
   });
 }
 
-/* ── contact form ── */
+/* ── Contact form ── */
 function setupContactForm() {
   const form = el('contactForm');
   if (!form) return;
@@ -512,15 +489,12 @@ function setupContactForm() {
   });
 }
 
-const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
 
 /* ── boot ── */
 document.addEventListener('DOMContentLoaded', async () => {
-  setupNav();
-  setupFAQ();
-  setupContactForm();
-  setupChartTabs();
-  setupChartTypeTabs();
+  setupNav(); setupFAQ(); setupContactForm();
+  setupChartTabs(); setupChartTypeTabs();
   await fetchPrices();
   setupCalculator();
   setInterval(fetchPrices, REFRESH_MS);
