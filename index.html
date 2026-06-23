@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Price in Nepal Today 2025 | Live Gold Rate | goldpricenepal.online</title>
+  <meta name="description" content="Check today's live gold price in Nepal. Real-time 24K, 22K, 18K gold rates per tola and gram. Gold price calculator, interactive charts, and silver rates." />
+  <meta name="keywords" content="gold price nepal, gold rate nepal today, suna ko bhaau, gold price per tola nepal, 24k gold nepal, 22k gold nepal, nepal gold rate, gold price calculator nepal, silver price nepal" />
+  <meta name="author" content="goldpricenepal.online" />
+  <link rel="canonical" href="https://goldpricenepal.online/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://goldpricenepal.online/" />
+  <meta property="og:title"       content="Gold Price in Nepal Today 2025 | Live Gold Rate" />
+  <meta property="og:description" content="Real-time gold prices in Nepal. Check 24K, 22K, 18K rates per tola and gram with live charts and calculator." />
+  <meta property="og:site_name"   content="Gold Price Nepal" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Gold Price in Nepal Today 2025" />
+  <meta name="twitter:description" content="Live gold price in Nepal — 24K, 22K, 18K per tola & gram." />
+
+  <!-- Schema.org structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://goldpricenepal.online/#website",
+        "url": "https://goldpricenepal.online/",
+        "name": "Gold Price Nepal",
+        "description": "Live gold price tracker for Nepal with calculator and charts",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://goldpricenepal.online/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the gold price per tola in Nepal today?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nepal gold prices are set daily by FENEGOSIDA. For 24K fine gold, the price is typically in the range of NPR 110,000–135,000 per tola. Visit goldpricenepal.online for the live rate."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much is 1 tola in grams?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "1 tola (also called 1 bhori) equals 11.664 grams. This is the standard gold measurement unit used in Nepal and India."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between 24K and 22K gold?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "24K gold is 99.9% pure gold. 22K gold is 91.67% pure, with the remaining 8.33% being other metals like copper or silver, making it harder and better suited for jewelry."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥇</text></svg>" />
+</head>
+<body>
+
+<!-- ======= HEADER ======= -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🥇</div>
+        <div>Gold Price <span>Nepal</span></div>
+      </a>
+
+      <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+        <a href="index.html" class="active">Home</a>
+        <a href="index.html#rates">Today's Rate</a>
+        <a href="index.html#calculator">Calculator</a>
+        <a href="index.html#chart">Chart</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ======= TICKER BAR ======= -->
+<div class="ticker-bar">
+  <div class="container">
+    <div class="ticker-content">
+      <span class="live-dot"></span>
+      <span style="color:#9CA3AF;font-size:.78rem;">LIVE</span>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item">
+        <span class="label">24K Gold:</span>
+        <span class="value skeleton price-loading" id="ticker-gold">Loading…</span>
+      </div>
+      <div class="ticker-sep">·</div>
+      <div class="ticker-item">
+        <span class="label">Silver:</span>
+        <span class="value" id="ticker-silver">—</span>
+      </div>
+      <div class="ticker-sep">·</div>
+      <div class="ticker-item">
+        <span class="label">Intl Gold:</span>
+        <span class="value" id="ticker-usd">—</span>
+      </div>
+      <div class="ticker-sep">·</div>
+      <div class="ticker-item">
+        <span class="label">Rate:</span>
+        <span class="value" id="ticker-rate">—</span>
+      </div>
+      <div class="ticker-sep">·</div>
+      <div class="ticker-item">
+        <span class="label">Updated:</span>
+        <span class="value last-updated-time">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= HERO ======= -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="hero-inner">
+
+      <div class="hero-text">
+        <h1>Today's Gold Price<br>in <span>Nepal</span></h1>
+        <p>Live gold rates updated every 5 minutes from international markets</p>
+        <div class="last-updated">
+          <span class="live-dot"></span>
+          Auto-updated · Last: <strong class="last-updated-time">—</strong>
+        </div>
+
+        <!-- Error banner -->
+        <div class="error-banner" role="alert">
+          ⚠️ Unable to reach live prices. Showing cached data.
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:280px">
+        <div class="price-cards">
+          <!-- 24K -->
+          <div class="price-card featured">
+            <div class="purity">24K Fine Gold</div>
+            <div class="price-amount skeleton" id="price-24k">—</div>
+            <div class="price-unit">per tola (11.664g)</div>
+            <div class="price-change" id="change-24k">—</div>
+            <div class="price-unit" style="margin-top:6px" id="price-24k-gram">—</div>
+          </div>
+          <!-- 22K -->
+          <div class="price-card">
+            <div class="purity">22K Gold</div>
+            <div class="price-amount skeleton" id="price-22k">—</div>
+            <div class="price-unit">per tola</div>
+            <div class="price-change" id="change-22k">—</div>
+            <div class="price-unit" style="margin-top:6px" id="price-22k-gram">—</div>
+          </div>
+          <!-- 18K -->
+          <div class="price-card">
+            <div class="purity">18K Gold</div>
+            <div class="price-amount skeleton" id="price-18k">—</div>
+            <div class="price-unit">per tola</div>
+            <div class="price-change" id="change-18k">—</div>
+            <div class="price-unit" style="margin-top:6px" id="price-18k-gram">—</div>
+          </div>
+        </div>
+
+        <!-- Silver + Forex -->
+        <div class="hero-secondary" style="margin-top:16px">
+          <div class="silver-card">
+            <div>
+              <div class="label">Silver Price</div>
+              <div class="val" id="silver-price">—</div>
+            </div>
+            <div style="font-size:1.6rem">🥈</div>
+          </div>
+          <div class="forex-card">
+            <div>
+              <div class="label">USD/NPR Rate</div>
+              <div class="val" id="forex-rate">—</div>
+            </div>
+            <div>
+              <div class="label" style="text-align:right">Intl. Gold</div>
+              <div class="val" style="font-size:.92rem" id="intl-gold-price">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= STATS STRIP ======= -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-label">24K per Tola</div>
+        <div class="stat-value" id="stat-24k-tola">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">22K per Tola</div>
+        <div class="stat-value" id="stat-22k-tola">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Silver per Tola</div>
+        <div class="stat-value" id="stat-silver-tola">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Today's Change</div>
+        <div class="stat-value" id="stat-change">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Source</div>
+        <div class="stat-value">International Markets</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= RATE TABLE ======= -->
+<section class="section rate-section" id="rates">
+  <div class="container">
+    <div class="section-header">
+      <h2>Gold & Silver Rate in Nepal Today</h2>
+      <p>Prices include Nepal import duties, VAT, and dealer margins. Updated every 5 minutes.</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="card rate-table-wrapper">
+      <table class="rate-table" aria-label="Nepal gold and silver prices">
+        <thead>
+          <tr>
+            <th>Metal / Purity</th>
+            <th>Per Tola (11.664g)</th>
+            <th>Per 10 Grams</th>
+            <th>Per Gram</th>
+            <th>Purity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="purity-badge"><span class="purity-dot dot-24k"></span> 24K Fine Gold</span></td>
+            <td class="price-value" id="tbl-24k-tola">—</td>
+            <td class="price-value" id="tbl-24k-10g">—</td>
+            <td class="price-value" id="tbl-24k-gram">—</td>
+            <td><span class="badge badge-gold">99.9%</span></td>
+          </tr>
+          <tr>
+            <td><span class="purity-badge"><span class="purity-dot dot-22k"></span> 22K Gold</span></td>
+            <td class="price-value" id="tbl-22k-tola">—</td>
+            <td class="price-value" id="tbl-22k-10g">—</td>
+            <td class="price-value" id="tbl-22k-gram">—</td>
+            <td><span class="badge badge-gold">91.7%</span></td>
+          </tr>
+          <tr>
+            <td><span class="purity-badge"><span class="purity-dot dot-18k"></span> 18K Gold</span></td>
+            <td class="price-value" id="tbl-18k-tola">—</td>
+            <td class="price-value" id="tbl-18k-10g">—</td>
+            <td class="price-value" id="tbl-18k-gram">—</td>
+            <td><span class="badge badge-gold">75.0%</span></td>
+          </tr>
+          <tr>
+            <td><span class="purity-badge"><span class="purity-dot dot-14k"></span> 14K Gold</span></td>
+            <td class="price-value" id="tbl-14k-tola">—</td>
+            <td class="price-value" id="tbl-14k-10g">—</td>
+            <td class="price-value" id="tbl-14k-gram">—</td>
+            <td><span class="badge badge-gold">58.3%</span></td>
+          </tr>
+          <tr>
+            <td><span class="purity-badge"><span class="purity-dot dot-silver"></span> Silver</span></td>
+            <td class="price-value" id="tbl-silver-tola">—</td>
+            <td class="price-value" id="tbl-silver-10g">—</td>
+            <td class="price-value" id="tbl-silver-gram">—</td>
+            <td><span class="badge" style="background:#F1F5F9;color:#475569">99.9%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box">
+      <span class="info-icon">ℹ️</span>
+      <span>Prices shown are <strong>indicative estimates</strong> based on international spot prices. Official Nepal gold rates are set daily by
+      <strong>FENEGOSIDA</strong> (Federation of Nepal Gold and Silver Dealers' Association). Prices may vary by dealer.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CHART ======= -->
+<section class="section" id="chart">
+  <div class="container">
+    <div class="section-header">
+      <h2>Gold Price Chart — Nepal</h2>
+      <p>Historical gold price trend per tola in Nepalese Rupees (NPR)</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-header">
+        <div class="chart-title">
+          <h3>24K Gold Price (NPR per Tola)</h3>
+          <p>Price movement over selected period</p>
+        </div>
+        <div class="chart-tabs">
+          <button class="chart-tab active" data-period="7d">7 Days</button>
+          <button class="chart-tab" data-period="1m">1 Month</button>
+          <button class="chart-tab" data-period="3m">3 Months</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="goldChart" aria-label="Gold price chart"></canvas>
+      </div>
+      <p class="chart-note">⚠️ Chart shows approximate price trends based on international rates. Actual Nepal rates may differ slightly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CALCULATOR ======= -->
+<section class="section calculator-section" id="calculator">
+  <div class="container">
+    <div class="section-header">
+      <h2>Gold Price Calculator — Nepal</h2>
+      <p>Calculate the exact gold price based on weight, purity, and making charges</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="card calc-card">
+      <!-- Mode tabs -->
+      <div class="calc-tabs">
+        <button class="calc-tab active" data-mode="weight-to-price">Weight → Price</button>
+        <button class="calc-tab" data-mode="price-to-weight">Budget → Weight</button>
+      </div>
+
+      <form id="calcForm" novalidate>
+        <div class="calc-grid">
+          <!-- Weight / Budget input -->
+          <div class="form-group" id="wtp-group">
+            <label class="form-label" id="wtp-label" for="calc-qty">Weight</label>
+            <input type="number" id="calc-qty" class="form-control"
+              placeholder="e.g. 2" min="0" step="0.001" />
+          </div>
+          <div class="form-group" id="ptw-group" style="display:none">
+            <label class="form-label" for="calc-budget">Budget (NPR)</label>
+            <input type="number" id="calc-budget" class="form-control"
+              placeholder="e.g. 200000" min="0" step="100" />
+          </div>
+
+          <!-- Unit -->
+          <div class="form-group">
+            <label class="form-label" for="calc-unit">Unit</label>
+            <select id="calc-unit" class="form-control">
+              <option value="tola">Tola (11.664g)</option>
+              <option value="gram">Gram</option>
+              <option value="10g">10 Grams</option>
+            </select>
+          </div>
+
+          <!-- Purity -->
+          <div class="form-group">
+            <label class="form-label" for="calc-purity">Gold Purity</label>
+            <select id="calc-purity" class="form-control">
+              <option value="24k">24K (99.9% Pure)</option>
+              <option value="22k">22K (91.7% Pure)</option>
+              <option value="18k">18K (75% Pure)</option>
+              <option value="14k">14K (58.3% Pure)</option>
+            </select>
+          </div>
+
+          <!-- Making charges -->
+          <div class="form-group">
+            <label class="form-label" for="calc-making">Making Charges (%)</label>
+            <input type="number" id="calc-making" class="form-control"
+              placeholder="e.g. 10" min="0" max="50" step="0.5" value="0" />
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="calc-result" id="calc-result">
+          <div class="result-label">Estimated Total Price</div>
+          <div class="result-amount" id="result-amount">—</div>
+          <div class="result-breakdown">
+            <div class="breakdown-item">
+              <div class="b-label">Weight (Grams)</div>
+              <div class="b-value" id="result-grams">—</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="b-label">Weight (Tola)</div>
+              <div class="b-value" id="result-tola">—</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="b-label">Making Cost</div>
+              <div class="b-value" id="result-making-cost">—</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CONTENT / INFO ======= -->
+<section class="section" style="background:#fff">
+  <div class="container">
+    <div class="section-header">
+      <h2>About Nepal's Gold Market</h2>
+      <p>Everything you need to know about buying and tracking gold in Nepal</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="content-grid">
+      <div class="card content-card">
+        <h3><span class="icon">📊</span> How Gold Prices Are Set in Nepal</h3>
+        <p>
+          Gold prices in Nepal are officially set each morning by
+          <strong>FENEGOSIDA</strong> — the Federation of Nepal Gold and Silver Dealers' Association.
+          They reference international spot prices (London Bullion Market Association),
+          the current USD/NPR exchange rate, and applicable import duties.
+        </p>
+        <p>
+          Nepal levies a <strong>10% customs duty</strong> and <strong>13% VAT</strong> on gold imports,
+          which makes local prices significantly higher than the raw international rate once converted.
+        </p>
+        <ul>
+          <li>Prices announced each morning before markets open</li>
+          <li>Separate rates for Tejabi (99.5%) and Asalchandie (99.9%) gold</li>
+          <li>Buying &amp; selling rates differ by ~NPR 200–500/tola</li>
+          <li>Hallmarking mandatory for gold jewellery above 14K</li>
+        </ul>
+      </div>
+
+      <div class="card content-card">
+        <h3><span class="icon">⚖️</span> Gold Measurement Units in Nepal</h3>
+        <p>
+          Nepal uses several units to measure gold. Understanding these is essential when buying
+          jewellery or comparing prices.
+        </p>
+        <ul>
+          <li><strong>1 Tola / Bhori</strong> = 11.664 grams (most common unit)</li>
+          <li><strong>1 Gram</strong> = 0.0857 tola (international standard)</li>
+          <li><strong>10 Grams</strong> = 0.857 tola (used in some quotes)</li>
+          <li><strong>1 Troy Ounce</strong> = 31.1035 grams = 2.667 tola</li>
+          <li><strong>1 Lal</strong> = 12 tola = 139.97 grams (rare)</li>
+        </ul>
+        <p>
+          The <strong>tola</strong> (also called bhori) is the dominant trading unit and all
+          FENEGOSIDA official rates are quoted per tola.
+        </p>
+      </div>
+
+      <div class="card content-card">
+        <h3><span class="icon">🛒</span> Tips for Buying Gold in Nepal</h3>
+        <ul>
+          <li>Always buy from a registered FENEGOSIDA dealer</li>
+          <li>Check the hallmark stamp on jewellery (Bureau of Standards Nepal)</li>
+          <li>Compare today's FENEGOSIDA rate before purchasing</li>
+          <li>Negotiate making charges — typically 8–15% of gold value</li>
+          <li>Request a receipt showing gold weight, purity, and rate</li>
+          <li>Avoid street vendors or unregistered shops</li>
+          <li>24K gold is for investment; 22K is better for jewellery</li>
+        </ul>
+      </div>
+
+      <div class="card content-card">
+        <h3><span class="icon">💡</span> Gold Purity Guide</h3>
+        <p>
+          Gold purity is measured in karats. Pure gold is 24 karats (24K = 99.9% gold).
+          Higher karat gold is more valuable but softer and less durable.
+        </p>
+        <ul>
+          <li><strong>24K (99.9% pure)</strong> — Investment grade, very soft</li>
+          <li><strong>22K (91.67% pure)</strong> — Best for jewellery in Nepal</li>
+          <li><strong>18K (75% pure)</strong> — Durable, popular for fine jewellery</li>
+          <li><strong>14K (58.3% pure)</strong> — Most durable, used in fashion jewellery</li>
+        </ul>
+        <p>
+          In Nepal, most jewellery is sold in 22K or 24K gold. Always verify
+          the purity stamp before purchasing.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FAQ ======= -->
+<section class="section faq-section" id="faq">
+  <div class="container">
+    <div class="section-header text-center" style="margin:0 auto 32px;max-width:600px">
+      <h2>Frequently Asked Questions</h2>
+      <p>Common questions about gold prices and the Nepal gold market</p>
+      <div class="divider" style="margin:12px auto 0"></div>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item open">
+        <button class="faq-question">
+          What is today's gold price per tola in Nepal?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Today's gold price per tola in Nepal is shown live at the top of this page. The price is updated every 5 minutes
+          based on international gold spot prices, the USD/NPR exchange rate, and Nepal's import duties (10% customs + 13% VAT).
+          Official rates are set by FENEGOSIDA each morning.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          How much is 1 tola of gold in Nepal?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          1 tola equals 11.664 grams. The price of 1 tola of 24K gold in Nepal typically ranges from NPR 110,000 to 135,000
+          depending on international gold rates and the NPR/USD exchange rate. Check the live price at the top of this page.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Why is gold more expensive in Nepal than the international price?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Nepal imposes a 10% customs duty and 13% VAT (Value Added Tax) on imported gold. Additionally, dealers add their
+          margin and transportation costs. These factors typically make Nepal gold prices 20–27% higher than the international
+          spot price when converted to NPR at the market exchange rate.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What is FENEGOSIDA and how does it set gold prices?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          FENEGOSIDA (Federation of Nepal Gold and Silver Dealers' Association) is the official body that sets daily gold
+          prices in Nepal. Every morning, they announce the official buying and selling rates based on international spot
+          prices from the London Bullion Market, current USD/NPR exchange rates, and government-mandated taxes.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Which gold is better for jewellery — 22K or 24K?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          22K gold is better for jewellery because it is harder and more durable than 24K. 24K gold (99.9% pure) is very
+          soft and can scratch or bend easily, making it impractical for everyday jewellery. 22K gold (91.7% pure) maintains
+          a beautiful golden color while being strong enough for rings, necklaces, and bangles.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          What are making charges and how are they calculated?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Making charges are the fees jewellers charge for crafting gold into jewellery. In Nepal, making charges typically
+          range from 8% to 15% of the gold value, depending on the complexity of the design. Use our Gold Calculator above to
+          include making charges in your price estimate. Always negotiate making charges before purchasing.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I trust the prices on this website?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Prices on goldpricenepal.online are calculated in real-time from international gold spot markets, converted to NPR
+          using live exchange rates, and adjusted for Nepal's import duties and typical dealer margins. These are
+          <strong>indicative estimates</strong>. For official rates, always check FENEGOSIDA's daily announcement or your
+          local registered gold dealer.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FOOTER ======= -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">🥇</div>
+          <div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div>
+        </a>
+        <p style="margin-top:12px">
+          Your trusted source for live gold and silver prices in Nepal. Updated every 5 minutes
+          from international markets.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#rates">Today's Rate</a></li>
+          <li><a href="index.html#calculator">Calculator</a></li>
+          <li><a href="index.html#chart">Price Chart</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 goldpricenepal.online · All rights reserved</p>
+      <p class="footer-disclaimer">
+        Disclaimer: Gold prices are indicative estimates based on international markets.
+        Not financial advice. Verify with official FENEGOSIDA rates before any transaction.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
