@@ -1,23 +1,27 @@
 /* =====================================================
    Gold Price Nepal – main.js
-   APIs: metals.live (spot price) + fawazahmed0 (FX)
+   API: fawazahmed0 currency CDN (XAU + XAG + USD)
+   XAU = troy oz gold, XAG = troy oz silver
    ===================================================== */
 
-const TOLA_GRAMS     = 11.664;
-const TROY_OZ_GRAMS  = 31.1035;
-const NEPAL_PREMIUM  = 1.245; // ~24.5% covers import duty, VAT, margin
-const REFRESH_MS     = 5 * 60 * 1000; // 5 minutes
-const FALLBACK_NPR   = 134.0;
+const TOLA_GRAMS    = 11.664;
+const TROY_OZ_GRAMS = 31.1035;
+// Nepal: ~10% import duty + 13% VAT + ~2% dealer = ~27.6% premium
+const NEPAL_PREMIUM  = 1.276;
+const SILVER_PREMIUM = 1.12;
+const REFRESH_MS     = 5 * 60 * 1000;
 
 const APIS = {
-  metals:   'https://api.metals.live/v1/spot',
-  currency: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json'
+  gold:   'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xau.json',
+  silver: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/xag.json'
 };
 
 const state = {
   goldUSD:     0,
+  goldNPR:     0,   // international price in NPR per troy oz
   silverUSD:   0,
-  usdNPR:      FALLBACK_NPR,
+  silverNPR:   0,
+  usdNPR:      135,
   prevGoldUSD: 0,
   lastUpdated: null,
   chartPeriod: '7d',
@@ -26,50 +30,41 @@ const state = {
 };
 
 /* ─── helpers ─── */
-const fmt = (n, dec = 0) =>
-  n == null ? '—' : Math.round(n).toLocaleString('en-NP');
-
-const el = id => document.getElementById(id);
+const fmt = n => n == null ? '—' : Math.round(n).toLocaleString('en-NP');
+const el  = id  => document.getElementById(id);
 const els = sel => document.querySelectorAll(sel);
 
 async function fetchWithTimeout(url, ms = 12000) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), ms);
+  const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res;
-  } catch (e) {
-    clearTimeout(timer);
-    throw e;
-  }
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r;
+  } catch (e) { clearTimeout(t); throw e; }
 }
 
-function saveCache(goldUSD, silverUSD, usdNPR) {
-  try {
-    localStorage.setItem('gnp_cache', JSON.stringify({ goldUSD, silverUSD, usdNPR, ts: Date.now() }));
-  } catch (_) {}
+function saveCache(data) {
+  try { localStorage.setItem('gnp_v2', JSON.stringify({ ...data, ts: Date.now() })); } catch (_) {}
 }
-
 function loadCache() {
   try {
-    const c = JSON.parse(localStorage.getItem('gnp_cache') || 'null');
+    const c = JSON.parse(localStorage.getItem('gnp_v2') || 'null');
     if (c && Date.now() - c.ts < 3_600_000) return c;
   } catch (_) {}
   return null;
 }
 
 /* ─── price calculations ─── */
-function calcPrices(goldUSD, silverUSD, usdNPR) {
-  const gpg = (goldUSD / TROY_OZ_GRAMS) * usdNPR * NEPAL_PREMIUM; // gold per gram NPR
-  const spg = (silverUSD / TROY_OZ_GRAMS) * usdNPR * 1.10;        // silver per gram NPR
+function calcPrices(goldNPR_oz, silverNPR_oz) {
+  const gpg = (goldNPR_oz / TROY_OZ_GRAMS) * NEPAL_PREMIUM;  // per gram 24K
+  const spg = (silverNPR_oz / TROY_OZ_GRAMS) * SILVER_PREMIUM;
 
-  const gold = karat => ({
-    perGram:  gpg * (karat / 24),
-    perTola:  gpg * (karat / 24) * TOLA_GRAMS,
-    per10g:   gpg * (karat / 24) * 10,
-    perOz:    gpg * (karat / 24) * TROY_OZ_GRAMS
+  const gold = k => ({
+    perGram: gpg * (k / 24),
+    perTola: gpg * (k / 24) * TOLA_GRAMS,
+    per10g:  gpg * (k / 24) * 10
   });
 
   return {
@@ -78,206 +73,173 @@ function calcPrices(goldUSD, silverUSD, usdNPR) {
   };
 }
 
-/* ─── DOM updates ─── */
-function updateUI(goldUSD, silverUSD, usdNPR) {
-  const p = calcPrices(goldUSD, silverUSD, usdNPR);
-  const changeUSD  = goldUSD - (state.prevGoldUSD || goldUSD);
-  const changePct  = state.prevGoldUSD ? (changeUSD / state.prevGoldUSD) * 100 : 0;
+/* ─── UI update ─── */
+function updateUI() {
+  const { goldNPR, silverNPR, goldUSD, prevGoldUSD, usdNPR } = state;
+  const p = calcPrices(goldNPR, silverNPR);
+
+  const changePct  = prevGoldUSD ? ((goldUSD - prevGoldUSD) / prevGoldUSD) * 100 : 0;
   const isUp       = changePct >= 0;
-  const changeSign = isUp ? '+' : '';
+  const sign       = isUp ? '+' : '';
 
   /* ticker */
-  setIfExists('ticker-gold',   `NPR ${fmt(p['24k'].perTola)}/tola`);
-  setIfExists('ticker-silver', `NPR ${fmt(p.silver.perTola)}/tola`);
-  setIfExists('ticker-usd',    `USD ${goldUSD.toFixed(2)}/oz`);
-  setIfExists('ticker-rate',   `1 USD = NPR ${usdNPR.toFixed(2)}`);
+  set('ticker-gold',   `NPR ${fmt(p['24k'].perTola)}/tola`);
+  set('ticker-silver', `NPR ${fmt(p.silver.perTola)}/tola`);
+  set('ticker-usd',    `USD ${goldUSD.toFixed(2)}/oz`);
+  set('ticker-rate',   `1 USD = NPR ${usdNPR.toFixed(2)}`);
 
-  /* hero price cards */
-  ['24k','22k','18k'].forEach(k => {
-    setIfExists(`price-${k}`,        `NPR ${fmt(p[k].perTola)}`);
-    setIfExists(`price-${k}-gram`,   `NPR ${fmt(p[k].perGram)}/g`);
+  /* hero cards */
+  ['24k', '22k', '18k'].forEach(k => {
+    set(`price-${k}`,      `NPR ${fmt(p[k].perTola)}`);
+    set(`price-${k}-gram`, `NPR ${fmt(p[k].perGram)}/g`);
     const chEl = el(`change-${k}`);
     if (chEl) {
-      chEl.textContent = `${changeSign}${changePct.toFixed(2)}% today`;
+      chEl.textContent = `${sign}${changePct.toFixed(2)}% today`;
       chEl.className   = 'price-change ' + (isUp ? 'text-green' : 'text-red');
     }
   });
 
-  setIfExists('silver-price',    `NPR ${fmt(p.silver.perTola)}/tola`);
-  setIfExists('forex-rate',      `1 USD = NPR ${usdNPR.toFixed(2)}`);
-  setIfExists('intl-gold-price', `USD ${goldUSD.toFixed(2)}/oz`);
+  set('silver-price',    `NPR ${fmt(p.silver.perTola)}/tola`);
+  set('forex-rate',      `1 USD = NPR ${usdNPR.toFixed(2)}`);
+  set('intl-gold-price', `USD ${goldUSD.toFixed(2)}/oz`);
 
   /* stats strip */
-  setIfExists('stat-24k-tola',    fmt(p['24k'].perTola));
-  setIfExists('stat-22k-tola',    fmt(p['22k'].perTola));
-  setIfExists('stat-silver-tola', fmt(p.silver.perTola));
-  setIfExists('stat-change',      `${changeSign}${changePct.toFixed(2)}%`);
+  set('stat-24k-tola',    fmt(p['24k'].perTola));
+  set('stat-22k-tola',    fmt(p['22k'].perTola));
+  set('stat-silver-tola', fmt(p.silver.perTola));
+  const statChEl = el('stat-change');
+  if (statChEl) {
+    statChEl.textContent = `${sign}${changePct.toFixed(2)}%`;
+    statChEl.style.color = isUp ? 'var(--green)' : 'var(--red)';
+  }
 
   /* rate table */
-  const purities = ['24k','22k','18k','14k'];
-  purities.forEach(k => {
-    setIfExists(`tbl-${k}-tola`, `NPR ${fmt(p[k].perTola)}`);
-    setIfExists(`tbl-${k}-gram`, `NPR ${fmt(p[k].perGram)}`);
-    setIfExists(`tbl-${k}-10g`,  `NPR ${fmt(p[k].per10g)}`);
+  ['24k','22k','18k','14k'].forEach(k => {
+    set(`tbl-${k}-tola`, `NPR ${fmt(p[k].perTola)}`);
+    set(`tbl-${k}-gram`, `NPR ${fmt(p[k].perGram)}`);
+    set(`tbl-${k}-10g`,  `NPR ${fmt(p[k].per10g)}`);
   });
-  setIfExists('tbl-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
-  setIfExists('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
-  setIfExists('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
+  set('tbl-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
+  set('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
+  set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
 
-  /* timestamp */
-  const now = new Date();
-  const timeStr = now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-  els('.last-updated-time').forEach(e => (e.textContent = timeStr));
+  /* timestamps */
+  const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  els('.last-updated-time').forEach(e => (e.textContent = t));
 
-  state.lastUpdated = now;
-  updateChart(p['24k'].perTola);
-
-  /* hide skeleton loaders */
+  /* hide skeleton, hide error */
   els('.skeleton').forEach(s => s.classList.remove('skeleton'));
   els('.error-banner').forEach(b => b.classList.remove('show'));
+
+  updateChart(p['24k'].perTola);
 }
 
-function setIfExists(id, val) {
-  const e = el(id);
-  if (e) e.textContent = val;
-}
+function set(id, val) { const e = el(id); if (e) e.textContent = val; }
 
-/* ─── data fetch ─── */
+/* ─── fetch ─── */
 async function fetchPrices() {
   try {
-    const [metalsRes, currencyRes] = await Promise.all([
-      fetchWithTimeout(APIS.metals),
-      fetchWithTimeout(APIS.currency)
+    const [xauRes, xagRes] = await Promise.all([
+      fetchWithTimeout(APIS.gold).then(r => r.json()),
+      fetchWithTimeout(APIS.silver).then(r => r.json())
     ]);
-    const metalsData   = await metalsRes.json();
-    const currencyData = await currencyRes.json();
 
-    // metals.live returns [{gold:..., silver:...}] or {gold:..., silver:...}
-    const m = Array.isArray(metalsData) ? metalsData[0] : metalsData;
-    const goldUSD   = parseFloat(m.gold)   || 0;
-    const silverUSD = parseFloat(m.silver) || 0;
-    const usdNPR    = parseFloat(currencyData?.usd?.npr) || FALLBACK_NPR;
+    const goldUSD   = xauRes?.xau?.usd;
+    const goldNPR   = xauRes?.xau?.npr;
+    const silverUSD = xagRes?.xag?.usd;
+    const silverNPR = xagRes?.xag?.npr;
 
-    if (!goldUSD) throw new Error('Invalid gold data');
+    if (!goldUSD || !goldNPR) throw new Error('No gold data');
 
     state.prevGoldUSD = state.goldUSD || goldUSD;
     state.goldUSD   = goldUSD;
-    state.silverUSD = silverUSD;
-    state.usdNPR    = usdNPR;
+    state.goldNPR   = goldNPR;
+    state.silverUSD = silverUSD || 0;
+    state.silverNPR = silverNPR || 0;
+    state.usdNPR    = goldNPR / goldUSD;
 
-    saveCache(goldUSD, silverUSD, usdNPR);
-    updateUI(goldUSD, silverUSD, usdNPR);
+    saveCache({ goldUSD, goldNPR, silverUSD, silverNPR });
+    updateUI();
 
   } catch (err) {
     console.warn('Live fetch failed:', err.message);
-    const cached = loadCache();
-    if (cached) {
-      state.goldUSD   = cached.goldUSD;
-      state.silverUSD = cached.silverUSD;
-      state.usdNPR    = cached.usdNPR;
-      updateUI(cached.goldUSD, cached.silverUSD, cached.usdNPR);
-      els('.error-banner').forEach(b => b.classList.add('show'));
-    } else {
-      els('.error-banner').forEach(b => b.classList.add('show'));
+    const c = loadCache();
+    if (c) {
+      state.goldUSD   = c.goldUSD;
+      state.goldNPR   = c.goldNPR;
+      state.silverUSD = c.silverUSD;
+      state.silverNPR = c.silverNPR;
+      state.usdNPR    = c.goldNPR / c.goldUSD;
+      updateUI();
     }
+    els('.error-banner').forEach(b => b.classList.add('show'));
   }
 }
 
 /* ─── chart ─── */
-function generateHistory(currentPrice, days) {
+function generateHistory(price, days) {
+  const vol = price * 0.007;
   const pts = [];
-  let price = currentPrice;
-
-  // Walk backwards
-  const dailyVol = currentPrice * 0.008; // ~0.8% daily volatility
+  let p = price;
   for (let i = days; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-
-    if (i > 0) {
-      price -= (Math.random() - 0.48) * dailyVol;
-      price = Math.max(price, currentPrice * 0.93);
-    } else {
-      price = currentPrice; // today is exact
-    }
-
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    if (i > 0) p -= (Math.random() - 0.48) * vol;
+    else        p = price;
     pts.push({
-      label: i === 0 ? 'Today' : date.toLocaleDateString('en-US', { month:'short', day:'numeric' }),
-      value: Math.round(price)
+      label: i === 0
+        ? 'Today'
+        : d.toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+      value: Math.round(p)
     });
   }
   return pts;
 }
 
-function updateChart(goldPerTolaNPR) {
-  if (!el('goldChart') || !goldPerTolaNPR) return;
-
-  const daysMap = { '7d': 7, '1m': 30, '3m': 90 };
-  const days    = daysMap[state.chartPeriod] || 7;
-  const history = generateHistory(goldPerTolaNPR, days);
-
-  const ctx = el('goldChart').getContext('2d');
-
-  const grad = ctx.createLinearGradient(0, 0, 0, 320);
-  grad.addColorStop(0, 'rgba(201,151,46,0.35)');
-  grad.addColorStop(1, 'rgba(201,151,46,0.00)');
+function updateChart(goldPerTola) {
+  if (!el('goldChart') || !goldPerTola) return;
+  const days = { '7d': 7, '1m': 30, '3m': 90 }[state.chartPeriod] || 7;
+  const h    = generateHistory(goldPerTola, days);
 
   if (state.chart) {
-    state.chart.data.labels   = history.map(h => h.label);
-    state.chart.data.datasets[0].data = history.map(h => h.value);
+    state.chart.data.labels = h.map(x => x.label);
+    state.chart.data.datasets[0].data = h.map(x => x.value);
     state.chart.update('none');
     return;
   }
 
+  const ctx  = el('goldChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 320);
+  grad.addColorStop(0, 'rgba(201,151,46,0.35)');
+  grad.addColorStop(1, 'rgba(201,151,46,0.00)');
+
   state.chart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: history.map(h => h.label),
+      labels: h.map(x => x.label),
       datasets: [{
-        label: 'Gold Price (NPR/Tola)',
-        data:  history.map(h => h.value),
-        borderColor:     '#C9972E',
-        backgroundColor: grad,
-        borderWidth:     2.5,
-        fill:            true,
-        tension:         0.4,
-        pointBackgroundColor: '#C9972E',
-        pointBorderColor:     '#fff',
-        pointBorderWidth:     2,
-        pointRadius:          4,
-        pointHoverRadius:     7
+        label: 'Gold NPR/Tola',
+        data:  h.map(x => x.value),
+        borderColor: '#C9972E', backgroundColor: grad,
+        borderWidth: 2.5, fill: true, tension: 0.4,
+        pointBackgroundColor: '#C9972E', pointBorderColor: '#fff',
+        pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 7
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1F2937',
-          titleColor: '#9CA3AF',
-          bodyColor:  '#FFFFFF',
-          bodyFont:   { size: 14, weight: 'bold' },
-          padding:    12,
-          callbacks: {
-            label: ctx => `  NPR ${ctx.raw.toLocaleString('en-NP')} / Tola`
-          }
+          backgroundColor: '#1F2937', titleColor: '#9CA3AF',
+          bodyColor: '#FFF', bodyFont: { size: 14, weight: 'bold' }, padding: 12,
+          callbacks: { label: c => `  NPR ${c.raw.toLocaleString('en-NP')} / Tola` }
         }
       },
       scales: {
-        x: {
-          grid:  { display: false },
-          ticks: { color: '#6B7280', font: { size: 11 }, maxRotation: 0,
-                   maxTicksLimit: days <= 7 ? 8 : days <= 30 ? 8 : 10 }
-        },
-        y: {
-          grid:  { color: '#F3F4F6', lineWidth: 1 },
-          ticks: {
-            color: '#6B7280', font: { size: 11 },
-            callback: v => 'NPR ' + Math.round(v).toLocaleString('en-NP')
-          }
-        }
+        x: { grid: { display: false }, ticks: { color: '#6B7280', font: { size: 11 }, maxRotation: 0, maxTicksLimit: 8 } },
+        y: { grid: { color: '#F3F4F6' }, ticks: { color: '#6B7280', font: { size: 11 }, callback: v => 'NPR ' + Math.round(v).toLocaleString('en-NP') } }
       }
     }
   });
@@ -290,11 +252,8 @@ function setupChartTabs() {
       els('.chart-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.chartPeriod = tab.dataset.period;
-      if (state.chart) {
-        state.chart.destroy();
-        state.chart = null;
-      }
-      const p = calcPrices(state.goldUSD, state.silverUSD, state.usdNPR);
+      if (state.chart) { state.chart.destroy(); state.chart = null; }
+      const p = calcPrices(state.goldNPR, state.silverNPR);
       updateChart(p['24k'].perTola);
     });
   });
@@ -302,8 +261,8 @@ function setupChartTabs() {
 
 /* ─── calculator ─── */
 function setupCalculator() {
-  const calcForm = el('calcForm');
-  if (!calcForm) return;
+  const form = el('calcForm');
+  if (!form) return;
 
   els('.calc-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -315,106 +274,79 @@ function setupCalculator() {
     });
   });
 
-  calcForm.addEventListener('input', debounce(doCalculate, 300));
-  calcForm.addEventListener('change', doCalculate);
+  form.addEventListener('input',  debounce(doCalculate, 250));
+  form.addEventListener('change', doCalculate);
 }
 
 function toggleCalcFields() {
-  const wtpGroup = el('wtp-group');
-  const ptw      = el('ptw-group');
-  if (!wtpGroup) return;
-
+  const wtp = el('wtp-group'), ptw = el('ptw-group');
+  if (!wtp) return;
   if (state.calcMode === 'weight-to-price') {
-    wtpGroup.style.display = '';
-    if (ptw) ptw.style.display = 'none';
-    const lbl = el('wtp-label');
-    if (lbl) lbl.textContent = 'Weight';
+    wtp.style.display = ''; if (ptw) ptw.style.display = 'none';
   } else {
-    wtpGroup.style.display = 'none';
-    if (ptw) ptw.style.display = '';
+    wtp.style.display = 'none'; if (ptw) ptw.style.display = '';
   }
 }
 
 function doCalculate() {
-  if (!state.goldUSD) return;
-  const p = calcPrices(state.goldUSD, state.silverUSD, state.usdNPR);
+  if (!state.goldNPR) return;
+  const p      = calcPrices(state.goldNPR, state.silverNPR);
+  const purity = el('calc-purity')?.value || '24k';
+  const unit   = el('calc-unit')?.value   || 'tola';
+  const making = parseFloat(el('calc-making')?.value || 0) || 0;
+  const prices = p[purity];
 
-  const purity   = (el('calc-purity')?.value || '24k');
-  const unit     = el('calc-unit')?.value || 'tola';
-  const making   = parseFloat(el('calc-making')?.value || 0) || 0;
-  const prices   = p[purity];
+  const pricePerUnit = unit === 'tola' ? prices.perTola : unit === 'gram' ? prices.perGram : prices.per10g;
 
-  const pricePerUnit = unit === 'tola'  ? prices.perTola :
-                       unit === 'gram'  ? prices.perGram : prices.per10g;
-
-  let totalNPR, weightInGrams, weightInTola;
+  let totalNPR, weightGrams, weightTola;
 
   if (state.calcMode === 'weight-to-price') {
     const qty = parseFloat(el('calc-qty')?.value) || 0;
     if (qty <= 0) return clearResult();
-    const baseWeight = unit === 'tola' ? qty * TOLA_GRAMS : unit === 'gram' ? qty : qty * 10;
-    const base = pricePerUnit * qty;
-    totalNPR     = base * (1 + making / 100);
-    weightInGrams = baseWeight;
-    weightInTola  = baseWeight / TOLA_GRAMS;
+    weightGrams = unit === 'tola' ? qty * TOLA_GRAMS : unit === 'gram' ? qty : qty * 10;
+    weightTola  = weightGrams / TOLA_GRAMS;
+    totalNPR    = pricePerUnit * qty * (1 + making / 100);
   } else {
     const budget = parseFloat(el('calc-budget')?.value) || 0;
     if (budget <= 0) return clearResult();
-    const goldBudget  = budget / (1 + making / 100);
-    const gramPrice   = prices.perGram;
-    weightInGrams     = goldBudget / gramPrice;
-    weightInTola      = weightInGrams / TOLA_GRAMS;
-    totalNPR          = budget;
+    totalNPR    = budget;
+    weightGrams = (budget / (1 + making / 100)) / prices.perGram;
+    weightTola  = weightGrams / TOLA_GRAMS;
   }
 
   const resultEl = el('calc-result');
   if (!resultEl) return;
   resultEl.classList.add('show');
-
-  setIfExists('result-amount',  `NPR ${Math.round(totalNPR).toLocaleString('en-NP')}`);
-  setIfExists('result-grams',   `${weightInGrams.toFixed(3)} g`);
-  setIfExists('result-tola',    `${weightInTola.toFixed(4)} tola`);
-  setIfExists('result-making-cost',
-    making > 0 ? `NPR ${Math.round(totalNPR - totalNPR / (1 + making / 100)).toLocaleString('en-NP')}` : '—');
+  set('result-amount',      `NPR ${Math.round(totalNPR).toLocaleString('en-NP')}`);
+  set('result-grams',       `${weightGrams.toFixed(3)} g`);
+  set('result-tola',        `${weightTola.toFixed(4)} tola`);
+  set('result-making-cost', making > 0 ? `NPR ${Math.round(totalNPR - totalNPR / (1 + making / 100)).toLocaleString('en-NP')}` : '—');
 }
 
-function clearResult() {
-  const r = el('calc-result');
-  if (r) r.classList.remove('show');
-}
+function clearResult() { const r = el('calc-result'); if (r) r.classList.remove('show'); }
 
-/* ─── nav toggle ─── */
+/* ─── nav ─── */
 function setupNav() {
-  const toggle = el('navToggle');
-  const menu   = el('navMenu');
+  const toggle = el('navToggle'), menu = el('navMenu');
   if (!toggle || !menu) return;
-
   toggle.addEventListener('click', () => {
     const open = menu.classList.toggle('open');
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', open);
   });
-
-  // close on outside click
   document.addEventListener('click', e => {
     if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-      menu.classList.remove('open');
-      toggle.classList.remove('open');
-      toggle.setAttribute('aria-expanded', false);
+      menu.classList.remove('open'); toggle.classList.remove('open');
     }
   });
-
-  // highlight active page
-  const current = location.pathname.split('/').pop() || 'index.html';
+  const cur = location.pathname.split('/').pop() || 'index.html';
   els('.nav-menu a').forEach(a => {
-    if (a.getAttribute('href') === current ||
-        (current === '' && a.getAttribute('href') === 'index.html')) {
+    if (a.getAttribute('href') === cur || (cur === '' && a.getAttribute('href') === 'index.html'))
       a.classList.add('active');
-    }
   });
 }
 
-/* ─── FAQ accordion ─── */
+/* ─── FAQ ─── */
 function setupFAQ() {
   els('.faq-question').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -438,29 +370,15 @@ function setupContactForm() {
   });
 }
 
-/* ─── debounce ─── */
-function debounce(fn, ms) {
-  let timer;
-  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
-}
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
 /* ─── init ─── */
 document.addEventListener('DOMContentLoaded', async () => {
   setupNav();
   setupFAQ();
   setupContactForm();
-  setupCalcTabs();
   setupChartTabs();
   await fetchPrices();
   setupCalculator();
   setInterval(fetchPrices, REFRESH_MS);
 });
-
-function setupCalcTabs() {
-  // Called before setupCalculator to ensure tabs work
-  els('.calc-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      state.calcMode = tab.dataset.mode;
-    });
-  });
-}

@@ -94,8 +94,9 @@ ul { list-style: none; }
   background: linear-gradient(135deg, var(--gold-400), var(--gold-600));
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
+  flex-shrink: 0;
 }
+.logo-icon svg { display: block; }
 .logo span { color: var(--gold-500); }
 
 .nav-menu {
