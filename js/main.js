@@ -205,9 +205,46 @@ function renderUI() {
    APEX CHART
 ══════════════════════════════ */
 
-const DAYS_MAP = { '7d': 7, '1m': 30, '3m': 90 };
+// null = intraday (hourly), number = daily
+const DAYS_MAP = { '1d': null, '7d': 7, '1m': 30, '3m': 90 };
 
-/* Generate line series data (timestamps + values) */
+/* ── Intraday: 24 hourly points ── */
+function makeHourlyLine(basePrice) {
+  const vol = basePrice * 0.0012; // ~0.12% per hour
+  const pts = [];
+  let p = basePrice * 0.988;
+  const now = new Date();
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(now);
+    d.setMinutes(0, 0, 0);
+    d.setHours(d.getHours() - i);
+    p += (Math.random() - 0.47) * vol;
+    if (i === 0) p = basePrice;
+    pts.push([d.getTime(), Math.round(Math.max(p, basePrice * 0.978))]);
+  }
+  return pts;
+}
+
+function makeHourlyOHLC(basePrice) {
+  const vol = basePrice * 0.0012;
+  const data = [];
+  let close = basePrice * 0.988;
+  const now = new Date();
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(now);
+    d.setMinutes(0, 0, 0);
+    d.setHours(d.getHours() - i);
+    const open  = close;
+    const move  = i === 0 ? basePrice - close : (Math.random() - 0.47) * vol;
+    close = i === 0 ? basePrice : Math.max(open + move, basePrice * 0.978);
+    const high  = Math.max(open, close) + Math.random() * vol * 0.4;
+    const low   = Math.min(open, close) - Math.random() * vol * 0.4;
+    data.push({ x: d.getTime(), y: [Math.round(open), Math.round(high), Math.round(low), Math.round(close)] });
+  }
+  return data;
+}
+
+/* ── Daily line data ── */
 function makeLineData(basePrice, days) {
   const vol = basePrice * 0.007;
   const pts = [];
@@ -223,11 +260,11 @@ function makeLineData(basePrice, days) {
   return pts;
 }
 
-/* Generate OHLC candle data */
+/* ── Daily OHLC candle data ── */
 function makeOHLC(basePrice, days) {
   const vol  = basePrice * 0.008;
   const data = [];
-  let close  = basePrice * (1 - (days * 0.001));  // start a bit lower
+  let close  = basePrice * (1 - (days * 0.001));
   for (let i = days; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -326,19 +363,17 @@ function renderChart() {
 
   const p    = calcPrices(state.goldNPR, state.silverNPR);
   const base = p['24k'].perTola;
-  const days = DAYS_MAP[state.chartPeriod] || 7;
+  const days = DAYS_MAP[state.chartPeriod]; // null = intraday
 
-  // destroy previous
-  if (state.apexChart) {
-    state.apexChart.destroy();
-    state.apexChart = null;
-  }
+  if (state.apexChart) { state.apexChart.destroy(); state.apexChart = null; }
 
   let opts;
   if (state.chartType === 'candlestick') {
-    opts = buildCandleOptions(makeOHLC(base, days));
+    const data = days === null ? makeHourlyOHLC(base) : makeOHLC(base, days);
+    opts = buildCandleOptions(data);
   } else {
-    opts = buildLineOptions(makeLineData(base, days));
+    const data = days === null ? makeHourlyLine(base) : makeLineData(base, days);
+    opts = buildLineOptions(data);
   }
 
   state.apexChart = new ApexCharts(container, opts);
