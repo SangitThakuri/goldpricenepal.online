@@ -1,32 +1,36 @@
 /* =====================================================
    Gold Price Nepal – main.js
-   Primary:  www.fenegosida.org  (official Nepal rate)
+   Primary:  fenegosida.org  (official Nepal rate)
    Fallback: fawazahmed0 CDN XAU/NPR + 27.6% Nepal premium
    Chart:    ApexCharts  (line + candlestick)
    ===================================================== */
 
 const TOLA_GRAMS     = 11.664;
 const TROY_OZ_GRAMS  = 31.1035;
-const NEPAL_PREMIUM  = 1.276;   // fallback: 10% duty + 13% VAT + ~2% margin
+const NEPAL_PREMIUM  = 1.382;   // fallback: 20% duty + 13% VAT + ~2% margin (no luxury tax)
 const SILVER_PREMIUM = 1.12;
 const REFRESH_MS     = 5 * 60 * 1000;
 
-const FENEGOSIDA_URL = 'https://www.fenegosida.org/';
-const CORS_PROXY     = 'https://api.allorigins.win/get?url=';
+// no-www works through allorigins; www fallback tried second
+const FENEGOSIDA_URLS = [
+  'https://fenegosida.org/',
+  'https://www.fenegosida.org/'
+];
+const CORS_PROXY = 'https://api.allorigins.win/get?url=';
 const CDN_BASE       = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
 
 const state = {
-  goldUSD:       0,
-  goldNPR:       0,       // international XAU/NPR
-  silverNPR:     0,
-  yesterdayNPR:  0,
-  usdNPR:        135,
-  nepal24kTola:  0,       // FENEGOSIDA price (or fallback)
-  priceSource:   'loading',  // 'fenegosida' | 'international'
-  chartPeriod:   '7d',
-  chartType:     'line',
-  calcMode:      'weight-to-price',
-  apexChart:     null
+  goldUSD:        0,
+  goldNPR:        0,       // international XAU/NPR (per troy oz)
+  silverTolaNPR:  0,       // silver price per tola in NPR
+  yesterdayNPR:   0,
+  usdNPR:         135,
+  nepal24kTola:   0,       // FENEGOSIDA price (or fallback)
+  priceSource:    'loading',  // 'fenegosida' | 'international'
+  chartPeriod:    '7d',
+  chartType:      'line',
+  calcMode:       'weight-to-price',
+  apexChart:      null
 };
 
 /* ── helpers ── */
@@ -67,28 +71,49 @@ function loadCache() {
 /* ══════════════════════════════════════════
    FENEGOSIDA  (official Nepal gold price)
 ══════════════════════════════════════════ */
-async function fetchFENEGOSIDA() {
-  const url  = CORS_PROXY + encodeURIComponent(FENEGOSIDA_URL);
-  const data = await fetchWithTimeout(url, 14000).then(r => r.json());
-  const html = data?.contents;
-  if (!html) throw new Error('No FENEGOSIDA HTML');
-
-  // 1. Try per-tola price directly
-  const tolaM = html.match(/per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
+function parseFENEGOSIDA(html) {
+  // Gold: per-tola block (Fine Gold 9999)
+  const tolaM = html.match(/FINE GOLD[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
+  let gold24kTola = 0;
   if (tolaM) {
     const p = parseInt(tolaM[1], 10);
-    if (p > 80000 && p < 700000) return p;
+    if (p > 80000 && p < 700000) gold24kTola = p;
+  }
+  if (!gold24kTola) {
+    // Derive from per-10g
+    const tenGM = html.match(/FINE GOLD[\s\S]{0,120}per 10 gr[\s\S]{0,80}<b>(\d+)<\/b>/);
+    if (tenGM) {
+      const per10g = parseInt(tenGM[1], 10);
+      const t = Math.round(per10g * TOLA_GRAMS / 10);
+      if (t > 80000 && t < 700000) gold24kTola = t;
+    }
   }
 
-  // 2. Derive from per-10g price
-  const tenGM = html.match(/per 10 gr[\s\S]{0,80}<b>(\d+)<\/b>/);
-  if (tenGM) {
-    const per10g = parseInt(tenGM[1], 10);
-    const perTola = Math.round(per10g * TOLA_GRAMS / 10);
-    if (perTola > 80000 && perTola < 700000) return perTola;
+  // Silver: per-tola block
+  const silverM = html.match(/SILVER[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
+  let silverTola = 0;
+  if (silverM) {
+    const s = parseInt(silverM[1], 10);
+    if (s > 100 && s < 50000) silverTola = s;
   }
 
-  throw new Error('Could not parse FENEGOSIDA price');
+  return { gold24kTola, silverTola };
+}
+
+async function fetchFENEGOSIDA() {
+  for (const baseUrl of FENEGOSIDA_URLS) {
+    try {
+      const url  = CORS_PROXY + encodeURIComponent(baseUrl);
+      const data = await fetchWithTimeout(url, 14000).then(r => r.json());
+      const html = data?.contents;
+      if (!html || html.length < 1000) continue;
+      const result = parseFENEGOSIDA(html);
+      if (result.gold24kTola) return result;
+    } catch (_) {
+      // try next URL
+    }
+  }
+  throw new Error('All FENEGOSIDA URLs failed');
 }
 
 /* ══════════════════════════════════════════
@@ -121,24 +146,28 @@ async function fetchPrices() {
 
     if (!goldUSD) throw new Error('XAU data missing');
 
-    const usdNPR    = goldNPR / goldUSD;
-    const silverNPR = xagRes.value?.xag?.npr || 0;
-    const yestNPR   = xauYestRes.value?.xau?.npr || 0;
+    const usdNPR  = goldNPR / goldUSD;
+    const yestNPR = xauYestRes.value?.xau?.npr || 0;
 
     // Decide price source
-    let nepal24kTola, priceSource;
-    if (fenegosidaRes.status === 'fulfilled' && fenegosidaRes.value) {
-      nepal24kTola = fenegosidaRes.value;
-      priceSource  = 'fenegosida';
+    let nepal24kTola, silverTolaNPR, priceSource;
+    const fData = fenegosidaRes.status === 'fulfilled' ? fenegosidaRes.value : null;
+    if (fData?.gold24kTola) {
+      nepal24kTola  = fData.gold24kTola;
+      silverTolaNPR = fData.silverTola || 0;
+      priceSource   = 'fenegosida';
     } else {
-      // Fallback: international calculation
-      nepal24kTola = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
-      priceSource  = 'international';
-      console.warn('FENEGOSIDA fetch failed, using international fallback:', fenegosidaRes.reason?.message);
+      nepal24kTola  = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
+      const xagNPR  = xagRes.value?.xag?.npr || 0;
+      silverTolaNPR = xagNPR ? (xagNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * SILVER_PREMIUM : 0;
+      priceSource   = 'international';
+      console.warn('FENEGOSIDA failed, using international:', fenegosidaRes.reason?.message);
     }
 
-    Object.assign(state, { goldUSD, goldNPR, silverNPR, yesterdayNPR: yestNPR, usdNPR, nepal24kTola, priceSource });
-    saveCache({ goldUSD, goldNPR, silverNPR, yesterdayNPR: yestNPR, nepal24kTola, priceSource });
+    Object.assign(state, {
+      goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR, usdNPR, nepal24kTola, priceSource
+    });
+    saveCache({ goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR, nepal24kTola, priceSource });
     renderUI();
 
   } catch (err) {
@@ -159,10 +188,11 @@ function calcPrices() {
   const base24kTola = state.nepal24kTola;
   const base24kGram = base24kTola / TOLA_GRAMS;
 
-  const spg  = state.silverNPR
-    ? (state.silverNPR / TROY_OZ_GRAMS) * SILVER_PREMIUM
-    : 0;
+  // Silver: FENEGOSIDA gives per-tola directly; derive gram and 10g from it
+  const silvTola = state.silverTolaNPR || 0;
+  const silvGram = silvTola / TOLA_GRAMS;
 
+  // Gold purities: proportional from 24K FENEGOSIDA price
   const gold = k => ({
     perTola: base24kTola * (k / 24),
     perGram: base24kGram * (k / 24),
@@ -171,7 +201,7 @@ function calcPrices() {
 
   return {
     '24k': gold(24), '22k': gold(22), '18k': gold(18), '14k': gold(14),
-    silver: { perGram: spg, perTola: spg * TOLA_GRAMS, per10g: spg * 10 }
+    silver: { perTola: silvTola, perGram: silvGram, per10g: silvGram * 10 }
   };
 }
 
@@ -179,7 +209,7 @@ function calcPrices() {
    Render UI
 ══════════════════════════════════════════ */
 function renderUI() {
-  const { goldUSD, goldNPR, usdNPR, silverNPR, yesterdayNPR, nepal24kTola, priceSource } = state;
+  const { goldUSD, goldNPR, usdNPR, silverTolaNPR, yesterdayNPR, nepal24kTola, priceSource } = state;
   if (!nepal24kTola) return;
 
   const p = calcPrices();
@@ -195,7 +225,7 @@ function renderUI() {
 
   /* ticker */
   set('ticker-gold',   `NPR ${fmt(p['24k'].perTola)}/tola`);
-  set('ticker-silver', silverNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
+  set('ticker-silver', silverTolaNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('ticker-usd',    `USD ${goldUSD.toFixed(2)}/oz`);
   set('ticker-rate',   `1 USD = NPR ${usdNPR.toFixed(2)}`);
 
@@ -212,7 +242,7 @@ function renderUI() {
     }
   });
 
-  set('silver-price',    silverNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
+  set('silver-price',    silverTolaNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('forex-rate',      `1 USD = NPR ${usdNPR.toFixed(2)}`);
   set('intl-gold-price', `USD ${goldUSD.toFixed(2)}/oz`);
 
@@ -220,7 +250,7 @@ function renderUI() {
   set('stat-24k-tola',    fmt(p['24k'].perTola));
   set('stat-yesterday',   yestTola ? fmt(yestTola) : '—');
   set('stat-22k-tola',    fmt(p['22k'].perTola));
-  set('stat-silver-tola', silverNPR ? fmt(p.silver.perTola) : '—');
+  set('stat-silver-tola', silverTolaNPR ? fmt(p.silver.perTola) : '—');
 
   const statChEl = el('stat-change');
   if (statChEl) {
@@ -251,7 +281,7 @@ function renderUI() {
     set(`tbl-${k}-gram`, `NPR ${fmt(p[k].perGram)}`);
     set(`tbl-${k}-10g`,  `NPR ${fmt(p[k].per10g)}`);
   });
-  if (silverNPR) {
+  if (silverTolaNPR) {
     set('tbl-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
     set('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
