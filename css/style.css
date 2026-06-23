@@ -314,6 +314,21 @@ ul { list-style: none; }
 .chart-container { position: relative; height: 320px; }
 .chart-note { font-size: .75rem; color: var(--dark-500); margin-top: 10px; text-align: right; }
 
+/* Chart type toggle */
+.chart-type-tabs {
+  display: flex; gap: 0;
+  border-radius: var(--radius-sm); overflow: hidden;
+  border: 1px solid var(--dark-200);
+}
+.chart-type-tab {
+  padding: 5px 14px; font-size: .8rem; font-weight: 600;
+  border: none; background: var(--white); cursor: pointer;
+  color: var(--dark-600); transition: all var(--transition);
+  border-right: 1px solid var(--dark-200);
+}
+.chart-type-tab:last-child { border-right: none; }
+.chart-type-tab.active { background: var(--dark-900); color: var(--white); }
+
 /* ===== CALCULATOR ===== */
 .calculator-section { background: var(--gold-50); }
 .calc-card { padding: 32px; }

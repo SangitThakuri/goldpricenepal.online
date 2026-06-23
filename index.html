@@ -213,8 +213,12 @@
   <div class="container">
     <div class="stats-grid">
       <div class="stat-item">
-        <div class="stat-label">24K per Tola</div>
+        <div class="stat-label">Today 24K / Tola</div>
         <div class="stat-value" id="stat-24k-tola">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Yesterday 24K / Tola</div>
+        <div class="stat-value" id="stat-yesterday">—</div>
       </div>
       <div class="stat-item">
         <div class="stat-label">22K per Tola</div>
@@ -225,7 +229,7 @@
         <div class="stat-value" id="stat-silver-tola">—</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Today's Change</div>
+        <div class="stat-label">Change vs Yesterday</div>
         <div class="stat-value" id="stat-change">—</div>
       </div>
       <div class="stat-item">
@@ -319,14 +323,20 @@
           <h3>24K Gold Price (NPR per Tola)</h3>
           <p>Price movement over selected period</p>
         </div>
-        <div class="chart-tabs">
-          <button class="chart-tab active" data-period="7d">7 Days</button>
-          <button class="chart-tab" data-period="1m">1 Month</button>
-          <button class="chart-tab" data-period="3m">3 Months</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-period="7d">7 Days</button>
+            <button class="chart-tab" data-period="1m">1 Month</button>
+            <button class="chart-tab" data-period="3m">3 Months</button>
+          </div>
+          <div class="chart-type-tabs">
+            <button class="chart-type-tab active" data-type="line">Line</button>
+            <button class="chart-type-tab" data-type="candlestick">Candlestick</button>
+          </div>
         </div>
       </div>
       <div class="chart-container">
-        <canvas id="goldChart" aria-label="Gold price chart"></canvas>
+        <div id="goldChart" style="min-height:320px"></div>
       </div>
       <p class="chart-note">⚠️ Chart shows approximate price trends based on international rates. Actual Nepal rates may differ slightly.</p>
     </div>
@@ -651,7 +661,7 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
