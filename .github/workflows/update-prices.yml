@@ -1,0 +1,55 @@
+name: Update Gold Prices
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # every 4 hours
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch FENEGOSIDA prices
+        run: |
+          HTML=$(curl -s "https://fenegosida.org/" \
+            -H "User-Agent: Mozilla/5.0 (compatible; GoldPriceNepal/1.0)" \
+            --max-time 20 || echo "")
+
+          GOLD=$(echo "$HTML" | python3 -c "
+          import sys, re
+          html = sys.stdin.read()
+          m = re.search(r'FINE GOLD[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)</b>', html)
+          print(m.group(1) if m else '0')
+          ")
+
+          SILVER=$(echo "$HTML" | python3 -c "
+          import sys, re
+          html = sys.stdin.read()
+          m = re.search(r'SILVER[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)</b>', html)
+          print(m.group(1) if m else '0')
+          ")
+
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          if [ "$GOLD" = "0" ] || [ -z "$GOLD" ]; then
+            echo "FENEGOSIDA fetch failed — keeping existing data/prices.json"
+            exit 0
+          fi
+
+          echo "{\"gold24kTola\": $GOLD, \"silverTola\": $SILVER, \"updatedAt\": \"$DATE\"}" > data/prices.json
+          echo "Fetched: gold=$GOLD, silver=$SILVER"
+
+      - name: Commit updated prices
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add data/prices.json
+          git diff --staged --quiet && echo "No changes" || git commit -m "chore: update gold prices $(date -u +%Y-%m-%d)"
+          git push

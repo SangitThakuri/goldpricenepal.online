@@ -1,7 +1,7 @@
 /* =====================================================
    Gold Price Nepal – main.js
-   Primary:  fenegosida.org  (official Nepal rate)
-   Fallback: fawazahmed0 CDN XAU/NPR + 27.6% Nepal premium
+   Primary:  data/prices.json  (updated by GitHub Actions every 4h from FENEGOSIDA)
+   Fallback: fawazahmed0 CDN XAU/NPR + 20% duty + 13% VAT
    Chart:    ApexCharts  (line + candlestick)
    ===================================================== */
 
@@ -11,13 +11,8 @@ const NEPAL_PREMIUM  = 1.382;   // fallback: 20% duty + 13% VAT + ~2% margin (no
 const SILVER_PREMIUM = 1.12;
 const REFRESH_MS     = 5 * 60 * 1000;
 
-// no-www works through allorigins; www fallback tried second
-const FENEGOSIDA_URLS = [
-  'https://fenegosida.org/',
-  'https://www.fenegosida.org/'
-];
-const CORS_PROXY = 'https://api.allorigins.win/get?url=';
-const CDN_BASE       = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
+const PRICES_JSON = 'data/prices.json';
+const CDN_BASE    = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
 
 const state = {
   goldUSD:        0,
@@ -69,51 +64,15 @@ function loadCache() {
 }
 
 /* ══════════════════════════════════════════
-   FENEGOSIDA  (official Nepal gold price)
+   FENEGOSIDA prices (served via GitHub Actions → data/prices.json)
+   GitHub Actions runs every 4h, scrapes fenegosida.org, commits the JSON.
+   Same-origin fetch — no CORS proxy needed.
 ══════════════════════════════════════════ */
-function parseFENEGOSIDA(html) {
-  // Gold: per-tola block (Fine Gold 9999)
-  const tolaM = html.match(/FINE GOLD[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
-  let gold24kTola = 0;
-  if (tolaM) {
-    const p = parseInt(tolaM[1], 10);
-    if (p > 80000 && p < 700000) gold24kTola = p;
-  }
-  if (!gold24kTola) {
-    // Derive from per-10g
-    const tenGM = html.match(/FINE GOLD[\s\S]{0,120}per 10 gr[\s\S]{0,80}<b>(\d+)<\/b>/);
-    if (tenGM) {
-      const per10g = parseInt(tenGM[1], 10);
-      const t = Math.round(per10g * TOLA_GRAMS / 10);
-      if (t > 80000 && t < 700000) gold24kTola = t;
-    }
-  }
-
-  // Silver: per-tola block
-  const silverM = html.match(/SILVER[\s\S]{0,120}per 1 tola[\s\S]{0,80}<b>(\d+)<\/b>/);
-  let silverTola = 0;
-  if (silverM) {
-    const s = parseInt(silverM[1], 10);
-    if (s > 100 && s < 50000) silverTola = s;
-  }
-
-  return { gold24kTola, silverTola };
-}
-
 async function fetchFENEGOSIDA() {
-  for (const baseUrl of FENEGOSIDA_URLS) {
-    try {
-      const url  = CORS_PROXY + encodeURIComponent(baseUrl);
-      const data = await fetchWithTimeout(url, 14000).then(r => r.json());
-      const html = data?.contents;
-      if (!html || html.length < 1000) continue;
-      const result = parseFENEGOSIDA(html);
-      if (result.gold24kTola) return result;
-    } catch (_) {
-      // try next URL
-    }
-  }
-  throw new Error('All FENEGOSIDA URLs failed');
+  const data = await fetchWithTimeout(PRICES_JSON + '?v=' + Date.now(), 8000).then(r => r.json());
+  const g = data?.gold24kTola;
+  if (!g || g < 80000 || g > 700000) throw new Error('Invalid price in prices.json');
+  return { gold24kTola: g, silverTola: data?.silverTola || 0 };
 }
 
 /* ══════════════════════════════════════════
