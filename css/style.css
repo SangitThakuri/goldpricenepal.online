@@ -183,9 +183,9 @@ ul { list-style: none; }
 
 /* Clickable ticker items */
 .ticker-link {
-  text-decoration: none;
-  border-radius: 4px;
-  padding: 2px 6px;
+  display: inline-flex; flex-direction: row; align-items: center; gap: 6px;
+  white-space: nowrap; text-decoration: none;
+  border-radius: 4px; padding: 2px 6px;
   transition: background var(--transition);
 }
 .ticker-link:hover {
