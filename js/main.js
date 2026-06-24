@@ -394,12 +394,12 @@ function setupChartTypeTabs() {
 /* ══════════════════════════════════════════
    Nepali weight converter + showroom price
 ══════════════════════════════════════════ */
-let _calcPurity  = '24k';
-let _lastTola    = 0;
-
-function r6(n) { return parseFloat(n.toPrecision(7)); }
+let _calcPurity = '24k';
+let _lastTola   = 0;
+let _updating   = false; // guard against programmatic-set → input event loops
 
 function setupCalculator() {
+  // purity toggle
   els('.purity-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       els('.purity-btn').forEach(b => b.classList.remove('active'));
@@ -409,12 +409,17 @@ function setupCalculator() {
     });
   });
 
+  // bidirectional weight inputs — direct (no debounce), guarded by _updating
   ['tola','aana','lal','gram'].forEach(f => {
     const inp = el('wc-' + f);
     if (!inp) return;
-    inp.addEventListener('input', debounce(() => handleWeightInput(f, inp.value), 120));
+    inp.addEventListener('input', () => {
+      if (_updating) return;
+      handleWeightInput(f, inp.value);
+    });
   });
 
+  // making charges slider
   const slider = el('making-slider');
   if (slider) {
     slider.addEventListener('input', () => {
@@ -428,54 +433,76 @@ function setupCalculator() {
 
 function updateSliderFill(slider) {
   const pct = (slider.value / slider.max) * 100;
-  slider.style.background = `linear-gradient(to right,var(--gold-500) 0%,var(--gold-500) ${pct}%,var(--dark-200) ${pct}%,var(--dark-200) 100%)`;
+  slider.style.background =
+    `linear-gradient(to right,var(--gold-500) 0%,var(--gold-500) ${pct}%,var(--dark-200) ${pct}%,var(--dark-200) 100%)`;
 }
 
 function handleWeightInput(field, raw) {
   const v = parseFloat(raw);
-  if (!raw || isNaN(v) || v < 0) {
+
+  // empty / invalid — clear other fields
+  if (raw === '' || raw === null || isNaN(v) || v < 0) {
     _lastTola = 0;
-    ['tola','aana','lal','gram'].forEach(f => { if (f !== field) setWC('wc-'+f, ''); });
-    updateShowroom(); return;
+    _updating = true;
+    ['tola','aana','lal','gram'].forEach(f => { if (f !== field) setWCVal(f, ''); });
+    _updating = false;
+    updateShowroom();
+    return;
   }
+
+  // convert typed value to tola
   let tola;
   switch (field) {
     case 'tola': tola = v; break;
     case 'aana': tola = v / AANA_PER_TOLA; break;
     case 'lal':  tola = v / (AANA_PER_TOLA * LAL_PER_AANA); break;
     case 'gram': tola = v / TOLA_GRAMS; break;
+    default: return;
   }
   _lastTola = tola;
-  if (field !== 'tola') setWC('wc-tola', r6(tola));
-  if (field !== 'aana') setWC('wc-aana', r6(tola * AANA_PER_TOLA));
-  if (field !== 'lal')  setWC('wc-lal',  r6(tola * AANA_PER_TOLA * LAL_PER_AANA));
-  if (field !== 'gram') setWC('wc-gram', r6(tola * TOLA_GRAMS));
+
+  // update the other three fields without re-triggering input handler
+  _updating = true;
+  if (field !== 'tola') setWCVal('tola', fmt4(tola));
+  if (field !== 'aana') setWCVal('aana', fmt4(tola * AANA_PER_TOLA));
+  if (field !== 'lal')  setWCVal('lal',  fmt4(tola * AANA_PER_TOLA * LAL_PER_AANA));
+  if (field !== 'gram') setWCVal('gram', fmt4(tola * TOLA_GRAMS));
+  _updating = false;
+
   updateShowroom();
 }
 
-function setWC(id, v) {
-  const e = el(id);
-  if (e && document.activeElement !== e) e.value = (v === '' || v === 0) ? '' : v;
+// set a wc-input value; prefix 'wc-' internally
+function setWCVal(field, v) {
+  const e = el('wc-' + field);
+  if (!e) return;
+  e.value = (v === '' || v === 0) ? '' : v;
+}
+
+// round to max 4 decimal places, strip trailing zeros
+function fmt4(n) {
+  if (!n || n === 0) return '';
+  return parseFloat(n.toFixed(4));
 }
 
 function updateShowroom() {
   if (!state.nepal24kTola || _lastTola <= 0) {
     set('sr-gold-value',  'Enter a weight above');
     set('sr-making-cost', '—');
-    set('sr-total', '—');
+    set('sr-total',       '—');
     return;
   }
-  const p          = calcPrices();
-  const pPerTola   = p[_calcPurity]?.perTola || 0;
-  const slider     = el('making-slider');
-  const makingPct  = slider ? parseInt(slider.value, 10) : 12;
-  const goldValue  = Math.round(pPerTola * _lastTola);
-  const makingCost = Math.round(goldValue * makingPct / 100);
-  const total      = goldValue + makingCost;
+  const p         = calcPrices();
+  const pPerTola  = p[_calcPurity]?.perTola || 0;
+  const slider    = el('making-slider');
+  const makingPct = slider ? parseInt(slider.value, 10) : 12;
+  const goldVal   = Math.round(pPerTola * _lastTola);
+  const makeVal   = Math.round(goldVal * makingPct / 100);
+  const total     = goldVal + makeVal;
 
-  set('sr-gold-value',  goldValue ? `NPR ${goldValue.toLocaleString('en-NP')}` : '—');
-  set('sr-making-cost', makingPct ? `NPR ${makingCost.toLocaleString('en-NP')}` : '—');
-  set('sr-total',       total     ? `NPR ${total.toLocaleString('en-NP')}` : '—');
+  set('sr-gold-value',  `NPR ${goldVal.toLocaleString('en-NP')}`);
+  set('sr-making-cost', makingPct > 0 ? `NPR ${makeVal.toLocaleString('en-NP')}` : 'None');
+  set('sr-total',       `NPR ${total.toLocaleString('en-NP')}`);
 }
 
 /* ── view toggle (Table ↔ Chart) ── */
