@@ -11,6 +11,10 @@ const NEPAL_PREMIUM  = 1.382;   // fallback: 20% duty + 13% VAT + ~2% margin (no
 const SILVER_PREMIUM = 1.12;
 const REFRESH_MS     = 5 * 60 * 1000;
 
+// Nepali traditional weight units
+const AANA_PER_TOLA  = 16;
+const LAL_PER_AANA   = 10;   // 1 Tola = 16 Aana = 160 Lal
+
 const PRICES_JSON = 'data/prices.json';
 const CDN_BASE    = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
 
@@ -24,7 +28,6 @@ const state = {
   priceSource:    'loading',  // 'fenegosida' | 'international'
   chartPeriod:    '7d',
   chartType:      'line',
-  calcMode:       'weight-to-price',
   apexChart:      null
 };
 
@@ -234,6 +237,12 @@ function renderUI() {
     }
   }
 
+  /* silver hero card */
+  if (silverTolaNPR) {
+    set('hero-silver-tola', `NPR ${fmt(p.silver.perTola)}`);
+    set('hero-silver-gram', `NPR ${fmt(p.silver.perGram)}/g`);
+  }
+
   /* rate table */
   ['24k','22k','18k','14k'].forEach(k => {
     set(`tbl-${k}-tola`, `NPR ${fmt(p[k].perTola)}`);
@@ -245,6 +254,9 @@ function renderUI() {
     set('tbl-silver-gram', `NPR ${fmt(p.silver.perGram)}`);
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
   }
+
+  /* refresh calculator showroom price when prices update */
+  updateShowroom();
 
   /* timestamps */
   const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -380,60 +392,105 @@ function setupChartTypeTabs() {
 }
 
 /* ══════════════════════════════════════════
-   Calculator
+   Nepali weight converter + showroom price
 ══════════════════════════════════════════ */
+let _calcPurity  = '24k';
+let _lastTola    = 0;
+
+function r6(n) { return parseFloat(n.toPrecision(7)); }
+
 function setupCalculator() {
-  const form = el('calcForm');
-  if (!form) return;
-  els('.calc-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      els('.calc-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      state.calcMode = tab.dataset.mode;
-      toggleCalcFields();
-      el('calc-result')?.classList.remove('show');
+  els('.purity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      els('.purity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _calcPurity = btn.dataset.k;
+      updateShowroom();
     });
   });
-  form.addEventListener('input',  debounce(doCalc, 250));
-  form.addEventListener('change', doCalc);
-}
-function toggleCalcFields() {
-  const wtp = el('wtp-group'), ptw = el('ptw-group');
-  if (!wtp) return;
-  wtp.style.display = state.calcMode === 'weight-to-price' ? '' : 'none';
-  if (ptw) ptw.style.display = state.calcMode === 'price-to-weight' ? '' : 'none';
-}
-function doCalc() {
-  if (!state.nepal24kTola) return;
-  const p      = calcPrices();
-  const purity = el('calc-purity')?.value || '24k';
-  const unit   = el('calc-unit')?.value   || 'tola';
-  const making = parseFloat(el('calc-making')?.value) || 0;
-  const prices = p[purity];
-  const ppUnit = unit==='tola' ? prices.perTola : unit==='gram' ? prices.perGram : prices.per10g;
-  let totalNPR, wGrams, wTola;
 
-  if (state.calcMode !== 'price-to-weight') {
-    const qty = parseFloat(el('calc-qty')?.value) || 0;
-    if (qty <= 0) return el('calc-result')?.classList.remove('show');
-    wGrams   = unit==='tola' ? qty*TOLA_GRAMS : unit==='gram' ? qty : qty*10;
-    wTola    = wGrams / TOLA_GRAMS;
-    totalNPR = ppUnit * qty * (1 + making/100);
-  } else {
-    const budget = parseFloat(el('calc-budget')?.value) || 0;
-    if (budget <= 0) return el('calc-result')?.classList.remove('show');
-    totalNPR = budget;
-    wGrams   = (budget / (1+making/100)) / prices.perGram;
-    wTola    = wGrams / TOLA_GRAMS;
+  ['tola','aana','lal','gram'].forEach(f => {
+    const inp = el('wc-' + f);
+    if (!inp) return;
+    inp.addEventListener('input', debounce(() => handleWeightInput(f, inp.value), 120));
+  });
+
+  const slider = el('making-slider');
+  if (slider) {
+    slider.addEventListener('input', () => {
+      set('making-pct-badge', slider.value + '%');
+      updateSliderFill(slider);
+      updateShowroom();
+    });
+    updateSliderFill(slider);
   }
+}
 
-  const r = el('calc-result');
-  if (!r) return;
-  r.classList.add('show');
-  set('result-amount',      `NPR ${Math.round(totalNPR).toLocaleString('en-NP')}`);
-  set('result-grams',       `${wGrams.toFixed(3)} g`);
-  set('result-tola',        `${wTola.toFixed(4)} tola`);
-  set('result-making-cost', making>0 ? `NPR ${Math.round(totalNPR - totalNPR/(1+making/100)).toLocaleString('en-NP')}` : '—');
+function updateSliderFill(slider) {
+  const pct = (slider.value / slider.max) * 100;
+  slider.style.background = `linear-gradient(to right,var(--gold-500) 0%,var(--gold-500) ${pct}%,var(--dark-200) ${pct}%,var(--dark-200) 100%)`;
+}
+
+function handleWeightInput(field, raw) {
+  const v = parseFloat(raw);
+  if (!raw || isNaN(v) || v < 0) {
+    _lastTola = 0;
+    ['tola','aana','lal','gram'].forEach(f => { if (f !== field) setWC('wc-'+f, ''); });
+    updateShowroom(); return;
+  }
+  let tola;
+  switch (field) {
+    case 'tola': tola = v; break;
+    case 'aana': tola = v / AANA_PER_TOLA; break;
+    case 'lal':  tola = v / (AANA_PER_TOLA * LAL_PER_AANA); break;
+    case 'gram': tola = v / TOLA_GRAMS; break;
+  }
+  _lastTola = tola;
+  if (field !== 'tola') setWC('wc-tola', r6(tola));
+  if (field !== 'aana') setWC('wc-aana', r6(tola * AANA_PER_TOLA));
+  if (field !== 'lal')  setWC('wc-lal',  r6(tola * AANA_PER_TOLA * LAL_PER_AANA));
+  if (field !== 'gram') setWC('wc-gram', r6(tola * TOLA_GRAMS));
+  updateShowroom();
+}
+
+function setWC(id, v) {
+  const e = el(id);
+  if (e && document.activeElement !== e) e.value = (v === '' || v === 0) ? '' : v;
+}
+
+function updateShowroom() {
+  if (!state.nepal24kTola || _lastTola <= 0) {
+    set('sr-gold-value',  'Enter a weight above');
+    set('sr-making-cost', '—');
+    set('sr-total', '—');
+    return;
+  }
+  const p          = calcPrices();
+  const pPerTola   = p[_calcPurity]?.perTola || 0;
+  const slider     = el('making-slider');
+  const makingPct  = slider ? parseInt(slider.value, 10) : 12;
+  const goldValue  = Math.round(pPerTola * _lastTola);
+  const makingCost = Math.round(goldValue * makingPct / 100);
+  const total      = goldValue + makingCost;
+
+  set('sr-gold-value',  goldValue ? `NPR ${goldValue.toLocaleString('en-NP')}` : '—');
+  set('sr-making-cost', makingPct ? `NPR ${makingCost.toLocaleString('en-NP')}` : '—');
+  set('sr-total',       total     ? `NPR ${total.toLocaleString('en-NP')}` : '—');
+}
+
+/* ── view toggle (Table ↔ Chart) ── */
+function setupViewToggle() {
+  els('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      els('.view-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+      btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+      const view = btn.dataset.view;
+      const tableEl = el('view-table'), chartEl = el('view-chart');
+      if (tableEl) tableEl.style.display = view === 'table' ? '' : 'none';
+      if (chartEl) chartEl.style.display = view === 'chart' ? '' : 'none';
+      if (view === 'chart') renderChart();
+    });
+  });
 }
 
 /* ── nav ── */
@@ -483,7 +540,7 @@ const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setT
 /* ── boot ── */
 document.addEventListener('DOMContentLoaded', async () => {
   setupNav(); setupFAQ(); setupContactForm();
-  setupChartTabs(); setupChartTypeTabs();
+  setupViewToggle(); setupChartTabs(); setupChartTypeTabs();
   await fetchPrices();
   setupCalculator();
   setInterval(fetchPrices, REFRESH_MS);

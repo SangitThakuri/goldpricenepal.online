@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gold Price in Nepal Today 2026 | Live Gold Rate Per Tola | goldpricenepal.online</title>
-  <meta name="description" content="Today's live gold price in Nepal (सुनको भाउ आज). Real-time 24K, 22K, 18K gold rates per tola &amp; gram in NPR. Free gold calculator, candlestick chart, and FENEGOSIDA daily rates." />
+  <title>Today Gold Price in Nepal 2026 | Live 24K 22K Rate Per Tola &amp; Gram | goldpricenepal.online</title>
+  <meta name="description" content="Today's official gold price in Nepal (सुनको भाउ आज). Live 24K Fine Gold, Tejabi 22K &amp; silver rates per tola, gram &amp; aana in NPR from FENEGOSIDA. Free Nepali weight calculator with Tola, Aana, Lal conversion." />
   <meta name="keywords" content="gold price nepal today, gold rate nepal, suna ko bhaau, सुनको भाउ, gold price per tola nepal 2026, 24k gold rate nepal, 22k gold nepal today, fenegosida gold rate, nepal gold price today in rupees, gold price calculator nepal, silver price nepal today, gold rate today nepal, tejabi gold price nepal, asalchandie gold, 1 tola gold price nepal, gold price per gram nepal" />
   <meta name="author"        content="goldpricenepal.online" />
   <meta name="robots"        content="index, follow, max-snippet:-1, max-image-preview:large" />
@@ -17,8 +17,8 @@
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://goldpricenepal.online/" />
-  <meta property="og:title"       content="Gold Price in Nepal Today 2026 | Live Rate Per Tola &amp; Gram" />
-  <meta property="og:description" content="Check today's live gold price in Nepal. 24K, 22K, 18K rates per tola &amp; gram in NPR. Free calculator, daily chart, and FENEGOSIDA rates." />
+  <meta property="og:title"       content="Today Gold Price in Nepal 2026 | Live 24K 22K Rate Per Tola" />
+  <meta property="og:description" content="Official FENEGOSIDA gold price in Nepal today. 24K Fine Gold &amp; Tejabi 22K rates per tola, gram &amp; aana. Free Nepali weight calculator with Tola, Aana, Lal conversion." />
   <meta property="og:site_name"   content="Gold Price Nepal" />
   <meta property="og:locale"      content="en_US" />
 
@@ -204,27 +204,27 @@
         <div class="price-cards">
           <!-- 24K -->
           <div class="price-card featured">
-            <div class="purity">24K Fine Gold</div>
+            <div class="purity">Fine Gold (24K)</div>
             <div class="price-amount skeleton" id="price-24k">—</div>
             <div class="price-unit">per tola (11.664g)</div>
             <div class="price-change" id="change-24k">—</div>
             <div class="price-unit" style="margin-top:6px" id="price-24k-gram">—</div>
           </div>
-          <!-- 22K -->
+          <!-- 22K Tejabi -->
           <div class="price-card">
-            <div class="purity">22K Gold</div>
+            <div class="purity">Tejabi Gold (22K)</div>
             <div class="price-amount skeleton" id="price-22k">—</div>
             <div class="price-unit">per tola</div>
             <div class="price-change" id="change-22k">—</div>
             <div class="price-unit" style="margin-top:6px" id="price-22k-gram">—</div>
           </div>
-          <!-- 18K -->
-          <div class="price-card">
-            <div class="purity">18K Gold</div>
-            <div class="price-amount skeleton" id="price-18k">—</div>
+          <!-- Silver -->
+          <div class="price-card silver-hero-card">
+            <div class="purity">Silver (Chandi)</div>
+            <div class="price-amount skeleton" id="hero-silver-tola">—</div>
             <div class="price-unit">per tola</div>
-            <div class="price-change" id="change-18k">—</div>
-            <div class="price-unit" style="margin-top:6px" id="price-18k-gram">—</div>
+            <div class="price-change" id="hero-silver-change">&nbsp;</div>
+            <div class="price-unit" style="margin-top:6px" id="hero-silver-gram">—</div>
           </div>
         </div>
 
@@ -285,106 +285,114 @@
   </div>
 </div>
 
-<!-- ======= RATE TABLE ======= -->
-<section class="section rate-section" id="rates">
+<!-- ======= RATES & CHART (merged with toggle) ======= -->
+<section class="section rate-chart-section" id="rates">
   <div class="container">
-    <div class="section-header">
-      <h2>Gold & Silver Rate in Nepal Today</h2>
-      <p>Live prices sourced from <strong>FENEGOSIDA</strong>. Refreshed every 5 minutes.</p>
-      <div class="divider"></div>
-    </div>
 
-    <div class="card rate-table-wrapper">
-      <table class="rate-table" aria-label="Nepal gold and silver prices">
-        <thead>
-          <tr>
-            <th>Metal / Purity</th>
-            <th>Per Tola (11.664g)</th>
-            <th>Per 10 Grams</th>
-            <th>Per Gram</th>
-            <th>Purity</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="purity-badge"><span class="purity-dot dot-24k"></span> 24K Fine Gold</span></td>
-            <td class="price-value" id="tbl-24k-tola">—</td>
-            <td class="price-value" id="tbl-24k-10g">—</td>
-            <td class="price-value" id="tbl-24k-gram">—</td>
-            <td><span class="badge badge-gold">99.9%</span></td>
-          </tr>
-          <tr>
-            <td><span class="purity-badge"><span class="purity-dot dot-22k"></span> 22K Gold</span></td>
-            <td class="price-value" id="tbl-22k-tola">—</td>
-            <td class="price-value" id="tbl-22k-10g">—</td>
-            <td class="price-value" id="tbl-22k-gram">—</td>
-            <td><span class="badge badge-gold">91.7%</span></td>
-          </tr>
-          <tr>
-            <td><span class="purity-badge"><span class="purity-dot dot-18k"></span> 18K Gold</span></td>
-            <td class="price-value" id="tbl-18k-tola">—</td>
-            <td class="price-value" id="tbl-18k-10g">—</td>
-            <td class="price-value" id="tbl-18k-gram">—</td>
-            <td><span class="badge badge-gold">75.0%</span></td>
-          </tr>
-          <tr>
-            <td><span class="purity-badge"><span class="purity-dot dot-14k"></span> 14K Gold</span></td>
-            <td class="price-value" id="tbl-14k-tola">—</td>
-            <td class="price-value" id="tbl-14k-10g">—</td>
-            <td class="price-value" id="tbl-14k-gram">—</td>
-            <td><span class="badge badge-gold">58.3%</span></td>
-          </tr>
-          <tr>
-            <td><span class="purity-badge"><span class="purity-dot dot-silver"></span> Silver</span></td>
-            <td class="price-value" id="tbl-silver-tola">—</td>
-            <td class="price-value" id="tbl-silver-10g">—</td>
-            <td class="price-value" id="tbl-silver-gram">—</td>
-            <td><span class="badge" style="background:#F1F5F9;color:#475569">99.9%</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="info-box">
-      <span class="info-icon">ℹ️</span>
-      <span>Gold prices are fetched directly from <strong>FENEGOSIDA</strong> (Federation of Nepal Gold and Silver Dealers' Association) — Nepal's official daily rate authority. Silver rates use international XAG/NPR data. Actual dealer prices may vary slightly.</span>
-    </div>
-  </div>
-</section>
-
-<!-- ======= CHART ======= -->
-<section class="section" id="chart">
-  <div class="container">
-    <div class="section-header">
-      <h2>Gold Price Chart — Nepal</h2>
-      <p>Historical gold price trend per tola in Nepalese Rupees (NPR)</p>
-      <div class="divider"></div>
-    </div>
-
-    <div class="card chart-card">
-      <div class="chart-header">
-        <div class="chart-title">
-          <h3>24K Gold Price (NPR per Tola)</h3>
-          <p>Price movement over selected period</p>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="chart-tabs">
-            <button class="chart-tab" data-period="1d">1 Day</button>
-            <button class="chart-tab active" data-period="7d">7 Days</button>
-            <button class="chart-tab" data-period="1m">1 Month</button>
-            <button class="chart-tab" data-period="3m">3 Months</button>
-          </div>
-          <div class="chart-type-tabs">
-            <button class="chart-type-tab active" data-type="line">Line</button>
-            <button class="chart-type-tab" data-type="candlestick">Candlestick</button>
-          </div>
-        </div>
+    <div class="rates-chart-header">
+      <div>
+        <h2>Gold &amp; Silver Rates — Nepal Today</h2>
+        <p>Live prices from <strong>FENEGOSIDA</strong> · Refreshed every 5 minutes</p>
+        <div class="divider"></div>
       </div>
-      <div class="chart-container">
-        <div id="goldChart" style="min-height:320px"></div>
+      <div class="view-toggle" role="group" aria-label="Switch view">
+        <button class="view-btn active" data-view="table" aria-pressed="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Table
+        </button>
+        <button class="view-btn" data-view="chart" aria-pressed="false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="22 12 18 12 15 20 9 4 6 12 2 12"/></svg>
+          Chart
+        </button>
       </div>
-      <p class="chart-note">⚠️ Chart shows approximate price trends based on international rates. Actual Nepal rates may differ slightly.</p>
     </div>
+
+    <!-- TABLE VIEW -->
+    <div id="view-table">
+      <div class="card rate-table-wrapper">
+        <table class="rate-table" aria-label="Nepal gold and silver prices">
+          <thead>
+            <tr>
+              <th>Metal / Purity</th>
+              <th>Per Tola (11.664g)</th>
+              <th>Per 10 Grams</th>
+              <th>Per Gram</th>
+              <th>Purity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="purity-badge"><span class="purity-dot dot-24k"></span> 24K Fine Gold</span></td>
+              <td class="price-value" id="tbl-24k-tola">—</td>
+              <td class="price-value" id="tbl-24k-10g">—</td>
+              <td class="price-value" id="tbl-24k-gram">—</td>
+              <td><span class="badge badge-gold">99.9%</span></td>
+            </tr>
+            <tr>
+              <td><span class="purity-badge"><span class="purity-dot dot-22k"></span> Tejabi Gold (22K)</span></td>
+              <td class="price-value" id="tbl-22k-tola">—</td>
+              <td class="price-value" id="tbl-22k-10g">—</td>
+              <td class="price-value" id="tbl-22k-gram">—</td>
+              <td><span class="badge badge-gold">91.7%</span></td>
+            </tr>
+            <tr>
+              <td><span class="purity-badge"><span class="purity-dot dot-18k"></span> 18K Gold</span></td>
+              <td class="price-value" id="tbl-18k-tola">—</td>
+              <td class="price-value" id="tbl-18k-10g">—</td>
+              <td class="price-value" id="tbl-18k-gram">—</td>
+              <td><span class="badge badge-gold">75.0%</span></td>
+            </tr>
+            <tr>
+              <td><span class="purity-badge"><span class="purity-dot dot-14k"></span> 14K Gold</span></td>
+              <td class="price-value" id="tbl-14k-tola">—</td>
+              <td class="price-value" id="tbl-14k-10g">—</td>
+              <td class="price-value" id="tbl-14k-gram">—</td>
+              <td><span class="badge badge-gold">58.3%</span></td>
+            </tr>
+            <tr>
+              <td><span class="purity-badge"><span class="purity-dot dot-silver"></span> Silver (Chandi)</span></td>
+              <td class="price-value" id="tbl-silver-tola">—</td>
+              <td class="price-value" id="tbl-silver-10g">—</td>
+              <td class="price-value" id="tbl-silver-gram">—</td>
+              <td><span class="badge" style="background:#F1F5F9;color:#475569">99.9%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="info-box">
+        <span class="info-icon">ℹ️</span>
+        <span>Gold prices fetched directly from <strong>FENEGOSIDA</strong> (Federation of Nepal Gold and Silver Dealers' Association). 22K/18K/14K calculated proportionally from the 24K base. Actual dealer prices may vary.</span>
+      </div>
+    </div>
+
+    <!-- CHART VIEW -->
+    <div id="view-chart" style="display:none" id="chart">
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <h3>24K Gold Price (NPR per Tola)</h3>
+            <p>Price movement over selected period</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="chart-tabs">
+              <button class="chart-tab" data-period="1d">1 Day</button>
+              <button class="chart-tab active" data-period="7d">7 Days</button>
+              <button class="chart-tab" data-period="1m">1 Month</button>
+              <button class="chart-tab" data-period="3m">3 Months</button>
+            </div>
+            <div class="chart-type-tabs">
+              <button class="chart-type-tab active" data-type="line">Line</button>
+              <button class="chart-type-tab" data-type="candlestick">Candlestick</button>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div id="goldChart" style="min-height:320px"></div>
+        </div>
+        <p class="chart-note">Chart shows approximate trends. Toggle to Table for exact FENEGOSIDA rates.</p>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -393,80 +401,81 @@
   <div class="container">
     <div class="section-header">
       <h2>Gold Price Calculator — Nepal</h2>
-      <p>Calculate the exact gold price based on weight, purity, and making charges</p>
+      <p>Type in any unit — Tola, Aana, Lal, or Grams — all values update automatically</p>
       <div class="divider"></div>
     </div>
 
     <div class="card calc-card">
-      <!-- Mode tabs -->
-      <div class="calc-tabs">
-        <button class="calc-tab active" data-mode="weight-to-price">Weight → Price</button>
-        <button class="calc-tab" data-mode="price-to-weight">Budget → Weight</button>
+
+      <!-- Purity selector -->
+      <div class="calc-purity-row">
+        <span class="form-label">Gold Purity</span>
+        <div class="purity-btns" id="purityBtns">
+          <button class="purity-btn active" data-k="24k">24K Fine</button>
+          <button class="purity-btn" data-k="22k">22K Tejabi</button>
+          <button class="purity-btn" data-k="18k">18K</button>
+          <button class="purity-btn" data-k="14k">14K</button>
+        </div>
       </div>
 
-      <form id="calcForm" novalidate>
-        <div class="calc-grid">
-          <!-- Weight / Budget input -->
-          <div class="form-group" id="wtp-group">
-            <label class="form-label" id="wtp-label" for="calc-qty">Weight</label>
-            <input type="number" id="calc-qty" class="form-control"
-              placeholder="e.g. 2" min="0" step="0.001" />
+      <!-- Bidirectional weight converter -->
+      <div class="wc-section">
+        <div class="wc-header">
+          <span class="form-label">Weight</span>
+          <span class="wc-hint">1 Tola = 16 Aana = 160 Lal = 11.664 g</span>
+        </div>
+        <div class="wc-grid">
+          <div class="wc-field">
+            <label for="wc-tola" class="wc-label">Tola <span class="wc-nep">(तोला)</span></label>
+            <input type="number" id="wc-tola" class="wc-input" placeholder="0.000" min="0" step="0.001" inputmode="decimal">
           </div>
-          <div class="form-group" id="ptw-group" style="display:none">
-            <label class="form-label" for="calc-budget">Budget (NPR)</label>
-            <input type="number" id="calc-budget" class="form-control"
-              placeholder="e.g. 200000" min="0" step="100" />
+          <div class="wc-field">
+            <label for="wc-aana" class="wc-label">Aana <span class="wc-nep">(आना)</span></label>
+            <input type="number" id="wc-aana" class="wc-input" placeholder="0.0" min="0" step="0.1" inputmode="decimal">
           </div>
-
-          <!-- Unit -->
-          <div class="form-group">
-            <label class="form-label" for="calc-unit">Unit</label>
-            <select id="calc-unit" class="form-control">
-              <option value="tola">Tola (11.664g)</option>
-              <option value="gram">Gram</option>
-              <option value="10g">10 Grams</option>
-            </select>
+          <div class="wc-field">
+            <label for="wc-lal" class="wc-label">Lal <span class="wc-nep">(लाल)</span></label>
+            <input type="number" id="wc-lal" class="wc-input" placeholder="0" min="0" step="1" inputmode="decimal">
           </div>
-
-          <!-- Purity -->
-          <div class="form-group">
-            <label class="form-label" for="calc-purity">Gold Purity</label>
-            <select id="calc-purity" class="form-control">
-              <option value="24k">24K (99.9% Pure)</option>
-              <option value="22k">22K (91.7% Pure)</option>
-              <option value="18k">18K (75% Pure)</option>
-              <option value="14k">14K (58.3% Pure)</option>
-            </select>
-          </div>
-
-          <!-- Making charges -->
-          <div class="form-group">
-            <label class="form-label" for="calc-making">Making Charges (%)</label>
-            <input type="number" id="calc-making" class="form-control"
-              placeholder="e.g. 10" min="0" max="50" step="0.5" value="0" />
+          <div class="wc-field">
+            <label for="wc-gram" class="wc-label">Grams <span class="wc-nep">(ग्राम)</span></label>
+            <input type="number" id="wc-gram" class="wc-input" placeholder="0.000" min="0" step="0.001" inputmode="decimal">
           </div>
         </div>
+      </div>
 
-        <!-- Result -->
-        <div class="calc-result" id="calc-result">
-          <div class="result-label">Estimated Total Price</div>
-          <div class="result-amount" id="result-amount">—</div>
-          <div class="result-breakdown">
-            <div class="breakdown-item">
-              <div class="b-label">Weight (Grams)</div>
-              <div class="b-value" id="result-grams">—</div>
-            </div>
-            <div class="breakdown-item">
-              <div class="b-label">Weight (Tola)</div>
-              <div class="b-value" id="result-tola">—</div>
-            </div>
-            <div class="breakdown-item">
-              <div class="b-label">Making Cost</div>
-              <div class="b-value" id="result-making-cost">—</div>
-            </div>
+      <!-- Making charges slider -->
+      <div class="making-section">
+        <div class="making-header">
+          <span class="form-label">Making Charges / Banauni <span class="wc-nep">(बनाउनी)</span></span>
+          <span class="making-pct-badge" id="making-pct-badge">12%</span>
+        </div>
+        <input type="range" id="making-slider" class="making-slider" min="0" max="30" step="1" value="12" aria-label="Making charges percentage">
+        <div class="making-scale">
+          <span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span><span>30%</span>
+        </div>
+      </div>
+
+      <!-- Showroom price result -->
+      <div class="showroom-result" id="showroomResult">
+        <div class="sr-rows">
+          <div class="sr-row">
+            <span class="sr-label">Gold Value (Raw)</span>
+            <span class="sr-value" id="sr-gold-value">Enter a weight above</span>
+          </div>
+          <div class="sr-row">
+            <span class="sr-label">Making Charges</span>
+            <span class="sr-value" id="sr-making-cost">—</span>
+          </div>
+          <div class="sr-divider"></div>
+          <div class="sr-row sr-total-row">
+            <span class="sr-label">Estimated Showroom Price</span>
+            <span class="sr-total" id="sr-total">—</span>
           </div>
         </div>
-      </form>
+        <p class="sr-note">Indicative estimate only. Actual showroom price may vary by dealer.</p>
+      </div>
+
     </div>
   </div>
 </section>
