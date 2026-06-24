@@ -149,38 +149,48 @@
 <!-- ======= TICKER BAR ======= -->
 <div class="ticker-bar" role="marquee" aria-label="Live gold prices">
   <div class="ticker-content">
-    <span class="ticker-live"><span class="live-dot"></span>LIVE</span>
-    <span class="ticker-sep">|</span>
+    <div class="ticker-track" id="tickerTrack">
+      <span class="ticker-live"><span class="live-dot"></span>LIVE</span>
+      <span class="ticker-sep">|</span>
 
-    <a href="#rates" class="ticker-item ticker-link">
-      <span class="label">24K Gold</span>
-      <span class="value skeleton price-loading" id="ticker-gold">Loading…</span>
-    </a>
+      <a href="#rates" class="ticker-item ticker-link">
+        <span class="label">24K Gold</span>
+        <span class="value skeleton price-loading" id="ticker-gold">Loading…</span>
+      </a>
 
-    <span class="ticker-sep">·</span>
+      <span class="ticker-sep">·</span>
 
-    <a href="#rates" class="ticker-item ticker-link ticker-silver-link">
-      <span class="label">Silver</span>
-      <span class="value" id="ticker-silver">—</span>
-    </a>
+      <a href="#rates" class="ticker-item ticker-link ticker-silver-link">
+        <span class="label">Silver</span>
+        <span class="value" id="ticker-silver">—</span>
+      </a>
 
-    <span class="ticker-sep ticker-md-hide">·</span>
-    <span class="ticker-item ticker-md-hide">
-      <span class="label">Intl Gold</span>
-      <span class="value" id="ticker-usd">—</span>
-    </span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item">
+        <span class="label">Intl Gold</span>
+        <span class="value" id="ticker-usd">—</span>
+      </span>
 
-    <span class="ticker-sep ticker-md-hide">·</span>
-    <span class="ticker-item ticker-md-hide">
-      <span class="label">USD/NPR</span>
-      <span class="value" id="ticker-rate">—</span>
-    </span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item">
+        <span class="label">USD/NPR</span>
+        <span class="value" id="ticker-rate">—</span>
+      </span>
 
-    <span class="ticker-sep ticker-sm-hide">·</span>
-    <span class="ticker-item ticker-sm-hide">
-      <span class="label">Updated</span>
-      <span class="value last-updated-time">—</span>
-    </span>
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item">
+        <span class="label">Updated</span>
+        <span class="value last-updated-time">—</span>
+      </span>
+
+      <span class="ticker-sep">·</span>
+      <span class="ticker-item">
+        <span class="label">22K Tejabi</span>
+        <span class="value" id="ticker-22k">—</span>
+      </span>
+
+      <span class="ticker-gap"></span>
+    </div>
   </div>
 </div>
 

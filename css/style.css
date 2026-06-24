@@ -130,22 +130,43 @@ ul { list-style: none; }
   color: var(--white);
   font-size: .8rem;
   position: relative;
+  overflow: hidden;
 }
-/* right-edge fade hints at scrollable content on mobile */
+/* left + right edge fades */
+.ticker-bar::before,
 .ticker-bar::after {
   content: '';
-  position: absolute; right: 0; top: 0; bottom: 0; width: 36px;
-  background: linear-gradient(to right, transparent, var(--dark-900));
-  pointer-events: none; z-index: 1;
+  position: absolute; top: 0; bottom: 0; width: 48px;
+  pointer-events: none; z-index: 2;
+}
+.ticker-bar::before {
+  left: 0;
+  background: linear-gradient(to right, var(--dark-900) 20%, transparent);
+}
+.ticker-bar::after {
+  right: 0;
+  background: linear-gradient(to left, var(--dark-900) 20%, transparent);
 }
 .ticker-content {
-  display: flex; align-items: center; gap: 20px;
-  white-space: nowrap;
-  overflow-x: auto; overflow-y: hidden;
-  padding: 9px 16px 9px 20px;
-  scrollbar-width: none; -ms-overflow-style: none;
+  overflow: hidden;
+  display: flex;
 }
-.ticker-content::-webkit-scrollbar { display: none; }
+.ticker-track {
+  display: inline-flex; align-items: center; gap: 20px;
+  white-space: nowrap;
+  padding: 9px 40px 9px 0;
+  animation: ticker-scroll 28s linear infinite;
+  will-change: transform;
+  flex-shrink: 0;
+}
+.ticker-bar:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-gap { display: inline-block; width: 60px; }
 
 .ticker-live {
   display: flex; align-items: center; gap: 5px;
@@ -177,13 +198,6 @@ ul { list-style: none; }
 .ticker-silver-link:hover { background: rgba(192,192,192,.12); }
 .ticker-silver-link .value { color: #C8C8C8; }
 
-/* Responsive hide classes */
-@media (max-width: 600px) {
-  .ticker-md-hide { display: none !important; }
-}
-@media (max-width: 360px) {
-  .ticker-sm-hide { display: none !important; }
-}
 .live-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--green);

@@ -187,6 +187,7 @@ function renderUI() {
 
   /* ticker */
   set('ticker-gold',   `NPR ${fmt(p['24k'].perTola)}/tola`);
+  set('ticker-22k',    `NPR ${fmt(p['22k'].perTola)}/tola`);
   set('ticker-silver', silverTolaNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('ticker-usd',    `USD ${goldUSD.toFixed(2)}/oz`);
   set('ticker-rate',   `1 USD = NPR ${usdNPR.toFixed(2)}`);
@@ -564,11 +565,22 @@ function setupContactForm() {
 
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
 
+/* ── ticker scroll init ── */
+function initTickerScroll() {
+  const track = document.getElementById('tickerTrack');
+  if (!track || track.parentElement.querySelectorAll('.ticker-track').length > 1) return;
+  const clone = track.cloneNode(true);
+  clone.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+  clone.removeAttribute('id');
+  track.parentElement.appendChild(clone);
+}
+
 /* ── boot ── */
 document.addEventListener('DOMContentLoaded', async () => {
   setupNav(); setupFAQ(); setupContactForm();
   setupViewToggle(); setupChartTabs(); setupChartTypeTabs();
   await fetchPrices();
+  initTickerScroll();
   setupCalculator();
   setInterval(fetchPrices, REFRESH_MS);
 });
