@@ -128,18 +128,62 @@ ul { list-style: none; }
 .ticker-bar {
   background: var(--dark-900);
   color: var(--white);
-  padding: 8px 0;
   font-size: .8rem;
-  overflow: hidden;
+  position: relative;
+}
+/* right-edge fade hints at scrollable content on mobile */
+.ticker-bar::after {
+  content: '';
+  position: absolute; right: 0; top: 0; bottom: 0; width: 36px;
+  background: linear-gradient(to right, transparent, var(--dark-900));
+  pointer-events: none; z-index: 1;
 }
 .ticker-content {
-  display: flex; align-items: center; gap: 32px;
+  display: flex; align-items: center; gap: 20px;
   white-space: nowrap;
+  overflow-x: auto; overflow-y: hidden;
+  padding: 9px 16px 9px 20px;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
-.ticker-item { display: flex; align-items: center; gap: 6px; }
+.ticker-content::-webkit-scrollbar { display: none; }
+
+.ticker-live {
+  display: flex; align-items: center; gap: 5px;
+  color: #9CA3AF; font-size: .75rem; font-weight: 600;
+  letter-spacing: .3px; flex-shrink: 0;
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 5px;
+  flex-shrink: 0;
+}
 .ticker-item .label { color: #9CA3AF; }
 .ticker-item .value { font-weight: 700; color: var(--gold-400); }
-.ticker-sep { color: #4B5563; }
+.ticker-sep { color: #4B5563; flex-shrink: 0; }
+
+/* Clickable ticker items */
+.ticker-link {
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: background var(--transition);
+}
+.ticker-link:hover {
+  background: rgba(201,151,46,.15);
+}
+.ticker-link .label { color: #9CA3AF; }
+.ticker-link .value { color: var(--gold-400); font-weight: 700; }
+
+/* Silver link gets a subtle silver accent on hover */
+.ticker-silver-link:hover { background: rgba(192,192,192,.12); }
+.ticker-silver-link .value { color: #C8C8C8; }
+
+/* Responsive hide classes */
+@media (max-width: 600px) {
+  .ticker-md-hide { display: none !important; }
+}
+@media (max-width: 360px) {
+  .ticker-sm-hide { display: none !important; }
+}
 .live-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--green);
