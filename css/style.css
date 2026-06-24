@@ -174,11 +174,11 @@ ul { list-style: none; }
   letter-spacing: .3px; flex-shrink: 0;
 }
 .ticker-item {
-  display: flex; align-items: center; gap: 5px;
-  flex-shrink: 0;
+  display: inline-flex; flex-direction: row; align-items: center; gap: 6px;
+  flex-shrink: 0; white-space: nowrap;
 }
-.ticker-item .label { color: #9CA3AF; }
-.ticker-item .value { font-weight: 700; color: var(--gold-400); }
+.ticker-item .label { color: #9CA3AF; white-space: nowrap; }
+.ticker-item .value { font-weight: 700; color: var(--gold-400); white-space: nowrap; }
 .ticker-sep { color: #4B5563; flex-shrink: 0; }
 
 /* Clickable ticker items */
@@ -194,9 +194,9 @@ ul { list-style: none; }
 .ticker-link .label { color: #9CA3AF; }
 .ticker-link .value { color: var(--gold-400); font-weight: 700; }
 
-/* Silver link gets a subtle silver accent on hover */
-.ticker-silver-link:hover { background: rgba(192,192,192,.12); }
-.ticker-silver-link .value { color: #C8C8C8; }
+/* Silver link — same gold color as other ticker values */
+.ticker-silver-link:hover { background: rgba(201,151,46,.15); }
+.ticker-silver-link .value { color: var(--gold-400); }
 
 .live-dot {
   width: 7px; height: 7px; border-radius: 50%;
