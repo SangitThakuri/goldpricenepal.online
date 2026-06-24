@@ -223,6 +223,9 @@ ul { list-style: none; }
   font-size: .82rem; color: #9CA3AF;
 }
 
+/* Hero cards wrapper */
+.hero-cards-wrap { flex: 1; min-width: 280px; }
+
 /* ===== PRICE CARDS ===== */
 .price-cards {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -582,40 +585,172 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .success-msg.show { display: block; }
 
 /* ===== RESPONSIVE ===== */
+
+/* ---- Tablet landscape ---- */
 @media (max-width: 1024px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-  .price-cards  { grid-template-columns: 1fr 1fr 1fr; }
+  .footer-grid  { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .price-cards  { grid-template-columns: repeat(3, 1fr); }
+  .content-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---- Tablet portrait / large phones ---- */
 @media (max-width: 768px) {
-  .nav-menu { display: none; flex-direction: column; gap: 4px; }
+  /* Container */
+  .container { padding: 0 16px; }
+
+  /* Header */
+  .nav-menu { display: none; flex-direction: column; gap: 2px; }
   .nav-menu.open {
     display: flex; position: absolute; top: 68px; left: 0; right: 0;
     background: var(--white); border-bottom: 1px solid var(--dark-200);
-    padding: 12px 20px; box-shadow: var(--shadow-lg);
+    padding: 10px 16px 14px; box-shadow: var(--shadow-lg); z-index: 999;
+  }
+  .nav-menu.open a {
+    padding: 12px 14px; font-size: .95rem; border-radius: var(--radius-sm);
+    min-height: 44px; display: flex; align-items: center;
   }
   .nav-toggle { display: flex; }
   .header-inner { position: relative; }
 
-  .hero-inner { flex-direction: column; }
-  .price-cards { grid-template-columns: 1fr 1fr; }
-  .content-grid  { grid-template-columns: 1fr; }
-  .calc-grid     { grid-template-columns: 1fr; }
-  .contact-grid  { grid-template-columns: 1fr; }
-  .form-row      { grid-template-columns: 1fr; }
-  .footer-grid   { grid-template-columns: 1fr; gap: 24px; }
-  .footer-bottom { flex-direction: column; text-align: center; }
-  .calc-result .result-breakdown { grid-template-columns: 1fr 1fr; }
-  .stats-grid { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
-  .stat-item { min-width: 130px; }
-  .chart-header { flex-direction: column; align-items: flex-start; }
-}
-@media (max-width: 480px) {
+  /* Hero */
+  .hero { padding: 36px 0 44px; }
+  .hero-inner { flex-direction: column; gap: 28px; }
+  .hero-text h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); margin-bottom: 10px; }
+  .hero-text p  { font-size: .95rem; }
+  .hero-cards-wrap { min-width: 0; width: 100%; }
+  .price-cards { grid-template-columns: 1fr 1fr; gap: 12px; max-width: 100%; }
+  .price-card { padding: 16px; }
+  .price-card .price-amount { font-size: 1.3rem; }
+  .hero-secondary { flex-direction: row; gap: 10px; margin-top: 12px !important; }
+  .silver-card, .forex-card { flex: 1; min-width: 0; padding: 12px 14px; }
+  .silver-card .val, .forex-card .val { font-size: .98rem; }
+
+  /* Stats strip */
+  .stats-grid { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .stat-item { min-width: 120px; padding: 8px 14px; }
+  .stat-value { font-size: .9rem; }
+
+  /* Sections */
   .section { padding: 40px 0; }
-  .price-cards { grid-template-columns: 1fr; max-width: 100%; }
-  .hero-secondary { flex-direction: row; flex-wrap: wrap; }
-  .silver-card, .forex-card { flex: 1; min-width: 140px; }
+  .section-header { margin-bottom: 24px; }
+
+  /* Rate table */
+  .rate-table th, .rate-table td { padding: 10px 12px; font-size: .82rem; }
+
+  /* Chart */
+  .chart-card { padding: 18px; }
+  .chart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .chart-container { height: 260px; }
+  #goldChart { min-height: 260px !important; }
+  .chart-tabs { flex-wrap: nowrap; gap: 2px; }
+  .chart-tab { padding: 5px 10px; font-size: .78rem; }
+  .chart-type-tab { padding: 5px 10px; font-size: .78rem; }
+
+  /* Rates+chart merged header */
+  .rates-chart-header { flex-direction: column; gap: 14px; }
+  .view-toggle { align-self: stretch; }
+  .view-btn { flex: 1; justify-content: center; min-height: 42px; font-size: .88rem; }
+
+  /* Calculator */
+  .calc-card { padding: 20px 16px; }
+  .calc-purity-row { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+  .purity-btns { gap: 6px; }
+  .purity-btn { padding: 8px 14px; min-height: 40px; font-size: .83rem; }
+  .wc-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wc-input { padding: 11px 12px; font-size: .92rem; min-height: 44px; }
+  .making-section, .wc-section { margin-bottom: 20px; }
+  .making-slider { height: 8px; }
+  .making-slider::-webkit-slider-thumb { width: 24px; height: 24px; }
+  .making-slider::-moz-range-thumb    { width: 24px; height: 24px; }
+  .showroom-result { padding: 18px 16px; }
+  .sr-total { font-size: 1.35rem; }
+
+  /* Content cards */
+  .content-grid { grid-template-columns: 1fr; gap: 20px; }
+  .content-card { padding: 20px; }
+
+  /* Contact / forms */
+  .calc-grid    { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .form-row     { grid-template-columns: 1fr; }
+
+  /* Footer */
+  .footer-grid   { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .footer-bottom { flex-direction: column; text-align: center; gap: 8px; }
+  .footer-disclaimer { max-width: 100%; }
+
+  /* Calc result breakdown */
+  .calc-result .result-breakdown { grid-template-columns: 1fr 1fr; }
+
+  /* FAQ */
+  .faq-question { font-size: .9rem; padding: 14px 16px; min-height: 52px; }
+  .faq-answer   { padding: 0 16px 14px; font-size: .88rem; }
+}
+
+/* ---- Small phones ---- */
+@media (max-width: 480px) {
+  .container { padding: 0 12px; }
+
+  /* Hero */
+  .hero { padding: 28px 0 36px; }
+  .hero-text h1 { font-size: 1.5rem; }
+  .price-cards { grid-template-columns: 1fr; gap: 10px; max-width: 100%; }
+  .price-card { padding: 14px 16px; }
+  .price-card .price-amount { font-size: 1.4rem; }
+  .hero-secondary { flex-direction: column; gap: 8px; }
+  .silver-card, .forex-card { width: 100%; flex: none; }
+
+  /* Stats */
+  .stat-item { min-width: 110px; padding: 7px 12px; }
+  .stat-label { font-size: .68rem; }
+  .stat-value { font-size: .88rem; }
+
+  /* Section */
+  .section { padding: 32px 0; }
+  .section-header h2 { font-size: 1.2rem; }
+  .section-header p  { font-size: .88rem; }
+
+  /* Rate table */
+  .rate-table th, .rate-table td { padding: 9px 10px; font-size: .78rem; }
+  .rate-table .purity-dot { width: 8px; height: 8px; }
+
+  /* Chart */
+  .chart-container { height: 220px; }
+  #goldChart { min-height: 220px !important; }
+  .chart-tabs { flex-wrap: wrap; gap: 4px; }
+  .chart-tab  { padding: 6px 10px; font-size: .75rem; }
+  .chart-type-tab { padding: 6px 10px; font-size: .75rem; }
+
+  /* Calculator */
+  .calc-card { padding: 16px 12px; }
+  .wc-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .purity-btn { padding: 7px 10px; font-size: .78rem; min-height: 38px; }
+  .making-scale span { font-size: .62rem; }
+  .showroom-result { padding: 16px 14px; }
+  .sr-total { font-size: 1.25rem; }
   .calc-result .result-breakdown { grid-template-columns: 1fr; }
-  .chart-tabs { flex-wrap: wrap; }
+
+  /* Content */
+  .content-card { padding: 16px; }
+  .content-card h3 { font-size: 1rem; }
+  .content-card p, .content-card ul li { font-size: .88rem; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  .footer-brand p { max-width: 100%; font-size: .85rem; }
+
+  /* FAQ */
+  .faq-question { font-size: .85rem; padding: 13px 14px; }
+}
+
+/* ---- Very small phones ---- */
+@media (max-width: 360px) {
+  .ticker-sm-hide { display: none !important; }
+  .price-card .price-amount { font-size: 1.25rem; }
+  .hero-text h1 { font-size: 1.35rem; }
+  .chart-tab { padding: 5px 8px; font-size: .72rem; }
+  .wc-input { padding: 10px; font-size: .88rem; }
+  .purity-btn { padding: 6px 8px; font-size: .75rem; }
 }
 
 /* ===== SILVER HERO CARD ===== */
@@ -781,20 +916,3 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   text-align: center;
 }
 
-/* ===== RESPONSIVE — new sections ===== */
-@media (max-width: 768px) {
-  .wc-grid { grid-template-columns: 1fr 1fr; }
-  .rates-chart-header { flex-direction: column; }
-  .view-toggle { align-self: stretch; }
-  .view-btn { flex: 1; justify-content: center; }
-  .calc-card { padding: 20px; }
-  .calc-purity-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .making-section, .wc-section { margin-bottom: 20px; }
-}
-@media (max-width: 480px) {
-  .wc-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .showroom-result { padding: 18px 16px; }
-  .sr-total { font-size: 1.25rem; }
-  .purity-btns { gap: 4px; }
-  .purity-btn { padding: 6px 12px; font-size: .8rem; }
-}
