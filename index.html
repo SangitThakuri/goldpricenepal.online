@@ -150,7 +150,7 @@
 <div class="ticker-bar" role="marquee" aria-label="Live gold prices">
   <div class="ticker-content">
     <div class="ticker-track" id="tickerTrack">
-      <span class="ticker-live"><span class="live-dot"></span>LIVE</span>
+      <span class="ticker-live"><span class="live-dot"></span>CONNECTED</span>
       <span class="ticker-sep">|</span>
 
       <a href="#rates" class="ticker-item ticker-link">
@@ -413,7 +413,7 @@
 <section class="section calculator-section" id="calculator">
   <div class="container">
     <div class="section-header">
-      <h2>Gold Price Calculator — Nepal</h2>
+      <h2>Gold &amp; Silver Price Calculator — Nepal</h2>
       <p>Type in any unit — Tola, Aana, Lal, or Grams — all values update automatically</p>
       <div class="divider"></div>
     </div>
@@ -422,12 +422,13 @@
 
       <!-- Purity selector -->
       <div class="calc-purity-row">
-        <span class="form-label">Gold Purity</span>
+        <span class="form-label">Metal / Purity</span>
         <div class="purity-btns" id="purityBtns">
           <button class="purity-btn active" data-k="24k">24K Fine</button>
           <button class="purity-btn" data-k="22k">22K Tejabi</button>
           <button class="purity-btn" data-k="18k">18K</button>
           <button class="purity-btn" data-k="14k">14K</button>
+          <button class="purity-btn purity-btn-silver" data-k="silver">Silver</button>
         </div>
       </div>
 
@@ -473,7 +474,7 @@
       <div class="showroom-result" id="showroomResult">
         <div class="sr-rows">
           <div class="sr-row">
-            <span class="sr-label">Gold Value (Raw)</span>
+            <span class="sr-label" id="sr-metal-label">Gold Value (Raw)</span>
             <span class="sr-value" id="sr-gold-value">Enter a weight above</span>
           </div>
           <div class="sr-row">

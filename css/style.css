@@ -271,6 +271,13 @@ ul { list-style: none; }
   margin-top: 10px; font-size: .78rem; font-weight: 600;
   display: flex; align-items: center; gap: 4px;
 }
+.trend-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 50px; font-size: .78rem; font-weight: 700;
+  letter-spacing: .01em;
+}
+.trend-pill.up   { background: rgba(16,185,129,0.12); color: #059669; }
+.trend-pill.down { background: rgba(239,68,68,0.10);  color: #DC2626; }
 .price-card.featured {
   background: linear-gradient(135deg, rgba(201,151,46,.25), rgba(201,151,46,.12));
   border-color: rgba(201,151,46,.5);
@@ -835,6 +842,9 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .purity-btn.active {
   background: var(--gold-500); border-color: var(--gold-500); color: var(--white);
 }
+.purity-btn-silver { border-color: #9CA3AF; color: #6B7280; margin-left: 6px; }
+.purity-btn-silver:hover { border-color: #6B7280; color: #374151; }
+.purity-btn-silver.active { background: #6B7280; border-color: #6B7280; color: var(--white); }
 
 /* Weight converter */
 .wc-section { margin-bottom: 28px; }

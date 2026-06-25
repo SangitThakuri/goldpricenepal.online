@@ -198,10 +198,10 @@ function renderUI() {
     set(`price-${k}-gram`, `NPR ${fmt(p[k].perGram)}/g`);
     const chEl = el(`change-${k}`);
     if (chEl) {
-      chEl.textContent = yestTola
-        ? `${sign}${changePct.toFixed(2)}% vs yesterday`
+      chEl.className = 'price-change';
+      chEl.innerHTML = yestTola
+        ? `<span class="trend-pill ${isUp ? 'up' : 'down'}">${isUp ? '↑' : '↓'} ${sign}${changePct.toFixed(2)}% vs yesterday</span>`
         : '—';
-      chEl.className = 'price-change ' + (isUp ? 'text-green' : 'text-red');
     }
   });
 
@@ -487,7 +487,12 @@ function fmt4(n) {
 }
 
 function updateShowroom() {
-  if (!state.nepal24kTola || _lastTola <= 0) {
+  const isSilver   = _calcPurity === 'silver';
+  const priceReady = isSilver ? state.silverTolaNPR > 0 : state.nepal24kTola > 0;
+  const metalLabel = isSilver ? 'Silver Value' : 'Gold Value (Raw)';
+  set('sr-metal-label', metalLabel);
+
+  if (!priceReady || _lastTola <= 0) {
     set('sr-gold-value',  'Enter a weight above');
     set('sr-making-cost', '—');
     set('sr-total',       '—');
@@ -497,11 +502,11 @@ function updateShowroom() {
   const pPerTola  = p[_calcPurity]?.perTola || 0;
   const slider    = el('making-slider');
   const makingPct = slider ? parseInt(slider.value, 10) : 12;
-  const goldVal   = Math.round(pPerTola * _lastTola);
-  const makeVal   = Math.round(goldVal * makingPct / 100);
-  const total     = goldVal + makeVal;
+  const metalVal  = Math.round(pPerTola * _lastTola);
+  const makeVal   = Math.round(metalVal * makingPct / 100);
+  const total     = metalVal + makeVal;
 
-  set('sr-gold-value',  `NPR ${goldVal.toLocaleString('en-NP')}`);
+  set('sr-gold-value',  `NPR ${metalVal.toLocaleString('en-NP')}`);
   set('sr-making-cost', makingPct > 0 ? `NPR ${makeVal.toLocaleString('en-NP')}` : 'None');
   set('sr-total',       `NPR ${total.toLocaleString('en-NP')}`);
 }
