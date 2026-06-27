@@ -625,7 +625,7 @@ function injectPriceSchema() {
 const TRACKER_KEY = 'gnp_tracker_v1';
 let _trackerPurity = '24k';
 
-const PURITY_LABELS = { '24k': '24K Fine', '22k': '22K Tejabi', '18k': '18K', '14k': '14K' };
+const PURITY_LABELS = { '24k': '24K Fine', '22k': '22K Tejabi', '18k': '18K', '14k': '14K', 'silver': 'Silver' };
 
 function loadInvestments() {
   try { return JSON.parse(localStorage.getItem(TRACKER_KEY) || '[]'); }
@@ -786,7 +786,7 @@ function renderTracker() {
       <div class="tracker-card" data-id="${escapeHtml(inv.id)}" role="listitem">
         <div class="tracker-card-header">
           <div class="tracker-card-meta">
-            <span class="badge badge-gold">${escapeHtml(PURITY_LABELS[inv.purity] || inv.purity)}</span>
+            <span class="badge ${inv.purity === 'silver' ? 'badge-silver' : 'badge-gold'}">${escapeHtml(PURITY_LABELS[inv.purity] || inv.purity)}</span>
             ${inv.label  ? `<span class="tracker-inv-label">${escapeHtml(inv.label)}</span>` : ''}
             ${dateStr    ? `<span class="tracker-inv-date">${escapeHtml(dateStr)}</span>`     : ''}
           </div>

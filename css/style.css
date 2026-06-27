@@ -54,7 +54,8 @@ ul { list-style: none; }
 }
 .badge-green { background: #D1FAE5; color: #065F46; }
 .badge-red   { background: #FEE2E2; color: #991B1B; }
-.badge-gold  { background: var(--gold-100); color: var(--gold-600); }
+.badge-gold   { background: var(--gold-100); color: var(--gold-600); }
+.badge-silver { background: #F1F5F9; color: #475569; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 11px 24px; border-radius: var(--radius-sm); font-size: .95rem;
