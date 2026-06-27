@@ -942,6 +942,150 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   text-align: center;
 }
 
+/* ===================================================================
+   FEATURE 1 — SHARE RATES BUTTON
+=================================================================== */
+.hero-share-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap;
+}
+.share-rates-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(228,184,77,.45); background: rgba(228,184,77,.1);
+  color: var(--gold-400); font-size: .85rem; font-weight: 700; letter-spacing: .2px;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.share-rates-btn:hover,
+.share-rates-btn:focus-visible {
+  background: var(--gold-500); border-color: var(--gold-500); color: var(--white);
+  transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,151,46,.35);
+}
+.share-toast {
+  font-size: .8rem; font-weight: 600; color: var(--green);
+  opacity: 0; transition: opacity .3s ease; pointer-events: none;
+}
+.share-toast.show { opacity: 1; }
+
+/* ===================================================================
+   FEATURE 2 — PUSH NOTIFICATION PROMPT
+=================================================================== */
+.push-prompt {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 14px;
+  animation: fade-slide-in .3s ease;
+}
+@keyframes fade-slide-in {
+  from { opacity:0; transform: translateY(-4px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.push-prompt[hidden] { display: none; }
+.push-prompt-text {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .81rem; color: #D1D5DB; flex: 1; min-width: 150px;
+}
+
+/* iOS-style toggle */
+.push-toggle-label  { display: inline-flex; align-items: center; cursor: pointer; }
+.push-toggle-input  { position: absolute; opacity: 0; width: 0; height: 0; }
+.push-toggle-track  {
+  display: inline-flex; width: 38px; height: 22px; border-radius: 11px;
+  background: #4B5563; padding: 3px; transition: background .25s; cursor: pointer;
+  flex-shrink: 0;
+}
+.push-toggle-input:checked + .push-toggle-track { background: var(--green); }
+.push-toggle-thumb  {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--white);
+  transition: transform .25s; box-shadow: 0 1px 3px rgba(0,0,0,.3); flex-shrink: 0;
+}
+.push-toggle-input:checked + .push-toggle-track > .push-toggle-thumb {
+  transform: translateX(16px);
+}
+
+.push-dismiss-btn {
+  background: none; border: none; cursor: pointer; color: #6B7280;
+  font-size: 1rem; padding: 2px 4px; line-height: 1;
+  transition: color .2s; flex-shrink: 0;
+}
+.push-dismiss-btn:hover { color: #9CA3AF; }
+
+/* ===================================================================
+   FEATURE 3 — REMITTANCE EXCHANGE CARDS
+=================================================================== */
+.remit-section { background: var(--dark-100); }
+
+.remit-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+.remit-card {
+  background: var(--white); border: 1px solid var(--dark-200);
+  border-radius: var(--radius); padding: 18px 14px;
+  display: flex; align-items: center; gap: 12px;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.remit-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.remit-flag { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
+.remit-info  { min-width: 0; }
+.remit-pair  { font-size: .75rem; color: var(--dark-500); font-weight: 600; letter-spacing: .3px; }
+.remit-rate  { font-size: 1.05rem; font-weight: 800; color: var(--dark-900); margin: 3px 0; }
+.remit-name  { font-size: .7rem; color: var(--dark-500); }
+.remit-ts    { font-size: .82rem; color: var(--dark-500); }
+.remit-note  {
+  font-size: .78rem; color: var(--dark-500); margin-top: 16px;
+  text-align: center; line-height: 1.6;
+}
+/* Skeleton placeholder cards */
+.remit-skel { pointer-events: none; }
+
+@media (max-width: 1024px) { .remit-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 580px)  { .remit-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+@media (max-width: 360px)  { .remit-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ===================================================================
+   FEATURE 4 — PWA INSTALL BAR
+=================================================================== */
+.pwa-install-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 3000;
+  background: var(--dark-900); border-top: 1px solid #374151;
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  animation: pwa-slide-up .35s ease;
+  box-shadow: 0 -4px 24px rgba(0,0,0,.35);
+}
+.pwa-install-bar[hidden] { display: none !important; }
+@keyframes pwa-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.pwa-install-content {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+}
+.pwa-install-logo {
+  width: 28px; height: 28px; border-radius: 7px; object-fit: contain; flex-shrink: 0;
+}
+.pwa-install-text { font-size: .85rem; color: #D1D5DB; line-height: 1.4; }
+.pwa-install-text strong { color: var(--white); }
+.pwa-install-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.pwa-install-btn { padding: 8px 22px; font-size: .85rem; }
+.pwa-dismiss-btn {
+  background: none; border: none; cursor: pointer; color: #6B7280;
+  font-size: 1.25rem; padding: 4px 6px; line-height: 1; transition: color .2s;
+}
+.pwa-dismiss-btn:hover { color: #9CA3AF; }
+
+@media (max-width: 480px) {
+  .pwa-install-bar { flex-direction: column; text-align: center; padding: 14px 16px; }
+  .pwa-install-content { justify-content: center; }
+  .push-prompt { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .hero-share-row { flex-direction: row; }
+  .remit-card { padding: 14px 10px; }
+  .remit-flag { font-size: 1.5rem; }
+  .remit-rate { font-size: .95rem; }
+}
+
 /* ===== HISTORY PAGE ===== */
 
 /* Summary stats strip */

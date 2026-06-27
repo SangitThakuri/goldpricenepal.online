@@ -256,10 +256,11 @@ function renderUI() {
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
   }
 
-  /* refresh calculator, tracker, and structured data schema */
+  /* refresh calculator, tracker, schema, and push notification check */
   updateShowroom();
   renderTracker();
   injectPriceSchema();
+  maybeSendPriceNotification(nepal24kTola);
 
   /* timestamps */
   const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -816,6 +817,213 @@ function renderTracker() {
   set('tr-holdings', `${investments.length} position${investments.length !== 1 ? 's' : ''}`);
 }
 
+/* ══════════════════════════════════════════
+   FEATURE 1 — Share Rates
+   Web Share API → clipboard → execCommand
+══════════════════════════════════════════ */
+function setupShareBtn() {
+  const btn = el('shareRatesBtn');
+  if (!btn) return;
+  btn.addEventListener('click', shareRates);
+}
+
+async function shareRates() {
+  if (!state.nepal24kTola) return;
+  const p   = calcPrices();
+  const g24 = fmt(p['24k'].perTola);
+  const g22 = fmt(p['22k'].perTola);
+
+  const text =
+    `🌟 Today's Gold Price in Nepal:\n` +
+    `Fine Gold (24K): Rs. ${g24} per tola\n` +
+    `Tejabi (22K):    Rs. ${g22} per tola\n\n` +
+    `Check live trends & calculate showroom costs:\nhttps://goldpricenepal.online`;
+
+  const shareData = {
+    title : "Today's Gold Price in Nepal",
+    text,
+    url   : 'https://goldpricenepal.online'
+  };
+
+  try {
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      await navigator.share(shareData);
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      showShareToast('✓ Copied to clipboard');
+      return;
+    }
+    legacyCopy(text);
+  } catch (err) {
+    if (err.name !== 'AbortError') legacyCopy(text);
+  }
+}
+
+function legacyCopy(str) {
+  const ta = document.createElement('textarea');
+  ta.value = str;
+  ta.style.cssText = 'position:fixed;top:-200px;opacity:0;pointer-events:none';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showShareToast('✓ Copied to clipboard'); } catch (_) {}
+  document.body.removeChild(ta);
+}
+
+function showShareToast(msg) {
+  const t = el('shareToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ══════════════════════════════════════════
+   FEATURE 2 — Push Notifications
+   Uses browser Notifications API for local
+   alerts; OneSignal slot ready in sw.js for
+   true background push (configure App ID).
+══════════════════════════════════════════ */
+const PUSH_DISMISSED_KEY = 'gnp_push_dismissed';
+
+function setupPushNotifications() {
+  const prompt     = el('pushPrompt');
+  const toggle     = el('pushToggle');
+  const dismissBtn = el('pushDismiss');
+  if (!prompt || !('Notification' in window)) return;
+
+  // Don't re-show if user dismissed
+  if (sessionStorage.getItem(PUSH_DISMISSED_KEY)) return;
+
+  // Restore checked state if already granted
+  if (toggle && Notification.permission === 'granted') toggle.checked = true;
+
+  setTimeout(() => { prompt.removeAttribute('hidden'); }, 3000);
+
+  toggle?.addEventListener('change', async () => {
+    if (!toggle.checked) return;
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') toggle.checked = false;
+  });
+
+  dismissBtn?.addEventListener('click', () => {
+    prompt.setAttribute('hidden', '');
+    sessionStorage.setItem(PUSH_DISMISSED_KEY, '1');
+  });
+}
+
+// Fires from renderUI() each time prices refresh
+function maybeSendPriceNotification(gold24k) {
+  if (Notification.permission !== 'granted') return;
+  const last = parseInt(sessionStorage.getItem('gnp_last_notif_price') || '0', 10);
+  if (!last) { sessionStorage.setItem('gnp_last_notif_price', String(gold24k)); return; }
+  if (last === gold24k) return;
+  sessionStorage.setItem('gnp_last_notif_price', String(gold24k));
+  try {
+    new Notification('Gold Price Nepal — Rate Updated', {
+      body : `Today’s 24K Gold: NPR ${fmt(gold24k)} per tola`,
+      icon : '/apple-touch-icon.png',
+      badge: '/favicon-32x32.png',
+      tag  : 'gnp-price-update',
+      renotify: true
+    });
+  } catch (_) {}
+}
+
+/* ══════════════════════════════════════════
+   FEATURE 3 — Remittance Exchange Rate Cards
+   Single CDN fetch (already trusted in codebase).
+   USD as base → cross-rates vs NPR derived inline.
+══════════════════════════════════════════ */
+const REMIT_PAIRS = [
+  { code: 'usd', flag: '🇺🇸', name: 'US Dollar',     abbr: 'USD' },
+  { code: 'aed', flag: '🇦🇪', name: 'UAE Dirham',    abbr: 'AED' },
+  { code: 'qar', flag: '🇶🇦', name: 'Qatari Riyal',  abbr: 'QAR' },
+  { code: 'aud', flag: '🇦🇺', name: 'Aus. Dollar',   abbr: 'AUD' },
+  { code: 'sar', flag: '🇸🇦', name: 'Saudi Riyal',   abbr: 'SAR' },
+  { code: 'gbp', flag: '🇬🇧', name: 'British Pound', abbr: 'GBP' },
+];
+
+async function fetchRemitRates() {
+  try {
+    const url      = `${CDN_BASE}@latest/v1/currencies/usd.json`;
+    const data     = await fetchWithTimeout(url, 10000).then(r => r.json());
+    const usdRates = data?.usd;
+    const nprPerUsd = usdRates?.npr;
+    if (!nprPerUsd) return;
+
+    const rates = {};
+    REMIT_PAIRS.forEach(({ code }) => {
+      rates[code] = code === 'usd' ? nprPerUsd : (nprPerUsd / (usdRates[code] || 1));
+    });
+    renderRemitCards(rates, data.date);
+  } catch (err) {
+    console.warn('[remit] fetch failed:', err.message);
+  }
+}
+
+function renderRemitCards(rates, date) {
+  const grid = el('remitGrid');
+  if (!grid) return;
+
+  const dateStr = date
+    ? new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '';
+
+  grid.innerHTML = REMIT_PAIRS.map(({ code, flag, name, abbr }) => {
+    const rate = rates[code];
+    if (!rate) return '';
+    return `
+      <div class="remit-card">
+        <div class="remit-flag" aria-hidden="true">${flag}</div>
+        <div class="remit-info">
+          <div class="remit-pair">1&nbsp;<strong>${abbr}</strong></div>
+          <div class="remit-rate">Rs.&nbsp;${rate.toFixed(2)}</div>
+          <div class="remit-name">${name}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  set('remitUpdated', dateStr ? `Rates: ${dateStr}` : '');
+}
+
+/* ══════════════════════════════════════════
+   FEATURE 4 — PWA: Service Worker + Install
+══════════════════════════════════════════ */
+let _deferredInstallPrompt = null;
+
+function setupPWAInstall() {
+  const bar        = el('pwaInstallBar');
+  const installBtn = el('pwaInstallBtn');
+  const dismissBtn = el('pwaDismissBtn');
+  if (!bar) return;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _deferredInstallPrompt = e;
+    bar.removeAttribute('hidden');
+  });
+
+  installBtn?.addEventListener('click', async () => {
+    if (!_deferredInstallPrompt) return;
+    _deferredInstallPrompt.prompt();
+    const { outcome } = await _deferredInstallPrompt.userChoice;
+    _deferredInstallPrompt = null;
+    bar.setAttribute('hidden', '');
+  });
+
+  dismissBtn?.addEventListener('click', () => {
+    bar.setAttribute('hidden', '');
+    _deferredInstallPrompt = null;
+  });
+
+  // Already installed in standalone mode — keep bar hidden
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    bar.setAttribute('hidden', '');
+  }
+}
+
 /* ── view toggle (Table ↔ Chart) ── */
 function setupViewToggle() {
   els('.view-btn').forEach(btn => {
@@ -890,7 +1098,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupNav(); setupFAQ(); setupContactForm();
   setupViewToggle(); setupChartTabs(); setupChartTypeTabs();
   setupTracker();
+  setupShareBtn();
+  setupPushNotifications();
+  setupPWAInstall();
   await fetchPrices();
+  fetchRemitRates();           // parallel — doesn't block price render
   initTickerScroll();
   setupCalculator();
   setInterval(fetchPrices, REFRESH_MS);

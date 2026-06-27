@@ -178,6 +178,12 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#C9972E" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Gold Price Nepal" />
 </head>
 <body>
 
@@ -273,6 +279,19 @@
         <div class="error-banner" role="alert">
           ⚠️ Unable to reach live prices. Showing cached data.
         </div>
+
+        <!-- Push notification opt-in (shown after 3s, dismissible) -->
+        <div class="push-prompt" id="pushPrompt" hidden>
+          <span class="push-prompt-text">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            Get daily gold rate alerts
+          </span>
+          <label class="push-toggle-label" title="Enable notifications">
+            <input type="checkbox" id="pushToggle" class="push-toggle-input">
+            <span class="push-toggle-track"><span class="push-toggle-thumb"></span></span>
+          </label>
+          <button id="pushDismiss" class="push-dismiss-btn" aria-label="Dismiss notification prompt">✕</button>
+        </div>
       </div>
 
       <div class="hero-cards-wrap">
@@ -322,6 +341,15 @@
               <div class="val" style="font-size:.92rem" id="intl-gold-price">—</div>
             </div>
           </div>
+        </div>
+
+        <!-- Share today's rates -->
+        <div class="hero-share-row">
+          <button id="shareRatesBtn" class="share-rates-btn" aria-label="Share today's gold rates">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share Today's Rates
+          </button>
+          <span id="shareToast" class="share-toast" aria-live="polite" role="status"></span>
         </div>
       </div>
     </div>
@@ -468,6 +496,32 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- ======= REMITTANCE RATES ======= -->
+<section class="section remit-section" id="remittance">
+  <div class="container">
+    <div class="section-header">
+      <h2>Remittance Exchange Rates</h2>
+      <p>Live NPR rates for major remittance corridors · <span id="remitUpdated" class="remit-ts">—</span></p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="remit-grid" id="remitGrid" aria-label="Currency exchange rate cards">
+      <!-- skeleton placeholders — replaced by JS -->
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+      <div class="remit-card remit-skel"><div class="remit-flag skeleton" style="width:36px;height:36px;border-radius:50%"></div><div class="remit-info"><div class="skeleton" style="height:12px;width:60px;margin-bottom:6px;border-radius:4px"></div><div class="skeleton" style="height:20px;width:90px;border-radius:4px"></div></div></div>
+    </div>
+
+    <p class="remit-note">
+      Exchange rates from <strong>@fawazahmed0 currency API</strong> (same source as our live gold feed) · Updated daily ·
+      For remittance reference only — actual bank/exchange rates may vary.
+    </p>
   </div>
 </section>
 
@@ -932,7 +986,42 @@
   </div>
 </footer>
 
+<!-- PWA Install Prompt Bar (shown by beforeinstallprompt event) -->
+<div class="pwa-install-bar" id="pwaInstallBar" hidden role="alertdialog" aria-label="Install app prompt">
+  <div class="pwa-install-content">
+    <img src="favicon-32x32.png" alt="" width="28" height="28" class="pwa-install-logo">
+    <div class="pwa-install-text">
+      <strong>Add Gold Price Nepal</strong> to your home screen for instant, offline access
+    </div>
+  </div>
+  <div class="pwa-install-actions">
+    <button id="pwaInstallBtn" class="btn btn-gold pwa-install-btn">Install</button>
+    <button id="pwaDismissBtn" class="pwa-dismiss-btn" aria-label="Dismiss install prompt">✕</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 <script src="js/main.js"></script>
+
+<!-- Service Worker registration (independent of main.js) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .catch(function (e) { console.warn('[SW] Registration failed:', e.message); });
+    });
+  }
+</script>
+
+<!-- OneSignal Web Push — uncomment & replace YOUR_ONESIGNAL_APP_ID after setup at onesignal.com -->
+<!--
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({ appId: 'YOUR_ONESIGNAL_APP_ID', notifyButton: { enable: false } });
+  });
+</script>
+-->
 </body>
 </html>

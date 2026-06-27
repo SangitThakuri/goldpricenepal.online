@@ -1,0 +1,43 @@
+{
+  "name": "Gold Price Nepal",
+  "short_name": "GoldNP",
+  "description": "Live FENEGOSIDA gold and silver prices in Nepal — 24K, 22K and Silver rates per tola",
+  "start_url": "./index.html",
+  "id": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#111827",
+  "theme_color": "#C9972E",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["finance"],
+  "icons": [
+    { "src": "favicon-16x16.png", "sizes": "16x16",   "type": "image/png" },
+    { "src": "favicon-32x32.png", "sizes": "32x32",   "type": "image/png" },
+    { "src": "icon-96.png",       "sizes": "96x96",   "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png",      "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png",      "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Gold Rate",
+      "short_name": "Rates",
+      "url": "./index.html#rates",
+      "description": "Check today's live FENEGOSIDA gold price"
+    },
+    {
+      "name": "Gold Calculator",
+      "short_name": "Calculator",
+      "url": "./index.html#calculator",
+      "description": "Calculate gold value for any weight"
+    },
+    {
+      "name": "Price History",
+      "short_name": "History",
+      "url": "./history.html",
+      "description": "View historical gold price chart"
+    }
+  ]
+}
