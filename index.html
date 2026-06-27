@@ -212,6 +212,15 @@
       </button>
     </div>
   </div>
+  <!-- Connection status — visible only when browser is offline -->
+  <div class="conn-banner" id="connBanner" hidden role="alert" aria-live="assertive">
+    <div class="container">
+      <span class="conn-banner-inner">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        ⚠️ Offline Mode — Displaying cached rates from <strong id="connBannerTime">—</strong>
+      </span>
+    </div>
+  </div>
 </header>
 
 <!-- ======= TICKER BAR ======= -->
@@ -610,6 +619,66 @@
   </div>
 </section>
 
+<!-- ======= GOLD PURCHASE GOAL PLANNER ======= -->
+<section class="section planner-section" id="planner">
+  <div class="container">
+    <div class="section-header">
+      <h2>Gold Purchase Planner</h2>
+      <p>Set a savings target — find out exactly how much to put away each month to reach your gold ownership goal</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="card planner-card">
+      <div class="planner-inputs">
+        <div class="wc-field">
+          <label for="pl-weight" class="wc-label">Target Weight (Tola)</label>
+          <input type="number" id="pl-weight" class="wc-input" placeholder="e.g. 5" min="0.1" step="0.1" inputmode="decimal">
+        </div>
+        <div class="wc-field">
+          <label for="pl-months" class="wc-label">Time Horizon (Months)</label>
+          <input type="number" id="pl-months" class="wc-input" placeholder="e.g. 12" min="1" max="360" step="1" inputmode="numeric">
+        </div>
+        <div class="wc-field planner-purity-field">
+          <label class="wc-label">Purity</label>
+          <div class="purity-btns" id="plannerPurityBtns">
+            <button class="purity-btn active" data-k="24k">24K Fine</button>
+            <button class="purity-btn" data-k="22k">22K Tejabi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="planner-result" id="plannerResult">
+        <div class="planner-result-inner">
+          <div class="planner-result-main">
+            <div class="planner-result-label">Monthly Savings Required</div>
+            <div class="planner-result-amount" id="pl-monthly">—</div>
+            <div class="planner-result-sub" id="pl-monthly-sub">Enter your target above</div>
+          </div>
+          <div class="planner-breakdown">
+            <div class="planner-bd-item">
+              <div class="planner-bd-label">Total Gold Cost</div>
+              <div class="planner-bd-value" id="pl-total-cost">—</div>
+            </div>
+            <div class="planner-bd-item">
+              <div class="planner-bd-label">Target Weight</div>
+              <div class="planner-bd-value" id="pl-target-weight-out">—</div>
+            </div>
+            <div class="planner-bd-item">
+              <div class="planner-bd-label">Current Rate / Tola</div>
+              <div class="planner-bd-value" id="pl-current-rate">Loading…</div>
+            </div>
+            <div class="planner-bd-item">
+              <div class="planner-bd-label">Completion Date</div>
+              <div class="planner-bd-value" id="pl-completion-date">—</div>
+            </div>
+          </div>
+        </div>
+        <p class="planner-note">Based on today's live FENEGOSIDA rate · Actual purchase price may vary.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ======= INVESTMENT TRACKER ======= -->
 <section class="section tracker-section" id="tracker">
   <div class="container">
@@ -952,6 +1021,7 @@
           <li><a href="index.html#calculator">Calculator</a></li>
           <li><a href="index.html#chart">Price Chart</a></li>
           <li><a href="history.html">Historical Rates</a></li>
+          <li><a href="index.html#planner">Gold Planner</a></li>
           <li><a href="index.html#tracker">Investment Tracker</a></li>
           <li><a href="index.html#faq">FAQ</a></li>
         </ul>

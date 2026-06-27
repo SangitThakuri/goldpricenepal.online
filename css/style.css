@@ -943,6 +943,88 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 }
 
 /* ===================================================================
+   CONNECTION STATUS BANNER
+=================================================================== */
+.conn-banner {
+  background: linear-gradient(90deg, #78350F 0%, #92400E 100%);
+  border-top: 1px solid rgba(180,83,9,.6);
+  padding: 6px 0;
+  font-size: .8rem;
+  color: #FEF3C7;
+  text-align: center;
+}
+.conn-banner[hidden] { display: none !important; }
+.conn-banner-inner {
+  display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center;
+}
+.conn-banner-inner svg { flex-shrink: 0; opacity: .85; }
+
+/* ===================================================================
+   GOLD PURCHASE GOAL PLANNER
+=================================================================== */
+.planner-section { background: var(--white); }
+
+.planner-card { overflow: visible; }
+
+.planner-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+.planner-purity-field .purity-btns { margin-top: 6px; }
+
+.planner-result {
+  background: linear-gradient(135deg, var(--dark-900) 0%, var(--dark-800) 100%);
+  border-radius: var(--radius);
+  padding: 28px 32px 22px;
+}
+.planner-result-inner {
+  display: flex; align-items: flex-start; gap: 40px; flex-wrap: wrap;
+}
+
+.planner-result-main { flex: 0 0 auto; min-width: 200px; }
+.planner-result-label {
+  font-size: .72rem; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--gold-400); margin-bottom: 8px;
+}
+.planner-result-amount {
+  font-size: 2.1rem; font-weight: 900; color: var(--white);
+  line-height: 1.1; letter-spacing: -.5px;
+}
+.planner-result-sub { font-size: .8rem; color: #9CA3AF; margin-top: 6px; }
+
+.planner-breakdown {
+  flex: 1; display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 14px 28px; min-width: 220px; align-content: start;
+}
+.planner-bd-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: .4px;
+  text-transform: uppercase; color: #6B7280; margin-bottom: 3px;
+}
+.planner-bd-value { font-size: .93rem; font-weight: 700; color: #F3F4F6; }
+
+.planner-note {
+  font-size: .74rem; color: #6B7280; margin-top: 20px;
+  padding-top: 16px; border-top: 1px solid rgba(255,255,255,.07);
+}
+
+@media (max-width: 860px) {
+  .planner-inputs { grid-template-columns: 1fr 1fr; }
+  .planner-purity-field { grid-column: 1 / -1; }
+  .planner-result { padding: 22px 20px 18px; }
+  .planner-result-inner { gap: 22px; }
+  .planner-result-amount { font-size: 1.7rem; }
+}
+@media (max-width: 540px) {
+  .planner-inputs { grid-template-columns: 1fr; }
+  .planner-purity-field { grid-column: 1; }
+  .planner-result-amount { font-size: 1.4rem; }
+  .planner-breakdown { grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+}
+
+/* ===================================================================
    FEATURE 1 — SHARE RATES BUTTON
 =================================================================== */
 .hero-share-row {

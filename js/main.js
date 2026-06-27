@@ -256,9 +256,10 @@ function renderUI() {
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
   }
 
-  /* refresh calculator, tracker, schema, and push notification check */
+  /* refresh calculator, tracker, planner, schema, and push notification check */
   updateShowroom();
   renderTracker();
+  updateGoalPlanner();
   injectPriceSchema();
   maybeSendPriceNotification(nepal24kTola);
 
@@ -1024,6 +1025,103 @@ function setupPWAInstall() {
   }
 }
 
+/* ══════════════════════════════════════════
+   CONNECTION STATUS BANNER
+   Tracks online/offline browser events and
+   injects a warning strip in the header.
+══════════════════════════════════════════ */
+function setupConnectionStatus() {
+  const banner = el('connBanner');
+  const timeEl = el('connBannerTime');
+  if (!banner) return;
+
+  function showOffline() {
+    const ts = new Date().toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    if (timeEl) timeEl.textContent = ts;
+    banner.removeAttribute('hidden');
+  }
+
+  function showOnline() {
+    banner.setAttribute('hidden', '');
+  }
+
+  window.addEventListener('offline', showOffline);
+  window.addEventListener('online',  showOnline);
+
+  if (!navigator.onLine) showOffline();
+}
+
+/* ══════════════════════════════════════════
+   GOLD PURCHASE GOAL PLANNER
+   Calculates monthly savings needed to buy
+   a target weight of gold within N months.
+══════════════════════════════════════════ */
+let _plannerPurity = '24k';
+
+function setupGoalPlanner() {
+  els('#plannerPurityBtns .purity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      els('#plannerPurityBtns .purity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _plannerPurity = btn.dataset.k;
+      updateGoalPlanner();
+    });
+  });
+
+  ['pl-weight', 'pl-months'].forEach(id => {
+    const inp = el(id);
+    if (inp) inp.addEventListener('input', updateGoalPlanner);
+  });
+}
+
+function updateGoalPlanner() {
+  const monthlyEl  = el('pl-monthly');
+  const subEl      = el('pl-monthly-sub');
+  const totalEl    = el('pl-total-cost');
+  const wOutEl     = el('pl-target-weight-out');
+  const rateEl     = el('pl-current-rate');
+  const dateEl     = el('pl-completion-date');
+
+  if (!monthlyEl) return;
+
+  if (!state.nepal24kTola) {
+    monthlyEl.textContent = '—';
+    if (rateEl) rateEl.textContent = 'Loading…';
+    return;
+  }
+
+  const p = calcPrices();
+  const pricePerTola = p[_plannerPurity]?.perTola || 0;
+  if (rateEl) rateEl.textContent = `NPR ${fmt(pricePerTola)}`;
+
+  const weight = parseFloat(el('pl-weight')?.value);
+  const months = parseInt(el('pl-months')?.value, 10);
+
+  if (!weight || isNaN(weight) || weight <= 0 || !months || isNaN(months) || months <= 0) {
+    monthlyEl.textContent = '—';
+    if (subEl)   subEl.textContent   = 'Enter your target above';
+    if (totalEl) totalEl.textContent = '—';
+    if (wOutEl)  wOutEl.textContent  = '—';
+    if (dateEl)  dateEl.textContent  = '—';
+    return;
+  }
+
+  const totalCost = Math.round(weight * pricePerTola);
+  const monthly   = Math.round(totalCost / months);
+
+  const completionDate = new Date();
+  completionDate.setMonth(completionDate.getMonth() + months);
+  const dateStr = completionDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  monthlyEl.textContent = `NPR ${monthly.toLocaleString('en-NP')}`;
+  if (subEl)   subEl.textContent   = `per month for ${months} month${months !== 1 ? 's' : ''}`;
+  if (totalEl) totalEl.textContent = `NPR ${totalCost.toLocaleString('en-NP')}`;
+  if (wOutEl)  wOutEl.textContent  = `${weight} Tola (${(weight * TOLA_GRAMS).toFixed(2)}g)`;
+  if (dateEl)  dateEl.textContent  = dateStr;
+}
+
 /* ── view toggle (Table ↔ Chart) ── */
 function setupViewToggle() {
   els('.view-btn').forEach(btn => {
@@ -1101,6 +1199,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupShareBtn();
   setupPushNotifications();
   setupPWAInstall();
+  setupConnectionStatus();
+  setupGoalPlanner();
   await fetchPrices();
   fetchRemitRates();           // parallel — doesn't block price render
   initTickerScroll();
