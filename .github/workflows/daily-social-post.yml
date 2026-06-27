@@ -1,0 +1,53 @@
+name: Daily Gold Price Social Post
+
+on:
+  schedule:
+    # 11:05 AM NPT = 05:20 UTC  (NPT is UTC+5:45)
+    - cron: '20 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (render only, no post)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: social-automation/package.json
+
+      - name: Install dependencies
+        working-directory: social-automation
+        run: npm install
+
+      - name: Post daily graphic (live)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: social-automation
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+        run: node index.js
+
+      - name: Post daily graphic (dry run)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        working-directory: social-automation
+        run: node index.js --dry-run
+
+      - name: Upload preview PNG (dry run only)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-graphic
+          path: social-automation/preview-*.png
+          retention-days: 3
