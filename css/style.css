@@ -1096,34 +1096,65 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 =================================================================== */
 .remit-section { background: var(--dark-100); }
 
-.remit-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
+/* Infinite-scroll ticker wrapper */
+.remit-scroll-outer {
+  overflow: hidden;
+  position: relative;
+  /* Fade out edges for a clean entry/exit */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
 }
+.remit-scroll-track,
+.remit-scroll-clone {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  padding: 6px 0 10px;       /* space for card shadow + bottom breathing room */
+}
+.remit-scroll-track {
+  animation: remit-scroll 40s linear infinite;
+}
+.remit-scroll-clone {
+  animation: remit-scroll 40s linear infinite;
+}
+/* Both tracks + their clone scroll together via the same keyframe;
+   the clone is appended after the original so the loop is seamless. */
+@keyframes remit-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+.remit-scroll-outer:hover .remit-scroll-track,
+.remit-scroll-outer:hover .remit-scroll-clone {
+  animation-play-state: paused;
+}
+
 .remit-card {
+  flex: 0 0 auto;
+  width: 168px;
   background: var(--white); border: 1px solid var(--dark-200);
-  border-radius: var(--radius); padding: 18px 14px;
+  border-radius: var(--radius); padding: 16px 14px;
   display: flex; align-items: center; gap: 12px;
   transition: transform var(--transition), box-shadow var(--transition);
+  cursor: default;
 }
 .remit-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.remit-flag { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
+.remit-flag { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
 .remit-info  { min-width: 0; }
-.remit-pair  { font-size: .75rem; color: var(--dark-500); font-weight: 600; letter-spacing: .3px; }
-.remit-rate  { font-size: 1.05rem; font-weight: 800; color: var(--dark-900); margin: 3px 0; }
-.remit-name  { font-size: .7rem; color: var(--dark-500); }
+.remit-pair  { font-size: .72rem; color: var(--dark-500); font-weight: 600; letter-spacing: .3px; }
+.remit-rate  { font-size: 1rem; font-weight: 800; color: var(--dark-900); margin: 3px 0; white-space: nowrap; }
+.remit-name  { font-size: .68rem; color: var(--dark-500); }
 .remit-ts    { font-size: .82rem; color: var(--dark-500); }
 .remit-note  {
   font-size: .78rem; color: var(--dark-500); margin-top: 16px;
   text-align: center; line-height: 1.6;
 }
-/* Skeleton placeholder cards */
 .remit-skel { pointer-events: none; }
 
-@media (max-width: 1024px) { .remit-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 580px)  { .remit-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-@media (max-width: 360px)  { .remit-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) {
+  .remit-card { width: 148px; padding: 12px 10px; }
+  .remit-flag { font-size: 1.5rem; }
+  .remit-rate { font-size: .9rem; }
+}
 
 /* ===================================================================
    FEATURE 4 — PWA INSTALL BAR
@@ -1163,9 +1194,6 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   .pwa-install-content { justify-content: center; }
   .push-prompt { flex-direction: column; align-items: flex-start; gap: 8px; }
   .hero-share-row { flex-direction: row; }
-  .remit-card { padding: 14px 10px; }
-  .remit-flag { font-size: 1.5rem; }
-  .remit-rate { font-size: .95rem; }
 }
 
 /* ===== HISTORY PAGE ===== */

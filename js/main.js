@@ -937,20 +937,29 @@ function maybeSendPriceNotification(gold24k) {
    Single CDN fetch (already trusted in codebase).
    USD as base → cross-rates vs NPR derived inline.
 ══════════════════════════════════════════ */
+// unit > 1 means "show N units = Rs. X" for small-denomination currencies
 const REMIT_PAIRS = [
-  { code: 'usd', flag: '🇺🇸', name: 'US Dollar',     abbr: 'USD' },
-  { code: 'aed', flag: '🇦🇪', name: 'UAE Dirham',    abbr: 'AED' },
-  { code: 'qar', flag: '🇶🇦', name: 'Qatari Riyal',  abbr: 'QAR' },
-  { code: 'aud', flag: '🇦🇺', name: 'Aus. Dollar',   abbr: 'AUD' },
-  { code: 'sar', flag: '🇸🇦', name: 'Saudi Riyal',   abbr: 'SAR' },
-  { code: 'gbp', flag: '🇬🇧', name: 'British Pound', abbr: 'GBP' },
+  { code: 'usd', flag: '🇺🇸', name: 'US Dollar',          abbr: 'USD', unit: 1    },
+  { code: 'aed', flag: '🇦🇪', name: 'UAE Dirham',          abbr: 'AED', unit: 1    },
+  { code: 'jpy', flag: '🇯🇵', name: 'Japanese Yen',        abbr: 'JPY', unit: 100  },
+  { code: 'qar', flag: '🇶🇦', name: 'Qatari Riyal',        abbr: 'QAR', unit: 1    },
+  { code: 'gbp', flag: '🇬🇧', name: 'British Pound',       abbr: 'GBP', unit: 1    },
+  { code: 'eur', flag: '🇪🇺', name: 'Euro',                abbr: 'EUR', unit: 1    },
+  { code: 'aud', flag: '🇦🇺', name: 'Australian Dollar',   abbr: 'AUD', unit: 1    },
+  { code: 'sar', flag: '🇸🇦', name: 'Saudi Riyal',         abbr: 'SAR', unit: 1    },
+  { code: 'cad', flag: '🇨🇦', name: 'Canadian Dollar',     abbr: 'CAD', unit: 1    },
+  { code: 'inr', flag: '🇮🇳', name: 'Indian Rupee',        abbr: 'INR', unit: 1    },
+  { code: 'myr', flag: '🇲🇾', name: 'Malaysian Ringgit',   abbr: 'MYR', unit: 1    },
+  { code: 'krw', flag: '🇰🇷', name: 'South Korean Won',    abbr: 'KRW', unit: 1000 },
+  { code: 'kwd', flag: '🇰🇼', name: 'Kuwaiti Dinar',       abbr: 'KWD', unit: 1    },
+  { code: 'bhd', flag: '🇧🇭', name: 'Bahraini Dinar',      abbr: 'BHD', unit: 1    },
 ];
 
 async function fetchRemitRates() {
   try {
-    const url      = `${CDN_BASE}@latest/v1/currencies/usd.json`;
-    const data     = await fetchWithTimeout(url, 10000).then(r => r.json());
-    const usdRates = data?.usd;
+    const url       = `${CDN_BASE}@latest/v1/currencies/usd.json`;
+    const data      = await fetchWithTimeout(url, 10000).then(r => r.json());
+    const usdRates  = data?.usd;
     const nprPerUsd = usdRates?.npr;
     if (!nprPerUsd) return;
 
@@ -965,26 +974,42 @@ async function fetchRemitRates() {
 }
 
 function renderRemitCards(rates, date) {
-  const grid = el('remitGrid');
-  if (!grid) return;
+  const track = el('remitGrid');
+  if (!track) return;
 
   const dateStr = date
     ? new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '';
 
-  grid.innerHTML = REMIT_PAIRS.map(({ code, flag, name, abbr }) => {
+  const cardsHTML = REMIT_PAIRS.map(({ code, flag, name, abbr, unit }) => {
     const rate = rates[code];
     if (!rate) return '';
+    const displayRate = (rate * unit).toFixed(2);
+    const unitLabel   = unit > 1 ? `${unit}&nbsp;` : '1&nbsp;';
     return `
       <div class="remit-card">
         <div class="remit-flag" aria-hidden="true">${flag}</div>
         <div class="remit-info">
-          <div class="remit-pair">1&nbsp;<strong>${abbr}</strong></div>
-          <div class="remit-rate">Rs.&nbsp;${rate.toFixed(2)}</div>
+          <div class="remit-pair">${unitLabel}<strong>${abbr}</strong></div>
+          <div class="remit-rate">Rs.&nbsp;${displayRate}</div>
           <div class="remit-name">${name}</div>
         </div>
       </div>`;
   }).join('');
+
+  track.innerHTML = cardsHTML;
+
+  // Clone the track for seamless infinite scroll (remove stale clone first)
+  const outer = track.parentElement;
+  const stale = outer?.querySelector('.remit-scroll-clone');
+  if (stale) stale.remove();
+  if (outer) {
+    const clone = track.cloneNode(true);
+    clone.id = '';
+    clone.classList.add('remit-scroll-clone');
+    clone.setAttribute('aria-hidden', 'true');
+    outer.appendChild(clone);
+  }
 
   set('remitUpdated', dateStr ? `Rates: ${dateStr}` : '');
 }
