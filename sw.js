@@ -11,12 +11,12 @@
 // importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 // ────────────────────────────────────────────────────────────────────────────
 
-const CACHE      = 'gnp-v2';
+const CACHE      = 'gnp-v3';
 const PRECACHE   = [
   './',
   './index.html',
   './history.html',
-  './css/style.css',
+  './css/style.css?v=2.0.1',
   './js/main.js',
   './js/history.js',
   './manifest.json',

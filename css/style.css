@@ -253,6 +253,7 @@ ul { list-style: none; }
   border: 1px solid rgba(255,255,255,.12);
   border-radius: var(--radius);
   padding: 20px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: transform var(--transition), box-shadow var(--transition);
 }
@@ -517,6 +518,19 @@ ul { list-style: none; }
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
+  color: transparent !important;
+}
+/* Dark-context skeleton: price cards sit on the dark hero — use translucent white shimmer
+   so the loading state never flashes a bright white block on the dark background */
+.price-card .skeleton,
+.silver-card .skeleton,
+.forex-card .skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,.08) 25%, rgba(255,255,255,.18) 50%, rgba(255,255,255,.08) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent !important;
+  border-radius: 4px;
+  min-height: 1.8rem;
 }
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
