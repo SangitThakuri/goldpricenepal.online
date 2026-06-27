@@ -23,6 +23,8 @@ const state = {
   goldNPR:        0,       // international XAU/NPR (per troy oz)
   silverTolaNPR:  0,       // silver price per tola in NPR
   yesterdayNPR:   0,
+  xagNPR:         0,       // today's XAG in NPR per troy oz
+  xagYestNPR:     0,       // yesterday's XAG in NPR per troy oz
   usdNPR:         135,
   nepal24kTola:   0,       // FENEGOSIDA price (or fallback)
   priceSource:    'loading',  // 'fenegosida' | 'international'
@@ -85,8 +87,8 @@ async function fetchXAU(dateStr) {
   const url = `${CDN_BASE}@${dateStr}/v1/currencies/xau.json`;
   return fetchWithTimeout(url, 10000).then(r => r.json());
 }
-async function fetchXAG() {
-  return fetchWithTimeout(`${CDN_BASE}@latest/v1/currencies/xag.json`, 10000).then(r => r.json());
+async function fetchXAG(dateStr = 'latest') {
+  return fetchWithTimeout(`${CDN_BASE}@${dateStr}/v1/currencies/xag.json`, 10000).then(r => r.json());
 }
 
 /* ══════════════════════════════════════════
@@ -94,12 +96,13 @@ async function fetchXAG() {
 ══════════════════════════════════════════ */
 async function fetchPrices() {
   try {
-    // Fetch FENEGOSIDA + XAU(today+yesterday) + XAG simultaneously
-    const [fenegosidaRes, xauTodayRes, xauYestRes, xagRes] = await Promise.allSettled([
+    // Fetch FENEGOSIDA + XAU(today+yesterday) + XAG(today+yesterday) simultaneously
+    const [fenegosidaRes, xauTodayRes, xauYestRes, xagTodayRes, xagYestRes] = await Promise.allSettled([
       fetchFENEGOSIDA(),
       fetchXAU(isoDate(0)),
       fetchXAU(isoDate(1)),
-      fetchXAG()
+      fetchXAG(),
+      fetchXAG(isoDate(1))
     ]);
 
     const xauToday = xauTodayRes.value;
@@ -108,8 +111,10 @@ async function fetchPrices() {
 
     if (!goldUSD) throw new Error('XAU data missing');
 
-    const usdNPR  = goldNPR / goldUSD;
-    const yestNPR = xauYestRes.value?.xau?.npr || 0;
+    const usdNPR     = goldNPR / goldUSD;
+    const yestNPR    = xauYestRes.value?.xau?.npr || 0;
+    const xagNPR     = xagTodayRes.value?.xag?.npr || 0;
+    const xagYestNPR = xagYestRes.value?.xag?.npr  || 0;
 
     // Decide price source
     let nepal24kTola, silverTolaNPR, priceSource;
@@ -120,16 +125,17 @@ async function fetchPrices() {
       priceSource   = 'fenegosida';
     } else {
       nepal24kTola  = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
-      const xagNPR  = xagRes.value?.xag?.npr || 0;
       silverTolaNPR = xagNPR ? (xagNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * SILVER_PREMIUM : 0;
       priceSource   = 'international';
       console.warn('FENEGOSIDA failed, using international:', fenegosidaRes.reason?.message);
     }
 
     Object.assign(state, {
-      goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR, usdNPR, nepal24kTola, priceSource
+      goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR,
+      xagNPR, xagYestNPR, usdNPR, nepal24kTola, priceSource
     });
-    saveCache({ goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR, nepal24kTola, priceSource });
+    saveCache({ goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR,
+      xagNPR, xagYestNPR, nepal24kTola, priceSource });
     renderUI();
 
   } catch (err) {
@@ -204,6 +210,24 @@ function renderUI() {
         : '—';
     }
   });
+
+  /* silver hero card change pill */
+  const silverChEl = el('hero-silver-change');
+  if (silverChEl && silverTolaNPR) {
+    const { xagNPR, xagYestNPR } = state;
+    const silvYestTola = xagNPR && xagYestNPR
+      ? (xagYestNPR / xagNPR) * silverTolaNPR
+      : 0;
+    silverChEl.className = 'price-change';
+    if (silvYestTola) {
+      const silvChangePct = ((silverTolaNPR - silvYestTola) / silvYestTola) * 100;
+      const silvUp   = silvChangePct >= 0;
+      const silvSign = silvUp ? '+' : '';
+      silverChEl.innerHTML = `<span class="trend-pill ${silvUp ? 'up' : 'down'}">${silvUp ? '↑' : '↓'} ${silvSign}${silvChangePct.toFixed(2)}% vs yesterday</span>`;
+    } else {
+      silverChEl.innerHTML = '—';
+    }
+  }
 
   set('silver-price',    silverTolaNPR ? `NPR ${fmt(p.silver.perTola)}/tola` : '—');
   set('forex-rate',      `1 USD = NPR ${usdNPR.toFixed(2)}`);
