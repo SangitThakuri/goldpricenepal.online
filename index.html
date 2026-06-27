@@ -116,8 +116,68 @@
   }
   </script>
 
+  <!-- Dynamic price schema — values injected by main.js after fetch -->
+  <script type="application/ld+json" id="priceSchema">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": "https://goldpricenepal.online/#gold-24k",
+        "name": "Fine Gold 24K Price in Nepal",
+        "description": "Official FENEGOSIDA 24K Fine Gold price per tola in Nepal (NPR). Updated daily.",
+        "brand": { "@type": "Organization", "name": "FENEGOSIDA" },
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "NPR",
+          "price": 0,
+          "priceValidUntil": "",
+          "availability": "https://schema.org/InStock",
+          "url": "https://goldpricenepal.online/",
+          "seller": { "@type": "Organization", "name": "goldpricenepal.online" }
+        }
+      },
+      {
+        "@type": "Product",
+        "@id": "https://goldpricenepal.online/#gold-22k",
+        "name": "Tejabi Gold 22K Price in Nepal",
+        "description": "FENEGOSIDA Tejabi 22K Gold price per tola in Nepal (NPR). Updated daily.",
+        "brand": { "@type": "Organization", "name": "FENEGOSIDA" },
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "NPR",
+          "price": 0,
+          "priceValidUntil": "",
+          "availability": "https://schema.org/InStock",
+          "url": "https://goldpricenepal.online/",
+          "seller": { "@type": "Organization", "name": "goldpricenepal.online" }
+        }
+      },
+      {
+        "@type": "Product",
+        "@id": "https://goldpricenepal.online/#silver",
+        "name": "Silver (Chandi) Price in Nepal",
+        "description": "FENEGOSIDA Silver (Chandi) price per tola in Nepal (NPR). Updated daily.",
+        "brand": { "@type": "Organization", "name": "FENEGOSIDA" },
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "NPR",
+          "price": 0,
+          "priceValidUntil": "",
+          "availability": "https://schema.org/InStock",
+          "url": "https://goldpricenepal.online/",
+          "seller": { "@type": "Organization", "name": "goldpricenepal.online" }
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 </head>
 <body>
 
@@ -135,6 +195,8 @@
         <a href="index.html#rates">Today's Rate</a>
         <a href="index.html#calculator">Calculator</a>
         <a href="index.html#chart">Chart</a>
+        <a href="history.html">History</a>
+        <a href="index.html#tracker">Tracker</a>
         <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
       </nav>
@@ -494,6 +556,98 @@
   </div>
 </section>
 
+<!-- ======= INVESTMENT TRACKER ======= -->
+<section class="section tracker-section" id="tracker">
+  <div class="container">
+    <div class="section-header">
+      <h2>Gold Investment Tracker</h2>
+      <p>Save your gold purchases and see live profit/loss against today's FENEGOSIDA rate</p>
+      <div class="divider"></div>
+    </div>
+
+    <!-- Add investment form -->
+    <div class="card tracker-form-card">
+      <div class="tracker-form-title">Add Investment</div>
+
+      <div class="tracker-form-row">
+        <span class="form-label">Purity</span>
+        <div class="purity-btns" id="trackerPurityBtns">
+          <button class="purity-btn active" data-k="24k">24K Fine</button>
+          <button class="purity-btn" data-k="22k">22K Tejabi</button>
+          <button class="purity-btn" data-k="18k">18K</button>
+          <button class="purity-btn" data-k="14k">14K</button>
+        </div>
+      </div>
+
+      <div class="tracker-inputs-grid">
+        <div class="wc-field">
+          <label for="tr-weight" class="wc-label">Weight (Tola)</label>
+          <input type="number" id="tr-weight" class="wc-input" placeholder="e.g. 1.5" min="0.001" step="0.001" inputmode="decimal">
+        </div>
+        <div class="wc-field">
+          <label for="tr-buy-price" class="wc-label">
+            Buy Price / Tola (NPR)
+            <button type="button" id="trUseTodayBtn" class="tracker-use-today">Use today's rate</button>
+          </label>
+          <input type="number" id="tr-buy-price" class="wc-input" placeholder="e.g. 250000" min="1" inputmode="decimal">
+        </div>
+        <div class="wc-field">
+          <label for="tr-date" class="wc-label">Purchase Date</label>
+          <input type="date" id="tr-date" class="wc-input">
+        </div>
+        <div class="wc-field">
+          <label for="tr-label" class="wc-label">Label (optional)</label>
+          <input type="text" id="tr-label" class="wc-input" placeholder="e.g. Wedding jewellery" maxlength="60">
+        </div>
+      </div>
+
+      <div id="trackerError" class="error-banner" style="display:none;margin-top:16px"></div>
+
+      <div class="tracker-form-footer">
+        <button id="addInvestmentBtn" class="btn btn-gold">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add to Portfolio
+        </button>
+        <span class="tracker-privacy-note">Saved in your browser — no account needed</span>
+      </div>
+    </div>
+
+    <!-- Portfolio summary bar -->
+    <div id="trackerSummary" class="tracker-summary" style="display:none" aria-label="Portfolio summary">
+      <div class="tracker-sum-item">
+        <div class="tracker-sum-label">Total Invested</div>
+        <div class="tracker-sum-val" id="tr-total-invested">—</div>
+      </div>
+      <div class="tracker-sum-item">
+        <div class="tracker-sum-label">Current Value</div>
+        <div class="tracker-sum-val" id="tr-current-value">—</div>
+      </div>
+      <div class="tracker-sum-item">
+        <div class="tracker-sum-label">Total P&amp;L</div>
+        <div class="tracker-sum-val" id="tr-pnl">—</div>
+      </div>
+      <div class="tracker-sum-item">
+        <div class="tracker-sum-label">Holdings</div>
+        <div class="tracker-sum-val" id="tr-holdings">—</div>
+      </div>
+    </div>
+
+    <!-- Investment list -->
+    <div id="trackerList" role="list"></div>
+
+    <!-- Empty state -->
+    <div id="trackerEmpty" class="tracker-empty">
+      <div class="tracker-empty-icon">📊</div>
+      <p>No investments yet. Add your first gold purchase above to start tracking its value against today's FENEGOSIDA rate.</p>
+    </div>
+
+    <div class="info-box" style="margin-top:24px">
+      <span class="info-icon">ℹ️</span>
+      <span>P&amp;L is calculated using today's official <strong>FENEGOSIDA</strong> rate for the selected purity. Actual resale value may differ due to the dealer buy/sell spread. See our <a href="disclaimer.html">Disclaimer</a>.</span>
+    </div>
+  </div>
+</section>
+
 <!-- ======= CONTENT / INFO ======= -->
 <section class="section" style="background:#fff">
   <div class="container">
@@ -743,6 +897,8 @@
           <li><a href="index.html#rates">Today's Rate</a></li>
           <li><a href="index.html#calculator">Calculator</a></li>
           <li><a href="index.html#chart">Price Chart</a></li>
+          <li><a href="history.html">Historical Rates</a></li>
+          <li><a href="index.html#tracker">Investment Tracker</a></li>
           <li><a href="index.html#faq">FAQ</a></li>
         </ul>
       </div>

@@ -256,8 +256,10 @@ function renderUI() {
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
   }
 
-  /* refresh calculator showroom price when prices update */
+  /* refresh calculator, tracker, and structured data schema */
   updateShowroom();
+  renderTracker();
+  injectPriceSchema();
 
   /* timestamps */
   const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -511,6 +513,309 @@ function updateShowroom() {
   set('sr-total',       `NPR ${total.toLocaleString('en-NP')}`);
 }
 
+/* ══════════════════════════════════════════
+   Dynamic JSON-LD price schema injection
+   Runs after each price fetch so Google sees
+   fresh numeric values, not placeholder zeros.
+══════════════════════════════════════════ */
+function injectPriceSchema() {
+  const schemaEl = document.getElementById('priceSchema');
+  if (!schemaEl || !state.nepal24kTola) return;
+
+  const p     = calcPrices();
+  const gold24 = Math.round(p['24k'].perTola);
+  const gold22 = Math.round(p['22k'].perTola);
+  const silver = Math.round(state.silverTolaNPR || 0);
+
+  // priceValidUntil = end of today (Nepal is UTC+5:45, round to midnight UTC+6)
+  const tomorrow = new Date();
+  tomorrow.setUTCHours(18, 15, 0, 0);        // 18:15 UTC ≈ midnight Nepal (UTC+5:45)
+  if (tomorrow <= new Date()) tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const validUntil = tomorrow.toISOString().split('T')[0];
+
+  // Build graph with real numeric prices — no commas, no currency symbols
+  const graph = [
+    {
+      '@type': 'Product',
+      '@id': 'https://goldpricenepal.online/#gold-24k',
+      'name': 'Fine Gold 24K Price in Nepal',
+      'description': `Today's official FENEGOSIDA 24K Fine Gold price: NPR ${gold24} per tola. Updated every 4 hours.`,
+      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'offers': {
+        '@type': 'Offer',
+        'priceCurrency': 'NPR',
+        'price': gold24,
+        'priceValidUntil': validUntil,
+        'availability': 'https://schema.org/InStock',
+        'url': 'https://goldpricenepal.online/',
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+      }
+    },
+    {
+      '@type': 'Product',
+      '@id': 'https://goldpricenepal.online/#gold-22k',
+      'name': 'Tejabi Gold 22K Price in Nepal',
+      'description': `Today's FENEGOSIDA Tejabi 22K Gold price: NPR ${gold22} per tola. Updated every 4 hours.`,
+      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'offers': {
+        '@type': 'Offer',
+        'priceCurrency': 'NPR',
+        'price': gold22,
+        'priceValidUntil': validUntil,
+        'availability': 'https://schema.org/InStock',
+        'url': 'https://goldpricenepal.online/',
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+      }
+    }
+  ];
+
+  if (silver > 0) {
+    graph.push({
+      '@type': 'Product',
+      '@id': 'https://goldpricenepal.online/#silver',
+      'name': 'Silver (Chandi) Price in Nepal',
+      'description': `Today's FENEGOSIDA Silver price: NPR ${silver} per tola. Updated every 4 hours.`,
+      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'offers': {
+        '@type': 'Offer',
+        'priceCurrency': 'NPR',
+        'price': silver,
+        'priceValidUntil': validUntil,
+        'availability': 'https://schema.org/InStock',
+        'url': 'https://goldpricenepal.online/',
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+      }
+    });
+  }
+
+  try {
+    schemaEl.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+  } catch (_) {}
+}
+
+/* ══════════════════════════════════════════
+   Gold Investment Tracker
+══════════════════════════════════════════ */
+const TRACKER_KEY = 'gnp_tracker_v1';
+let _trackerPurity = '24k';
+
+const PURITY_LABELS = { '24k': '24K Fine', '22k': '22K Tejabi', '18k': '18K', '14k': '14K' };
+
+function loadInvestments() {
+  try { return JSON.parse(localStorage.getItem(TRACKER_KEY) || '[]'); }
+  catch (_) { return []; }
+}
+
+function saveInvestments(list) {
+  try { localStorage.setItem(TRACKER_KEY, JSON.stringify(list)); } catch (_) {}
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+}
+
+function setupTracker() {
+  // purity buttons
+  els('#trackerPurityBtns .purity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      els('#trackerPurityBtns .purity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _trackerPurity = btn.dataset.k;
+    });
+  });
+
+  // "Use today's rate" button
+  const todayBtn = el('trUseTodayBtn');
+  if (todayBtn) {
+    todayBtn.addEventListener('click', () => {
+      if (!state.nepal24kTola) return;
+      const p = calcPrices();
+      const inp = el('tr-buy-price');
+      if (inp) inp.value = Math.round(p[_trackerPurity]?.perTola || 0);
+    });
+  }
+
+  // add button
+  const addBtn = el('addInvestmentBtn');
+  if (addBtn) addBtn.addEventListener('click', addInvestment);
+
+  // delete via event delegation
+  const listEl = el('trackerList');
+  if (listEl) {
+    listEl.addEventListener('click', e => {
+      const btn = e.target.closest('.tracker-delete');
+      if (btn) {
+        const card = btn.closest('.tracker-card');
+        if (card) deleteInvestment(card.dataset.id);
+      }
+    });
+  }
+
+  renderTracker();
+}
+
+function addInvestment() {
+  const weightRaw   = el('tr-weight')?.value;
+  const buyPriceRaw = el('tr-buy-price')?.value;
+  const weightVal   = parseFloat(weightRaw);
+  const buyPriceVal = parseFloat(buyPriceRaw);
+
+  if (!weightRaw || isNaN(weightVal) || weightVal <= 0) {
+    showTrackerError('Please enter a valid weight in tola (e.g. 1.5).');
+    return;
+  }
+  if (!buyPriceRaw || isNaN(buyPriceVal) || buyPriceVal <= 0) {
+    showTrackerError('Please enter the price per tola you paid (e.g. 250000).');
+    return;
+  }
+
+  const dateVal  = el('tr-date')?.value || '';
+  const labelVal = (el('tr-label')?.value || '').trim().slice(0, 60);
+
+  const investments = loadInvestments();
+  investments.unshift({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    purity: _trackerPurity,
+    weightTola: weightVal,
+    buyPricePerTola: buyPriceVal,
+    date: dateVal,
+    label: labelVal
+  });
+  saveInvestments(investments);
+
+  // reset form fields
+  ['tr-weight', 'tr-buy-price', 'tr-date', 'tr-label'].forEach(id => {
+    const inp = el(id); if (inp) inp.value = '';
+  });
+
+  renderTracker();
+}
+
+function deleteInvestment(id) {
+  saveInvestments(loadInvestments().filter(inv => inv.id !== id));
+  renderTracker();
+}
+
+function showTrackerError(msg) {
+  const errEl = el('trackerError');
+  if (!errEl) return;
+  errEl.textContent = msg;
+  errEl.style.display = 'flex';
+  setTimeout(() => { errEl.style.display = 'none'; }, 4000);
+}
+
+function renderTracker() {
+  const investments = loadInvestments();
+  const listEl    = el('trackerList');
+  const emptyEl   = el('trackerEmpty');
+  const summaryEl = el('trackerSummary');
+  if (!listEl) return;
+
+  if (investments.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl)   emptyEl.style.display   = 'block';
+    if (summaryEl) summaryEl.style.display = 'none';
+    return;
+  }
+
+  if (emptyEl)   emptyEl.style.display   = 'none';
+  if (summaryEl) summaryEl.style.display = 'grid';
+
+  const p = state.nepal24kTola ? calcPrices() : null;
+
+  let totalInvested = 0, totalCurrentValue = 0;
+  let html = '';
+
+  investments.forEach(inv => {
+    const invested = inv.weightTola * inv.buyPricePerTola;
+    totalInvested += invested;
+
+    let currentPerTola = 0, currentValue = 0, pnl = 0, pnlPct = 0;
+    const hasPrice = !!p;
+    if (p) {
+      currentPerTola = p[inv.purity]?.perTola || 0;
+      currentValue   = inv.weightTola * currentPerTola;
+      totalCurrentValue += currentValue;
+      pnl    = currentValue - invested;
+      pnlPct = invested ? (pnl / invested) * 100 : 0;
+    }
+
+    const isUp    = pnl >= 0;
+    const sign    = isUp ? '+' : '';
+    const dateStr = fmtDate(inv.date);
+
+    const pnlCell = hasPrice
+      ? `<span class="trend-pill ${isUp ? 'up' : 'down'}">${isUp ? '▲' : '▼'} ${sign}NPR ${fmt(Math.abs(pnl))} (${sign}${pnlPct.toFixed(2)}%)</span>`
+      : '—';
+
+    html += `
+      <div class="tracker-card" data-id="${escapeHtml(inv.id)}" role="listitem">
+        <div class="tracker-card-header">
+          <div class="tracker-card-meta">
+            <span class="badge badge-gold">${escapeHtml(PURITY_LABELS[inv.purity] || inv.purity)}</span>
+            ${inv.label  ? `<span class="tracker-inv-label">${escapeHtml(inv.label)}</span>` : ''}
+            ${dateStr    ? `<span class="tracker-inv-date">${escapeHtml(dateStr)}</span>`     : ''}
+          </div>
+          <button class="tracker-delete" aria-label="Remove investment" title="Remove">✕</button>
+        </div>
+        <div class="tracker-card-body">
+          <div>
+            <div class="tracker-stat-label">Weight</div>
+            <div class="tracker-stat-value">${inv.weightTola} Tola</div>
+          </div>
+          <div>
+            <div class="tracker-stat-label">Buy Price / Tola</div>
+            <div class="tracker-stat-value">NPR ${fmt(inv.buyPricePerTola)}</div>
+          </div>
+          <div>
+            <div class="tracker-stat-label">Total Invested</div>
+            <div class="tracker-stat-value">NPR ${fmt(invested)}</div>
+          </div>
+          <div>
+            <div class="tracker-stat-label">Today's Price / Tola</div>
+            <div class="tracker-stat-value">${hasPrice ? `NPR ${fmt(currentPerTola)}` : '<span class="tracker-loading">Loading…</span>'}</div>
+          </div>
+          <div>
+            <div class="tracker-stat-label">Current Value</div>
+            <div class="tracker-stat-value">${hasPrice ? `NPR ${fmt(currentValue)}` : '—'}</div>
+          </div>
+          <div>
+            <div class="tracker-stat-label">Profit / Loss</div>
+            <div class="tracker-stat-value">${pnlCell}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  listEl.innerHTML = html;
+
+  // summary bar
+  const totalPnl    = totalCurrentValue - totalInvested;
+  const totalPnlPct = totalInvested ? (totalPnl / totalInvested) * 100 : 0;
+  const pnlUp       = totalPnl >= 0;
+  const pnlSign     = pnlUp ? '+' : '';
+  const pnlColor    = pnlUp ? 'text-green' : 'text-red';
+
+  set('tr-total-invested', `NPR ${fmt(totalInvested)}`);
+  set('tr-current-value',  p ? `NPR ${fmt(totalCurrentValue)}` : 'Loading…');
+
+  const pnlEl = el('tr-pnl');
+  if (pnlEl) {
+    pnlEl.innerHTML = p
+      ? `<span class="${pnlColor}">${pnlSign}NPR ${fmt(Math.abs(totalPnl))}<br><small style="font-size:.76rem;font-weight:500;opacity:.85">(${pnlSign}${totalPnlPct.toFixed(2)}%)</small></span>`
+      : '—';
+  }
+  set('tr-holdings', `${investments.length} position${investments.length !== 1 ? 's' : ''}`);
+}
+
 /* ── view toggle (Table ↔ Chart) ── */
 function setupViewToggle() {
   els('.view-btn').forEach(btn => {
@@ -584,6 +889,7 @@ function initTickerScroll() {
 document.addEventListener('DOMContentLoaded', async () => {
   setupNav(); setupFAQ(); setupContactForm();
   setupViewToggle(); setupChartTabs(); setupChartTypeTabs();
+  setupTracker();
   await fetchPrices();
   initTickerScroll();
   setupCalculator();
