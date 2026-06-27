@@ -1023,10 +1023,9 @@ function renderRemitCards(rates, date) {
 
   track.innerHTML = cardsHTML;
 
-  // Clone the track for seamless infinite scroll (remove stale clone first)
+  // Clone the track for seamless infinite scroll (purge ALL stale clones first)
   const outer = track.parentElement;
-  const stale = outer?.querySelector('.remit-scroll-clone');
-  if (stale) stale.remove();
+  outer?.querySelectorAll('.remit-scroll-clone').forEach(c => c.remove());
   if (outer) {
     const clone = track.cloneNode(true);
     clone.id = '';

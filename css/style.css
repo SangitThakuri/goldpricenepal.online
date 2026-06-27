@@ -1114,6 +1114,9 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .remit-scroll-outer {
   overflow: hidden;
   position: relative;
+  /* Required: side-by-side layout so track + clone animate as one continuous strip */
+  display: flex;
+  align-items: flex-start;
   /* Fade out edges for a clean entry/exit */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
           mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
@@ -1121,6 +1124,7 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .remit-scroll-track,
 .remit-scroll-clone {
   display: flex;
+  flex-shrink: 0;
   gap: 14px;
   width: max-content;
   padding: 6px 0 10px;       /* space for card shadow + bottom breathing room */
@@ -1131,8 +1135,9 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .remit-scroll-clone {
   animation: remit-scroll 40s linear infinite;
 }
-/* Both tracks + their clone scroll together via the same keyframe;
-   the clone is appended after the original so the loop is seamless. */
+/* Each track animates by -100% of its own width. With display:flex on the outer,
+   track sits at x=0 and clone at x=trackWidth. When track reaches -100% (fully
+   off-screen left), clone has moved to x=0 — seamless loop, no visual gap. */
 @keyframes remit-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-100%); }
