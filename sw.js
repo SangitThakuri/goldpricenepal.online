@@ -1,23 +1,16 @@
 /* ================================================================
-   sw.js — Gold Price Nepal Service Worker  v2
-   Responsibilities:
-     1. PWA: cache-first shell, network-first for live data
-     2. Offline fallback to cached pages
-     3. OneSignal push (uncomment ONE line below to enable after
-        adding your App ID to the OneSignal init script in index.html)
+   sw.js — Gold Price Nepal Service Worker  v5
    ================================================================ */
 
-// ── OneSignal push support (requires App ID configured in index.html) ──────
 // importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
-// ────────────────────────────────────────────────────────────────────────────
 
-const CACHE      = 'gnp-v4';
-const PRECACHE   = [
+const CACHE    = 'gnp-v5';   // bump to force full reinstall on all devices
+const PRECACHE = [
   './',
   './index.html',
   './history.html',
   './css/style.css?v=2.0.2',
-  './js/main.js',
+  './js/main.js?v=2.1.0',   // versioned — forces fresh fetch on SW update
   './js/history.js',
   './manifest.json',
   './favicon.svg',
@@ -26,7 +19,7 @@ const PRECACHE   = [
   './icon-512.png'
 ];
 
-// Patterns that should always come from the network (live data / CDN)
+// Patterns that should always be fetched from the network first
 const NETWORK_FIRST = [
   /\/data\//,
   /cdn\.jsdelivr\.net/,
@@ -35,8 +28,7 @@ const NETWORK_FIRST = [
   /open\.er-api\.com/
 ];
 
-const isNetworkFirst = url =>
-  NETWORK_FIRST.some(p => p.test(url.href));
+const isNetworkFirst = url => NETWORK_FIRST.some(p => p.test(url.href));
 
 /* ── Install ── */
 self.addEventListener('install', e => {
@@ -47,7 +39,7 @@ self.addEventListener('install', e => {
   );
 });
 
-/* ── Activate: purge old cache versions ── */
+/* ── Activate: purge all old cache versions ── */
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -64,22 +56,28 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
   if (isNetworkFirst(url)) {
-    // Network-first: always fresh, cache as fallback
+    // Network-first for live data files.
+    // Cache key uses pathname only (strips ?v=timestamp) so the offline
+    // fallback works regardless of which cache-buster was in the URL.
+    const pathKey = url.origin + url.pathname;
+
     e.respondWith(
       fetch(e.request)
         .then(res => {
           if (res.ok) {
             const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
+            caches.open(CACHE).then(c => c.put(pathKey, clone));
           }
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() =>
+          caches.match(pathKey).then(r => r || caches.match(e.request))
+        )
     );
     return;
   }
 
-  // Cache-first: static shell assets
+  // Cache-first for static shell assets
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
@@ -94,7 +92,7 @@ self.addEventListener('fetch', e => {
   );
 });
 
-/* ── Push (fires when OneSignal or FCM delivers a push) ── */
+/* ── Push ── */
 self.addEventListener('push', e => {
   if (!e.data) return;
   let payload;
@@ -111,7 +109,7 @@ self.addEventListener('push', e => {
   );
 });
 
-/* ── Notification click: focus or open the app ── */
+/* ── Notification click ── */
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const target = e.notification.data?.url || '/';
