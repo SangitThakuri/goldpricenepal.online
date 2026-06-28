@@ -62,7 +62,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add data/prices.json data/history.json data/rates.json
-          git diff --staged --quiet \
-            && echo "No changes to commit" \
-            || git commit -m "chore: update gold prices $(date -u +%Y-%m-%d)"
+          if git diff --staged --quiet; then
+            echo "No data changes — skipping commit and push"
+            exit 0
+          fi
+          git commit -m "chore: update gold prices $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
           git push
