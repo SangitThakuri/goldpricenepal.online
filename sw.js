@@ -4,13 +4,13 @@
 
 // importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE    = 'gnp-v5';   // bump to force full reinstall on all devices
+const CACHE    = 'gnp-v6';   // bump to force full reinstall on all devices
 const PRECACHE = [
   './',
   './index.html',
   './history.html',
   './css/style.css?v=2.0.2',
-  './js/main.js?v=2.1.0',   // versioned — forces fresh fetch on SW update
+  './js/main.js?v=2.2.0',   // versioned — forces fresh fetch on SW update
   './js/history.js',
   './manifest.json',
   './favicon.svg',
@@ -39,7 +39,7 @@ self.addEventListener('install', e => {
   );
 });
 
-/* ── Activate: purge all old cache versions ── */
+/* ── Activate: purge old caches, claim clients, signal reload ── */
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -47,6 +47,8 @@ self.addEventListener('activate', e => {
         keys.filter(k => k !== CACHE).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ includeUncontrolled: true, type: 'window' }))
+      .then(clients => clients.forEach(c => c.postMessage({ type: 'SW_UPDATED', version: CACHE })))
   );
 });
 

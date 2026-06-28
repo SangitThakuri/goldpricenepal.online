@@ -220,6 +220,8 @@ function renderUI() {
           nepal24kTola, nepal24kTolaPrev, silverTolaPrev, priceSource } = state;
   if (!nepal24kTola) return;
 
+  try {
+
   const p = calcPrices();
 
   // Yesterday 24K: prefer FENEGOSIDA prev (baked in prices.json), fall back to XAU ratio
@@ -334,6 +336,12 @@ function renderUI() {
 
   els('.skeleton').forEach(s => s.classList.remove('skeleton'));
   els('.error-banner').forEach(b => b.classList.remove('show'));
+
+  } catch (err) {
+    console.error('renderUI error:', err);
+    // Always clear skeletons so users see partial data rather than endless shimmer
+    els('.skeleton').forEach(s => s.classList.remove('skeleton'));
+  }
 
   renderChart();
 }
