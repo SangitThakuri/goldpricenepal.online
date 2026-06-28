@@ -1081,6 +1081,13 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .then(function (reg) {
+          // When a new SW takes control (version bump), reload once so the
+          // fresh main.js and index.html are served instead of stale cache.
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            window.location.reload();
+          });
+        })
         .catch(function (e) { console.warn('[SW] Registration failed:', e.message); });
     });
   }
