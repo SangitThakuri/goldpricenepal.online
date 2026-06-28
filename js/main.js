@@ -15,22 +15,25 @@ const REFRESH_MS     = 5 * 60 * 1000;
 const AANA_PER_TOLA  = 16;
 const LAL_PER_AANA   = 10;   // 1 Tola = 16 Aana = 160 Lal
 
-const PRICES_JSON = 'data/prices.json';
+const PRICES_JSON = './data/prices.json';
+const RATES_JSON  = './data/rates.json';
 const CDN_BASE    = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api';
 
 const state = {
-  goldUSD:        0,
-  goldNPR:        0,       // international XAU/NPR (per troy oz)
-  silverTolaNPR:  0,       // silver price per tola in NPR
-  yesterdayNPR:   0,
-  xagNPR:         0,       // today's XAG in NPR per troy oz
-  xagYestNPR:     0,       // yesterday's XAG in NPR per troy oz
-  usdNPR:         135,
-  nepal24kTola:   0,       // FENEGOSIDA price (or fallback)
-  priceSource:    'loading',  // 'fenegosida' | 'international'
-  chartPeriod:    '7d',
-  chartType:      'line',
-  apexChart:      null
+  goldUSD:          0,
+  goldNPR:          0,       // international XAU/NPR (per troy oz)
+  silverTolaNPR:    0,       // silver price per tola in NPR
+  yesterdayNPR:     0,
+  xagNPR:           0,       // today's XAG in NPR per troy oz
+  xagYestNPR:       0,       // yesterday's XAG in NPR per troy oz
+  usdNPR:           135,
+  nepal24kTola:     0,       // FENEGOSIDA price (or fallback)
+  nepal24kTolaPrev: 0,       // yesterday's FENEGOSIDA 24K price (from prices.json)
+  silverTolaPrev:   0,       // yesterday's FENEGOSIDA silver price
+  priceSource:      'loading',  // 'fenegosida' | 'international'
+  chartPeriod:      '7d',
+  chartType:        'line',
+  apexChart:        null
 };
 
 /* ── helpers ── */
@@ -74,10 +77,20 @@ function loadCache() {
    Same-origin fetch — no CORS proxy needed.
 ══════════════════════════════════════════ */
 async function fetchFENEGOSIDA() {
-  const data = await fetchWithTimeout(PRICES_JSON + '?v=' + Date.now(), 8000).then(r => r.json());
-  const g = data?.gold24kTola;
-  if (!g || g < 80000 || g > 700000) throw new Error('Invalid price in prices.json');
-  return { gold24kTola: g, silverTola: data?.silverTola || 0 };
+  try {
+    const data = await fetchWithTimeout(`${PRICES_JSON}?v=${Date.now()}`, 8000).then(r => r.json());
+    const g = data?.gold24kTola;
+    if (!g || g < 80000 || g > 700000) throw new Error(`Invalid gold price in prices.json: ${g}`);
+    return {
+      gold24kTola:     g,
+      silverTola:      data?.silverTola      || 0,
+      gold24kTolaPrev: data?.gold24kTolaPrev || 0,
+      silverTolaPrev:  data?.silverTolaPrev  || 0,
+    };
+  } catch (err) {
+    console.error('Fetch failure context [prices.json]:', err);
+    throw err;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -92,11 +105,13 @@ async function fetchXAG(dateStr = 'latest') {
 }
 
 /* ══════════════════════════════════════════
-   Master fetch – tries FENEGOSIDA first
+   Master fetch – FENEGOSIDA primary, XAU fallback.
+   IMPORTANT: XAU CDN failure must NOT block the gold price render.
+   prices.json is same-origin and always reachable on the custom domain.
+   XAU is only needed as a fallback when FENEGOSIDA itself fails.
 ══════════════════════════════════════════ */
 async function fetchPrices() {
   try {
-    // Fetch FENEGOSIDA + XAU(today+yesterday) + XAG(today+yesterday) simultaneously
     const [fenegosidaRes, xauTodayRes, xauYestRes, xagTodayRes, xagYestRes] = await Promise.allSettled([
       fetchFENEGOSIDA(),
       fetchXAU(isoDate(0)),
@@ -105,41 +120,65 @@ async function fetchPrices() {
       fetchXAG(isoDate(1))
     ]);
 
-    const xauToday = xauTodayRes.value;
-    const goldUSD  = xauToday?.xau?.usd;
-    const goldNPR  = xauToday?.xau?.usd ? xauToday.xau.npr : null;
+    // Log every CDN failure verbosely so devtools shows the exact blocked URL
+    if (xauTodayRes.status === 'rejected')
+      console.error('Fetch failure context [XAU today CDN]:', xauTodayRes.reason);
+    if (xauYestRes.status === 'rejected')
+      console.error('Fetch failure context [XAU yesterday CDN]:', xauYestRes.reason);
+    if (xagTodayRes.status === 'rejected')
+      console.error('Fetch failure context [XAG today CDN]:', xagTodayRes.reason);
+    if (xagYestRes.status === 'rejected')
+      console.error('Fetch failure context [XAG yesterday CDN]:', xagYestRes.reason);
 
-    if (!goldUSD) throw new Error('XAU data missing');
+    // XAU is optional — used for USD rate display and international fallback only
+    const xauToday   = xauTodayRes.status === 'fulfilled' ? xauTodayRes.value : null;
+    const goldUSD    = xauToday?.xau?.usd  || 0;
+    const goldNPR    = xauToday?.xau?.npr  || 0;
+    const usdNPR     = goldUSD && goldNPR ? goldNPR / goldUSD : state.usdNPR;
+    const yestNPR    = xauYestRes.status  === 'fulfilled' ? (xauYestRes.value?.xau?.npr  || 0) : 0;
+    const xagNPR     = xagTodayRes.status === 'fulfilled' ? (xagTodayRes.value?.xag?.npr || 0) : 0;
+    const xagYestNPR = xagYestRes.status  === 'fulfilled' ? (xagYestRes.value?.xag?.npr  || 0) : 0;
 
-    const usdNPR     = goldNPR / goldUSD;
-    const yestNPR    = xauYestRes.value?.xau?.npr || 0;
-    const xagNPR     = xagTodayRes.value?.xag?.npr || 0;
-    const xagYestNPR = xagYestRes.value?.xag?.npr  || 0;
-
-    // Decide price source
-    let nepal24kTola, silverTolaNPR, priceSource;
     const fData = fenegosidaRes.status === 'fulfilled' ? fenegosidaRes.value : null;
+
+    let nepal24kTola, silverTolaNPR, nepal24kTolaPrev, silverTolaPrev, priceSource;
+
     if (fData?.gold24kTola) {
-      nepal24kTola  = fData.gold24kTola;
-      silverTolaNPR = fData.silverTola || 0;
-      priceSource   = 'fenegosida';
+      // Primary path: FENEGOSIDA same-origin fetch — always works on custom domain
+      nepal24kTola     = fData.gold24kTola;
+      silverTolaNPR    = fData.silverTola      || 0;
+      nepal24kTolaPrev = fData.gold24kTolaPrev || 0;
+      silverTolaPrev   = fData.silverTolaPrev  || 0;
+      priceSource      = 'fenegosida';
+    } else if (goldNPR) {
+      // Fallback: compute from international XAU rate if FENEGOSIDA is unreachable
+      console.warn('Fetch failure context [FENEGOSIDA → switching to international]:', fenegosidaRes.reason);
+      nepal24kTola     = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
+      silverTolaNPR    = xagNPR ? (xagNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * SILVER_PREMIUM : 0;
+      nepal24kTolaPrev = yestNPR ? (yestNPR / goldNPR) * nepal24kTola : 0;
+      silverTolaPrev   = 0;
+      priceSource      = 'international';
     } else {
-      nepal24kTola  = (goldNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * NEPAL_PREMIUM;
-      silverTolaNPR = xagNPR ? (xagNPR / TROY_OZ_GRAMS) * TOLA_GRAMS * SILVER_PREMIUM : 0;
-      priceSource   = 'international';
-      console.warn('FENEGOSIDA failed, using international:', fenegosidaRes.reason?.message);
+      // Both sources failed — fall through to cache
+      throw new Error('All price sources failed: FENEGOSIDA unreachable and XAU CDN blocked');
     }
 
     Object.assign(state, {
       goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR,
-      xagNPR, xagYestNPR, usdNPR, nepal24kTola, priceSource
+      xagNPR, xagYestNPR, usdNPR,
+      nepal24kTola, nepal24kTolaPrev, silverTolaPrev,
+      priceSource
     });
-    saveCache({ goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR,
-      xagNPR, xagYestNPR, nepal24kTola, priceSource });
+    saveCache({
+      goldUSD, goldNPR, silverTolaNPR, yesterdayNPR: yestNPR,
+      xagNPR, xagYestNPR, usdNPR,
+      nepal24kTola, nepal24kTolaPrev, silverTolaPrev,
+      priceSource
+    });
     renderUI();
 
   } catch (err) {
-    console.warn('Fetch failed:', err.message);
+    console.error('Fetch failure context [fetchPrices — loading from cache]:', err);
     const c = loadCache();
     if (c) {
       Object.assign(state, c);
@@ -177,15 +216,16 @@ function calcPrices() {
    Render UI
 ══════════════════════════════════════════ */
 function renderUI() {
-  const { goldUSD, goldNPR, usdNPR, silverTolaNPR, yesterdayNPR, nepal24kTola, priceSource } = state;
+  const { goldUSD, goldNPR, usdNPR, silverTolaNPR, yesterdayNPR,
+          nepal24kTola, nepal24kTolaPrev, silverTolaPrev, priceSource } = state;
   if (!nepal24kTola) return;
 
   const p = calcPrices();
 
-  // Yesterday 24K tola estimate
-  const yestTola  = yesterdayNPR && goldNPR
-    ? (yesterdayNPR / goldNPR) * nepal24kTola   // scale yesterday's intl ratio to today's Nepal price
-    : 0;
+  // Yesterday 24K: prefer FENEGOSIDA prev (baked in prices.json), fall back to XAU ratio
+  const yestTola  = nepal24kTolaPrev > 0
+    ? nepal24kTolaPrev
+    : (yesterdayNPR && goldNPR ? (yesterdayNPR / goldNPR) * nepal24kTola : 0);
   const changeAbs = yestTola ? nepal24kTola - yestTola : 0;
   const changePct = yestTola ? (changeAbs / yestTola) * 100 : 0;
   const isUp      = changePct >= 0;
@@ -215,9 +255,10 @@ function renderUI() {
   const silverChEl = el('hero-silver-change');
   if (silverChEl && silverTolaNPR) {
     const { xagNPR, xagYestNPR } = state;
-    const silvYestTola = xagNPR && xagYestNPR
-      ? (xagYestNPR / xagNPR) * silverTolaNPR
-      : 0;
+    // Prefer FENEGOSIDA prev-day silver (from prices.json), fall back to XAG ratio
+    const silvYestTola = silverTolaPrev > 0
+      ? silverTolaPrev
+      : (xagNPR && xagYestNPR ? (xagYestNPR / xagNPR) * silverTolaNPR : 0);
     silverChEl.className = 'price-change';
     if (silvYestTola) {
       const silvChangePct = ((silverTolaNPR - silvYestTola) / silvYestTola) * 100;
@@ -980,21 +1021,37 @@ const REMIT_PAIRS = [
 ];
 
 async function fetchRemitRates() {
-  try {
-    const url       = `${CDN_BASE}@latest/v1/currencies/usd.json`;
-    const data      = await fetchWithTimeout(url, 10000).then(r => r.json());
-    const usdRates  = data?.usd;
-    const nprPerUsd = usdRates?.npr;
-    if (!nprPerUsd) return;
+  let usdRates = null, rateDate = null;
 
-    const rates = {};
-    REMIT_PAIRS.forEach(({ code }) => {
-      rates[code] = code === 'usd' ? nprPerUsd : (nprPerUsd / (usdRates[code] || 1));
-    });
-    renderRemitCards(rates, data.date);
-  } catch (err) {
-    console.warn('[remit] fetch failed:', err.message);
+  // Primary: same-origin rates.json baked by GitHub Actions — no CORS, no CDN dependency
+  try {
+    const data = await fetchWithTimeout(`${RATES_JSON}?v=${Date.now()}`, 8000).then(r => r.json());
+    if (!data?.usd?.npr) throw new Error('rates.json missing usd.npr field');
+    usdRates = data.usd;
+    rateDate = data.date;
+  } catch (localErr) {
+    console.error('Fetch failure context [rates.json local]:', localErr);
+
+    // CDN fallback — may be blocked on some mobile networks
+    try {
+      const data = await fetchWithTimeout(
+        `${CDN_BASE}@latest/v1/currencies/usd.json`, 10000
+      ).then(r => r.json());
+      if (!data?.usd?.npr) throw new Error('CDN usd.json missing npr field');
+      usdRates = data.usd;
+      rateDate = data.date;
+    } catch (cdnErr) {
+      console.error('Fetch failure context [remittance CDN fallback]:', cdnErr);
+      return;
+    }
   }
+
+  const nprPerUsd = usdRates.npr;
+  const rates = {};
+  REMIT_PAIRS.forEach(({ code }) => {
+    rates[code] = code === 'usd' ? nprPerUsd : (nprPerUsd / (usdRates[code] || 1));
+  });
+  renderRemitCards(rates, rateDate);
 }
 
 function renderRemitCards(rates, date) {

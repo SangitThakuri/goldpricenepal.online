@@ -2,8 +2,8 @@ name: Update Gold Prices
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # every 4 hours
-  workflow_dispatch:          # allow manual trigger from GitHub UI
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -36,54 +36,32 @@ jobs:
           print(m.group(1) if m else '0')
           ")
 
-          DATE=$(date -u +"%Y-%m-%d")
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
           if [ "$GOLD" = "0" ] || [ -z "$GOLD" ]; then
             echo "FENEGOSIDA fetch failed — keeping existing data unchanged"
             exit 0
           fi
 
-          echo "Fetched: gold=$GOLD, silver=$SILVER, date=$DATE"
+          echo "Fetched: gold=$GOLD, silver=$SILVER"
+          GOLD=$GOLD \
+          SILVER=$SILVER \
+          DATE=$(date -u +"%Y-%m-%d") \
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+          python3 .github/scripts/update_prices.py
 
-          # --- Update prices.json (today's live price) ---
-          echo "{\"gold24kTola\": $GOLD, \"silverTola\": $SILVER, \"updatedAt\": \"$TIMESTAMP\"}" \
-            > data/prices.json
+      - name: Fetch exchange rates server-side
+        run: |
+          curl -s \
+            "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json" \
+            -H "User-Agent: Mozilla/5.0 (compatible; GoldPriceNepal/1.0)" \
+            --max-time 30 \
+            -o /tmp/rates_raw.json || echo "{}" > /tmp/rates_raw.json
+          python3 .github/scripts/update_rates.py
 
-          # --- Append/update history.json ---
-          python3 - << PYEOF
-          import json, os
-
-          gold   = $GOLD
-          silver = $SILVER
-          date   = "$DATE"
-          path   = "data/history.json"
-
-          try:
-              with open(path) as f:
-                  history = json.load(f)
-          except Exception:
-              history = []
-
-          # Replace today's entry if already present (keep freshest values)
-          history = [h for h in history if h.get("date") != date]
-          history.append({"date": date, "gold24k": gold, "silver": silver})
-
-          # Sort oldest → newest, keep at most 730 days (2 years)
-          history.sort(key=lambda x: x["date"])
-          history = history[-730:]
-
-          with open(path, "w") as f:
-              json.dump(history, f, separators=(",", ":"))
-
-          print(f"history.json: {len(history)} records, latest={history[-1]}")
-          PYEOF
-
-      - name: Commit updated prices
+      - name: Commit updated data
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add data/prices.json data/history.json
+          git add data/prices.json data/history.json data/rates.json
           git diff --staged --quiet \
             && echo "No changes to commit" \
             || git commit -m "chore: update gold prices $(date -u +%Y-%m-%d)"
