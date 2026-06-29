@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#1C1408"/>
+  <rect width="512" height="512" rx="60" fill="url(#bg)"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1C1408"/>
+      <stop offset="100%" stop-color="#3D2E08"/>
+    </linearGradient>
+  </defs>
+  <!-- Mountain chart icon scaled to center of 512x512 -->
+  <path d="M60 440 L200 110 L295 250 L365 60 L452 440 H60Z" fill="rgba(228,184,77,0.35)"/>
+  <path d="M200 110 L295 250 L365 60 L445 440 H75 L200 110Z" fill="rgba(228,184,77,0.65)"/>
+  <path d="M295 250 L365 60 L438 440 H178 L295 250Z" fill="#E4B84D"/>
+</svg>
