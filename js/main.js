@@ -624,7 +624,22 @@ function injectPriceSchema() {
         'priceValidUntil': validUntil,
         'availability': 'https://schema.org/InStock',
         'url': 'https://goldpricenepal.online/',
-        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' },
+        'shippingDetails': {
+          '@type': 'OfferShippingDetails',
+          'shippingRate': { '@type': 'MonetaryAmount', 'value': '0', 'currency': 'NPR' },
+          'shippingDestination': { '@type': 'DefinedRegion', 'addressCountry': 'NP' },
+          'deliveryTime': {
+            '@type': 'ShippingDeliveryTime',
+            'handlingTime': { '@type': 'QuantitativeValue', 'minValue': 0, 'maxValue': 1, 'unitCode': 'DAY' },
+            'transitTime':  { '@type': 'QuantitativeValue', 'minValue': 1, 'maxValue': 3, 'unitCode': 'DAY' }
+          }
+        },
+        'hasMerchantReturnPolicy': {
+          '@type': 'MerchantReturnPolicy',
+          'applicableCountry': 'NP',
+          'returnPolicyCategory': 'https://schema.org/MerchantReturnNotPermitted'
+        }
       }
     },
     {
@@ -641,7 +656,22 @@ function injectPriceSchema() {
         'priceValidUntil': validUntil,
         'availability': 'https://schema.org/InStock',
         'url': 'https://goldpricenepal.online/',
-        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' },
+        'shippingDetails': {
+          '@type': 'OfferShippingDetails',
+          'shippingRate': { '@type': 'MonetaryAmount', 'value': '0', 'currency': 'NPR' },
+          'shippingDestination': { '@type': 'DefinedRegion', 'addressCountry': 'NP' },
+          'deliveryTime': {
+            '@type': 'ShippingDeliveryTime',
+            'handlingTime': { '@type': 'QuantitativeValue', 'minValue': 0, 'maxValue': 1, 'unitCode': 'DAY' },
+            'transitTime':  { '@type': 'QuantitativeValue', 'minValue': 1, 'maxValue': 3, 'unitCode': 'DAY' }
+          }
+        },
+        'hasMerchantReturnPolicy': {
+          '@type': 'MerchantReturnPolicy',
+          'applicableCountry': 'NP',
+          'returnPolicyCategory': 'https://schema.org/MerchantReturnNotPermitted'
+        }
       }
     }
   ];
@@ -661,7 +691,22 @@ function injectPriceSchema() {
         'priceValidUntil': validUntil,
         'availability': 'https://schema.org/InStock',
         'url': 'https://goldpricenepal.online/',
-        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' }
+        'seller': { '@type': 'Organization', 'name': 'goldpricenepal.online' },
+        'shippingDetails': {
+          '@type': 'OfferShippingDetails',
+          'shippingRate': { '@type': 'MonetaryAmount', 'value': '0', 'currency': 'NPR' },
+          'shippingDestination': { '@type': 'DefinedRegion', 'addressCountry': 'NP' },
+          'deliveryTime': {
+            '@type': 'ShippingDeliveryTime',
+            'handlingTime': { '@type': 'QuantitativeValue', 'minValue': 0, 'maxValue': 1, 'unitCode': 'DAY' },
+            'transitTime':  { '@type': 'QuantitativeValue', 'minValue': 1, 'maxValue': 3, 'unitCode': 'DAY' }
+          }
+        },
+        'hasMerchantReturnPolicy': {
+          '@type': 'MerchantReturnPolicy',
+          'applicableCountry': 'NP',
+          'returnPolicyCategory': 'https://schema.org/MerchantReturnNotPermitted'
+        }
       }
     });
   }
