@@ -615,7 +615,8 @@ function injectPriceSchema() {
       '@id': 'https://goldpricenepal.online/#gold-24k',
       'name': 'Fine Gold 24K Price in Nepal',
       'description': `Today's official FENEGOSIDA 24K Fine Gold price: NPR ${gold24} per tola. Updated every 4 hours.`,
-      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'image': 'https://goldpricenepal.online/logo.svg',
+      'brand': { '@type': 'Brand', 'name': 'FENEGOSIDA' },
       'offers': {
         '@type': 'Offer',
         'priceCurrency': 'NPR',
@@ -631,7 +632,8 @@ function injectPriceSchema() {
       '@id': 'https://goldpricenepal.online/#gold-22k',
       'name': 'Tejabi Gold 22K Price in Nepal',
       'description': `Today's FENEGOSIDA Tejabi 22K Gold price: NPR ${gold22} per tola. Updated every 4 hours.`,
-      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'image': 'https://goldpricenepal.online/logo.svg',
+      'brand': { '@type': 'Brand', 'name': 'FENEGOSIDA' },
       'offers': {
         '@type': 'Offer',
         'priceCurrency': 'NPR',
@@ -650,7 +652,8 @@ function injectPriceSchema() {
       '@id': 'https://goldpricenepal.online/#silver',
       'name': 'Silver (Chandi) Price in Nepal',
       'description': `Today's FENEGOSIDA Silver price: NPR ${silver} per tola. Updated every 4 hours.`,
-      'brand': { '@type': 'Organization', 'name': 'FENEGOSIDA' },
+      'image': 'https://goldpricenepal.online/logo.svg',
+      'brand': { '@type': 'Brand', 'name': 'FENEGOSIDA' },
       'offers': {
         '@type': 'Offer',
         'priceCurrency': 'NPR',
