@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Sources — Gold Price Nepal | Where We Get Our Gold & Silver Rates</title>
+  <meta name="description" content="Full transparency on where Gold Price Nepal gets its daily gold and silver rates — FENEGOSIDA, update timing, data pipeline, and methodology." />
+  <link rel="canonical" href="https://goldpricenepal.online/data-sources.html" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type"    content="website" />
+  <meta property="og:url"     content="https://goldpricenepal.online/data-sources.html" />
+  <meta property="og:title"   content="Data Sources — Gold Price Nepal" />
+  <meta property="og:image"   content="https://goldpricenepal.online/logo.svg" />
+  <meta property="og:site_name" content="Gold Price Nepal" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://goldpricenepal.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Data Sources", "item": "https://goldpricenepal.online/data-sources.html" }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+        <div>Gold Price <span>Nepal</span></div>
+      </a>
+      <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#rates">Today's Rate</a>
+        <a href="gold-calculator.html">Calculator</a>
+        <a href="index.html#chart">Chart</a>
+        <a href="history.html">History</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span>
+      <span>Data Sources</span>
+    </div>
+    <h1>Data Sources</h1>
+    <p>Full transparency on how we collect, process, and display Nepal gold and silver prices</p>
+  </div>
+</section>
+
+<section class="page-content">
+  <div class="container">
+    <div class="prose">
+
+      <h2>Primary Source: FENEGOSIDA</h2>
+      <p>All gold and silver prices on this website are sourced from <strong>FENEGOSIDA</strong> — the Federation of Nepal Gold and Silver Dealers' Association (<em>नेपाल सुनचाँदी व्यवसायी महासंघ</em>).</p>
+      <p>FENEGOSIDA is the authoritative body responsible for setting and publishing official daily gold and silver rates in Nepal. All licenced gold dealers and jewellers in Nepal are required to follow FENEGOSIDA rates.</p>
+      <ul>
+        <li><strong>FENEGOSIDA website:</strong> fenegosida.com.np</li>
+        <li><strong>Price announcement:</strong> Rates are typically announced each business day by 10:00–11:00 AM NST</li>
+        <li><strong>Applicable to:</strong> All gold and silver transactions at licensed dealers throughout Nepal</li>
+      </ul>
+
+      <h2>How Prices Are Set in Nepal</h2>
+      <p>Nepal's gold prices are influenced by several factors that FENEGOSIDA considers when setting daily rates:</p>
+      <ul>
+        <li><strong>International spot price:</strong> The global gold spot price (USD per troy ounce), quoted on international commodity exchanges</li>
+        <li><strong>USD/NPR exchange rate:</strong> The Nepal Rastra Bank daily exchange rate, since gold is imported and priced internationally in USD</li>
+        <li><strong>Import duty and taxes:</strong> Nepal levies customs duty on gold imports; any changes to duty rates affect the domestic price</li>
+        <li><strong>Market supply and demand:</strong> Seasonal demand (wedding season, Teej, Dashain) and domestic supply conditions</li>
+      </ul>
+      <p>FENEGOSIDA synthesises these factors and publishes a single unified rate that member dealers must follow. We report this rate exactly as published — we do not calculate or adjust it ourselves.</p>
+
+      <h2>Price Update Pipeline</h2>
+      <ol>
+        <li>FENEGOSIDA publishes the new daily rate (typically before 11:00 AM NST)</li>
+        <li>Our server fetches the updated rate via a scheduled task</li>
+        <li>The new rate is stored and served to our website frontend</li>
+        <li>The website displays the updated price, including a "Last Updated" timestamp</li>
+        <li>Historical price records are stored in our database for the price history chart</li>
+      </ol>
+      <p>On public holidays and bank holidays when FENEGOSIDA does not publish a new rate, the previous business day's rate remains displayed. This is clearly indicated on the website.</p>
+
+      <h2>Purity Levels and Derived Rates</h2>
+      <p>FENEGOSIDA publishes the 24K (Fine Gold / Tejabi) rate directly. Lower purity rates are calculated proportionally:</p>
+      <ul>
+        <li><strong>24K Fine Gold (99.9%):</strong> Published directly by FENEGOSIDA</li>
+        <li><strong>22K Tejabi (91.67%):</strong> Published directly by FENEGOSIDA</li>
+        <li><strong>18K (75%):</strong> 24K rate × 0.75</li>
+        <li><strong>14K (58.3%):</strong> 24K rate × 0.583</li>
+        <li><strong>Silver (Chandi):</strong> Published directly by FENEGOSIDA (per tola)</li>
+      </ul>
+
+      <h2>Historical Price Data</h2>
+      <p>Our historical price records are compiled from FENEGOSIDA daily rates going back several years. Our price history chart and table show the actual FENEGOSIDA rate for each trading day. Gaps in the chart correspond to public holidays and market closures.</p>
+
+      <h2>Calculator Methodology</h2>
+      <p>Our Gold Calculator and other tools use the current FENEGOSIDA rate as the base price. Derived calculations:</p>
+      <ul>
+        <li><strong>Per gram:</strong> Per tola price ÷ 11.664 (grams per tola)</li>
+        <li><strong>Per 10 grams:</strong> Per gram × 10</li>
+        <li><strong>Making charges:</strong> User-defined percentage applied to the raw gold value; not a recommendation</li>
+        <li><strong>Gold loan:</strong> Raw gold value × LTV ratio; banks' actual terms will vary</li>
+      </ul>
+
+      <h2>What We Do Not Source</h2>
+      <ul>
+        <li>Individual jeweller prices (these vary by dealer and are not regulated)</li>
+        <li>International spot prices in USD (available on international commodity sites)</li>
+        <li>Futures or forward prices</li>
+        <li>Prices from unofficial or unlicensed dealers</li>
+      </ul>
+
+      <h2>Reporting Errors</h2>
+      <p>If you notice a price that appears incorrect or a data discrepancy, please contact us immediately via the <a href="contact.html">Contact page</a>. We take data accuracy seriously and will investigate promptly.</p>
+
+      <p><a href="editorial-policy.html">Read our Editorial Policy →</a></p>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+          <div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div>
+        </a>
+        <p style="margin-top:12px">Nepal's trusted source for live gold and silver prices. Updated daily from FENEGOSIDA.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Live Prices</h4>
+        <ul>
+          <li><a href="index.html#rates">Today's Rate Table</a></li>
+          <li><a href="24k-gold-price-nepal.html">24K Gold Price</a></li>
+          <li><a href="22k-gold-price-nepal.html">22K Gold Price</a></li>
+          <li><a href="silver-price-nepal.html">Silver Price</a></li>
+          <li><a href="history.html">Historical Rates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="gold-calculator.html">Gold Calculator</a></li>
+          <li><a href="gold-calculator.html#profit">Profit Calculator</a></li>
+          <li><a href="gold-calculator.html#loan">Loan Calculator</a></li>
+          <li><a href="index.html#planner">Gold Planner</a></li>
+          <li><a href="index.html#tracker">Investment Tracker</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="editorial-policy.html">Editorial Policy</a></li>
+          <li><a href="data-sources.html">Data Sources</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 goldpricenepal.online · All rights reserved</p>
+      <p class="footer-disclaimer">Prices are indicative. Not financial advice. Verify with official FENEGOSIDA rates before transactions.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

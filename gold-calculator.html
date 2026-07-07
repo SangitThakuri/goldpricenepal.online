@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Price Calculator Nepal 2026 | Free Tola, Gram, Aana, Profit & Loan Calculator</title>
+  <meta name="description" content="Free Nepal gold calculator — instantly calculate gold value by tola, gram, aana, lal. Includes profit calculator, gold loan calculator, and making charge calculator. Live prices from FENEGOSIDA." />
+  <meta name="keywords" content="gold calculator nepal, gold price calculator nepal tola, gold value calculator nepal, gold profit calculator, gold loan calculator nepal, making charge calculator nepal" />
+  <link rel="canonical" href="https://goldpricenepal.online/gold-calculator.html" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://goldpricenepal.online/gold-calculator.html" />
+  <meta property="og:title"       content="Free Gold Calculator Nepal 2026 | Tola, Gram, Profit & Loan" />
+  <meta property="og:description" content="Free Nepal gold calculators — value by weight, profit/loss, gold loan amount, making charges. Live FENEGOSIDA prices." />
+  <meta property="og:image"       content="https://goldpricenepal.online/logo.svg" />
+  <meta property="og:site_name"   content="Gold Price Nepal" />
+  <meta name="twitter:card"       content="summary" />
+  <meta name="twitter:image"      content="https://goldpricenepal.online/logo.svg" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://goldpricenepal.online/" },
+          { "@type": "ListItem", "position": 2, "name": "Gold Calculator Nepal", "item": "https://goldpricenepal.online/gold-calculator.html" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I calculate gold price in Nepal by tola?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Multiply the number of tolas by the current per-tola rate for the gold purity you have (24K, 22K, 18K, or 14K). Our Gold Calculator does this automatically using live FENEGOSIDA prices — just enter the weight and purity." }
+          },
+          {
+            "@type": "Question",
+            "name": "How is making charge (banauni) calculated on gold jewellery?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Making charges in Nepal are typically 8–15% of the gold value. To calculate: Gold Weight × Price Per Tola × Making Charge %. Our calculator lets you set the exact making charge percentage and shows the breakdown clearly." }
+          },
+          {
+            "@type": "Question",
+            "name": "How to calculate gold profit or loss in Nepal?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Gold profit = (Current selling price - Original buying price) × Weight in tola. Use the Profit Calculator below to enter your buy price, current price, and weight to instantly see your profit or loss in NPR and percentage." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    /* Calculator tabs */
+    .calc-tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:28px; border-bottom:2px solid var(--dark-200); padding-bottom:0; }
+    .calc-tab { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:.9rem; font-weight:600; color:var(--dark-600); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all var(--transition); border-radius:var(--radius-sm) var(--radius-sm) 0 0; }
+    .calc-tab.active { color:var(--gold-500); border-bottom-color:var(--gold-500); background:var(--gold-50); }
+    .calc-tab:hover:not(.active) { color:var(--gold-600); background:var(--gold-50); }
+    .calc-panel { display:none; }
+    .calc-panel.active { display:block; }
+    /* Result box */
+    .result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-top:20px; }
+    .result-tile { background:var(--dark-100); border-radius:var(--radius); padding:16px; text-align:center; }
+    .result-tile .r-label { font-size:.75rem; color:var(--dark-500); font-weight:600; text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px; }
+    .result-tile .r-value { font-size:1.25rem; font-weight:800; color:var(--dark-900); }
+    .result-tile.highlight { background:linear-gradient(135deg,rgba(201,151,46,.2),rgba(201,151,46,.08)); border:1.5px solid rgba(201,151,46,.35); }
+    .result-tile.highlight .r-value { color:var(--gold-600); }
+    .result-tile.profit { background:rgba(16,185,129,.08); border:1.5px solid rgba(16,185,129,.25); }
+    .result-tile.profit .r-value { color:#059669; }
+    .result-tile.loss { background:rgba(239,68,68,.08); border:1.5px solid rgba(239,68,68,.2); }
+    .result-tile.loss .r-value { color:#DC2626; }
+    /* Input rows */
+    .calc-input-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:20px; }
+    .calc-field label { display:block; font-size:.8rem; font-weight:600; color:var(--dark-600); margin-bottom:6px; }
+    .calc-field input, .calc-field select { width:100%; padding:10px 14px; border:1.5px solid var(--dark-200); border-radius:var(--radius-sm); font-size:.95rem; color:var(--dark-900); background:var(--white); transition:border-color var(--transition); }
+    .calc-field input:focus, .calc-field select:focus { outline:none; border-color:var(--gold-400); }
+    .calc-note { font-size:.78rem; color:var(--dark-500); margin-top:16px; line-height:1.6; }
+    .live-badge { display:inline-flex; align-items:center; gap:5px; font-size:.75rem; font-weight:600; color:#059669; background:rgba(16,185,129,.1); padding:3px 10px; border-radius:50px; margin-bottom:16px; }
+    .live-badge::before { content:''; display:inline-block; width:7px; height:7px; border-radius:50%; background:#10B981; animation:blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+        <div>Gold Price <span>Nepal</span></div>
+      </a>
+      <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#rates">Today's Rate</a>
+        <a href="gold-calculator.html" class="active">Calculator</a>
+        <a href="index.html#chart">Chart</a>
+        <a href="history.html">History</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span>
+      <span>Gold Calculator</span>
+    </div>
+    <h1>Free Gold Calculator — Nepal</h1>
+    <p>Calculate gold value, profit, loan amount, and making charges using live FENEGOSIDA prices</p>
+  </div>
+</section>
+
+<section class="section calculator-section" style="padding-top:32px">
+  <div class="container">
+    <div class="card calc-card">
+      <div class="live-badge">LIVE FENEGOSIDA PRICES &nbsp;·&nbsp; <span class="last-updated-time">—</span></div>
+
+      <!-- ── TABS ── -->
+      <div class="calc-tabs" id="calcTabsRow" role="tablist">
+        <button class="calc-tab active" data-panel="panel-value" role="tab" aria-selected="true">💰 Gold Value</button>
+        <button class="calc-tab" data-panel="panel-profit" role="tab" aria-selected="false">📈 Profit / Loss</button>
+        <button class="calc-tab" data-panel="panel-loan" role="tab" aria-selected="false">🏦 Gold Loan</button>
+        <button class="calc-tab" data-panel="panel-making" role="tab" aria-selected="false">⚒️ Making Charges</button>
+        <button class="calc-tab" data-panel="panel-savings" role="tab" aria-selected="false">🎯 Savings Goal</button>
+      </div>
+
+      <!-- ══ PANEL 1: GOLD VALUE ══ -->
+      <div class="calc-panel active" id="panel-value">
+        <div class="calc-purity-row">
+          <span class="form-label">Metal / Purity</span>
+          <div class="purity-btns" id="purityBtns">
+            <button class="purity-btn active" data-k="24k">24K Fine</button>
+            <button class="purity-btn" data-k="22k">22K Tejabi</button>
+            <button class="purity-btn" data-k="18k">18K</button>
+            <button class="purity-btn" data-k="14k">14K</button>
+            <button class="purity-btn purity-btn-silver" data-k="silver">Silver</button>
+          </div>
+        </div>
+        <div class="wc-section">
+          <div class="wc-header">
+            <span class="form-label">Weight</span>
+            <span class="wc-hint">1 Tola = 16 Aana = 160 Lal = 11.664 g</span>
+          </div>
+          <div class="wc-grid">
+            <div class="wc-field">
+              <label for="wc-tola" class="wc-label">Tola <span class="wc-nep">(तोला)</span></label>
+              <input type="number" id="wc-tola" class="wc-input" placeholder="0.000" min="0" step="0.001" inputmode="decimal">
+            </div>
+            <div class="wc-field">
+              <label for="wc-aana" class="wc-label">Aana <span class="wc-nep">(आना)</span></label>
+              <input type="number" id="wc-aana" class="wc-input" placeholder="0.0" min="0" step="0.1" inputmode="decimal">
+            </div>
+            <div class="wc-field">
+              <label for="wc-lal" class="wc-label">Lal <span class="wc-nep">(लाल)</span></label>
+              <input type="number" id="wc-lal" class="wc-input" placeholder="0" min="0" step="1" inputmode="decimal">
+            </div>
+            <div class="wc-field">
+              <label for="wc-gram" class="wc-label">Grams <span class="wc-nep">(ग्राम)</span></label>
+              <input type="number" id="wc-gram" class="wc-input" placeholder="0.000" min="0" step="0.001" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+        <div class="making-section">
+          <div class="making-header">
+            <span class="form-label">Making Charges / Banauni <span class="wc-nep">(बनाउनी)</span></span>
+            <span class="making-pct-badge" id="making-pct-badge">12%</span>
+          </div>
+          <input type="range" id="making-slider" class="making-slider" min="0" max="30" step="1" value="12" aria-label="Making charges percentage">
+          <div class="making-scale">
+            <span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span><span>30%</span>
+          </div>
+        </div>
+        <div class="showroom-result" id="showroomResult">
+          <div class="sr-rows">
+            <div class="sr-row">
+              <span class="sr-label" id="sr-metal-label">Gold Value (Raw)</span>
+              <span class="sr-value" id="sr-gold-value">Enter a weight above</span>
+            </div>
+            <div class="sr-row">
+              <span class="sr-label">Making Charges</span>
+              <span class="sr-value" id="sr-making-cost">—</span>
+            </div>
+            <div class="sr-divider"></div>
+            <div class="sr-row sr-total-row">
+              <span class="sr-label">Estimated Showroom Price</span>
+              <span class="sr-total" id="sr-total">—</span>
+            </div>
+          </div>
+          <p class="sr-note">Indicative estimate only. Actual showroom price may vary by dealer.</p>
+        </div>
+      </div>
+
+      <!-- ══ PANEL 2: PROFIT / LOSS ══ -->
+      <div class="calc-panel" id="panel-profit">
+        <p style="color:var(--dark-600);margin-bottom:20px;font-size:.9rem">Calculate your gold profit or loss based on when you bought vs. current or selling price.</p>
+        <div class="calc-input-row">
+          <div class="calc-field">
+            <label for="pl-buy-price">Buy Price (NPR per tola)</label>
+            <input type="number" id="pl-buy-price" placeholder="e.g. 250000" min="0" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="pl-sell-price">Sell / Current Price (NPR per tola)</label>
+            <input type="number" id="pl-sell-price" placeholder="e.g. 280000" min="0" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="pl-weight-tola">Weight (Tola)</label>
+            <input type="number" id="pl-weight-tola" placeholder="e.g. 2" min="0" step="0.001" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="pl-making">Making Charges Paid (%)</label>
+            <input type="number" id="pl-making" placeholder="e.g. 10" min="0" max="50" step="0.5" value="10" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn btn-gold" id="pl-calc-btn" style="margin-bottom:20px">Calculate Profit / Loss</button>
+        <div id="pl-result" class="result-grid" style="display:none">
+          <div class="result-tile">
+            <div class="r-label">Total Cost Paid</div>
+            <div class="r-value" id="pl-cost">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">Current Value</div>
+            <div class="r-value" id="pl-curr-val">—</div>
+          </div>
+          <div class="result-tile highlight" id="pl-pnl-tile">
+            <div class="r-label">Profit / Loss</div>
+            <div class="r-value" id="pl-pnl">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">Return %</div>
+            <div class="r-value" id="pl-pct">—</div>
+          </div>
+        </div>
+        <p class="calc-note">Making charges paid at the time of purchase are included in your cost basis. They are not recovered on resale — gold is resold at the raw metal price only.</p>
+      </div>
+
+      <!-- ══ PANEL 3: GOLD LOAN ══ -->
+      <div class="calc-panel" id="panel-loan">
+        <p style="color:var(--dark-600);margin-bottom:20px;font-size:.9rem">Estimate how much loan you can get against your gold. Banks and cooperatives in Nepal typically offer 65–80% LTV on gold loans.</p>
+        <div class="calc-input-row">
+          <div class="calc-field">
+            <label for="loan-weight">Gold Weight (Tola)</label>
+            <input type="number" id="loan-weight" placeholder="e.g. 5" min="0" step="0.001" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="loan-purity">Purity</label>
+            <select id="loan-purity">
+              <option value="1.0">24K Fine (99.9%)</option>
+              <option value="0.9167" selected>22K Tejabi (91.7%)</option>
+              <option value="0.75">18K (75%)</option>
+              <option value="0.583">14K (58.3%)</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label for="loan-ltv">Loan-to-Value (LTV %)</label>
+            <input type="number" id="loan-ltv" placeholder="75" min="10" max="90" step="5" value="75" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn btn-gold" id="loan-calc-btn" style="margin-bottom:20px">Calculate Loan Amount</button>
+        <div id="loan-result" class="result-grid" style="display:none">
+          <div class="result-tile">
+            <div class="r-label">Gold Market Value</div>
+            <div class="r-value" id="loan-gold-val">—</div>
+          </div>
+          <div class="result-tile highlight">
+            <div class="r-label">Estimated Loan Amount</div>
+            <div class="r-value" id="loan-amount">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">LTV Applied</div>
+            <div class="r-value" id="loan-ltv-shown">—</div>
+          </div>
+        </div>
+        <p class="calc-note">Actual loan amount depends on your lender's policies. Nepal Rastra Bank guidelines cap gold loan LTV at 75% for banks. Cooperatives may offer up to 80%. This calculator uses the current 24K FENEGOSIDA price for valuation.</p>
+      </div>
+
+      <!-- ══ PANEL 4: MAKING CHARGES ══ -->
+      <div class="calc-panel" id="panel-making">
+        <p style="color:var(--dark-600);margin-bottom:20px;font-size:.9rem">Calculate detailed jewellery price breakdown — gold value + making charges + VAT.</p>
+        <div class="calc-input-row">
+          <div class="calc-field">
+            <label for="mc-weight">Weight (Tola)</label>
+            <input type="number" id="mc-weight" placeholder="e.g. 2.5" min="0" step="0.001" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="mc-purity">Gold Purity</label>
+            <select id="mc-purity">
+              <option value="24k">24K Fine (99.9%)</option>
+              <option value="22k" selected>22K Tejabi (91.7%)</option>
+              <option value="18k">18K (75%)</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label for="mc-rate">Making Charge (%)</label>
+            <input type="number" id="mc-rate" placeholder="12" min="0" max="50" step="0.5" value="12" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="mc-vat">VAT on Making (%)</label>
+            <input type="number" id="mc-vat" placeholder="13" min="0" max="30" value="13" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn btn-gold" id="mc-calc-btn" style="margin-bottom:20px">Calculate Jewellery Price</button>
+        <div id="mc-result" class="result-grid" style="display:none">
+          <div class="result-tile">
+            <div class="r-label">Gold Value</div>
+            <div class="r-value" id="mc-gold-val">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">Making Charges</div>
+            <div class="r-value" id="mc-making-val">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">VAT on Making</div>
+            <div class="r-value" id="mc-vat-val">—</div>
+          </div>
+          <div class="result-tile highlight">
+            <div class="r-label">Total Jewellery Price</div>
+            <div class="r-value" id="mc-total">—</div>
+          </div>
+        </div>
+        <p class="calc-note">VAT (13%) applies to making charges in Nepal. The gold value component is VAT-exempt since VAT was paid on import. Actual charges vary by jeweller and design complexity.</p>
+      </div>
+
+      <!-- ══ PANEL 5: SAVINGS GOAL ══ -->
+      <div class="calc-panel" id="panel-savings">
+        <p style="color:var(--dark-600);margin-bottom:20px;font-size:.9rem">How much do you need to save each month to buy your target gold weight?</p>
+        <div class="calc-input-row">
+          <div class="calc-field">
+            <label for="sg-target-tola">Target Weight (Tola)</label>
+            <input type="number" id="sg-target-tola" placeholder="e.g. 5" min="0.1" step="0.1" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="sg-purity">Purity</label>
+            <select id="sg-purity">
+              <option value="24k">24K Fine</option>
+              <option value="22k" selected>22K Tejabi</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label for="sg-months">Target in (Months)</label>
+            <input type="number" id="sg-months" placeholder="e.g. 12" min="1" max="120" step="1" value="12" inputmode="decimal">
+          </div>
+          <div class="calc-field">
+            <label for="sg-saved">Already Saved (NPR)</label>
+            <input type="number" id="sg-saved" placeholder="0" min="0" inputmode="decimal" value="0">
+          </div>
+        </div>
+        <button class="btn btn-gold" id="sg-calc-btn" style="margin-bottom:20px">Calculate Monthly Savings</button>
+        <div id="sg-result" class="result-grid" style="display:none">
+          <div class="result-tile">
+            <div class="r-label">Total Cost Needed</div>
+            <div class="r-value" id="sg-total-cost">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">Remaining</div>
+            <div class="r-value" id="sg-remaining">—</div>
+          </div>
+          <div class="result-tile highlight">
+            <div class="r-label">Monthly Savings</div>
+            <div class="r-value" id="sg-monthly">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="r-label">Daily Savings</div>
+            <div class="r-value" id="sg-daily">—</div>
+          </div>
+        </div>
+        <p class="calc-note">Based on today's gold price. Gold prices fluctuate daily — adjust your savings as prices change. Use the <a href="index.html#planner">Gold Planner</a> for more detailed planning.</p>
+      </div>
+
+    </div><!-- /card -->
+
+    <!-- Quick reference links -->
+    <div class="info-box" style="margin-top:20px">
+      <span class="info-icon">ℹ️</span>
+      <span>Using live prices from <strong>FENEGOSIDA</strong>. &nbsp;
+        <a href="24k-gold-price-nepal.html">24K Gold Price →</a> &nbsp;·&nbsp;
+        <a href="22k-gold-price-nepal.html">22K Gold Price →</a> &nbsp;·&nbsp;
+        <a href="silver-price-nepal.html">Silver Price →</a>
+      </span>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTENT -->
+<section class="page-content" style="padding-top:16px">
+  <div class="container">
+    <div class="prose">
+      <h2>How to Use the Gold Calculator — Nepal</h2>
+      <p>Select a calculator tab above:</p>
+      <ul>
+        <li><strong>Gold Value:</strong> Enter weight in tola, aana, lal, or grams. Select purity (24K, 22K, 18K, 14K, or Silver). Adjust making charges slider for jewellery total.</li>
+        <li><strong>Profit / Loss:</strong> Enter your original buy price, current price, weight, and making charges paid. Instantly see your profit or loss in NPR and %.</li>
+        <li><strong>Gold Loan:</strong> Enter weight and purity, set your expected LTV ratio (65–80%), and see the estimated loan amount banks will offer against your gold.</li>
+        <li><strong>Making Charges:</strong> Full jewellery price breakdown — gold value + making charge % + VAT on making charges.</li>
+        <li><strong>Savings Goal:</strong> Set a target gold weight and timeline — see how much to save per month and per day to reach your goal.</li>
+      </ul>
+
+      <h2>Gold Weight Units in Nepal</h2>
+      <ul>
+        <li><strong>1 Tola (तोला)</strong> = 11.664 grams = 16 Aana</li>
+        <li><strong>1 Aana (आना)</strong> = 0.7290 grams = 10 Lal</li>
+        <li><strong>1 Lal (लाल)</strong> = 0.0729 grams</li>
+        <li><strong>1 Gram</strong> = 1.3717 Aana = 0.08573 Tola</li>
+      </ul>
+
+      <h2>Related Tools & Pages</h2>
+      <ul>
+        <li><a href="24k-gold-price-nepal.html">24K Gold Price in Nepal Today →</a></li>
+        <li><a href="22k-gold-price-nepal.html">22K Tejabi Gold Price Nepal →</a></li>
+        <li><a href="silver-price-nepal.html">Silver (Chandi) Price Nepal →</a></li>
+        <li><a href="history.html">Historical Gold Price Chart Nepal →</a></li>
+        <li><a href="index.html#planner">Gold Purchase Goal Planner →</a></li>
+        <li><a href="index.html#tracker">Investment Tracker →</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+          <div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div>
+        </a>
+        <p style="margin-top:12px">Nepal's trusted source for live gold and silver prices. Updated daily from FENEGOSIDA.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Live Prices</h4>
+        <ul>
+          <li><a href="index.html#rates">Today's Rate Table</a></li>
+          <li><a href="24k-gold-price-nepal.html">24K Gold Price</a></li>
+          <li><a href="22k-gold-price-nepal.html">22K Gold Price</a></li>
+          <li><a href="silver-price-nepal.html">Silver Price</a></li>
+          <li><a href="history.html">Historical Rates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="gold-calculator.html">Gold Calculator</a></li>
+          <li><a href="gold-calculator.html#profit">Profit Calculator</a></li>
+          <li><a href="gold-calculator.html#loan">Loan Calculator</a></li>
+          <li><a href="index.html#planner">Gold Planner</a></li>
+          <li><a href="index.html#tracker">Investment Tracker</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="editorial-policy.html">Editorial Policy</a></li>
+          <li><a href="data-sources.html">Data Sources</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 goldpricenepal.online · All rights reserved</p>
+      <p class="footer-disclaimer">Prices are indicative. Not financial advice. Verify with official FENEGOSIDA rates before transactions.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+/* ── Calculator tabs ── */
+document.getElementById('calcTabsRow').addEventListener('click', e => {
+  const btn = e.target.closest('.calc-tab');
+  if (!btn) return;
+  document.querySelectorAll('.calc-tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected','true');
+  document.getElementById(btn.dataset.panel).classList.add('active');
+});
+
+/* Deep-link tab from URL hash */
+const hashMap = { '#profit':'panel-profit','#loan':'panel-loan','#making':'panel-making','#savings':'panel-savings' };
+if (hashMap[location.hash]) {
+  const tab = document.querySelector(`[data-panel="${hashMap[location.hash]}"]`);
+  if (tab) tab.click();
+}
+
+const fmt = n => Math.round(n).toLocaleString('en-NP');
+
+/* ── Profit / Loss Calculator ── */
+document.getElementById('pl-calc-btn').addEventListener('click', () => {
+  const buy     = parseFloat(document.getElementById('pl-buy-price').value);
+  const sell    = parseFloat(document.getElementById('pl-sell-price').value);
+  const weight  = parseFloat(document.getElementById('pl-weight-tola').value);
+  const making  = parseFloat(document.getElementById('pl-making').value) || 0;
+  if (!buy || !sell || !weight) { alert('Please fill in all fields.'); return; }
+
+  const totalCost  = buy * weight * (1 + making / 100);
+  const currValue  = sell * weight;
+  const pnl        = currValue - totalCost;
+  const pct        = (pnl / totalCost) * 100;
+  const isProfit   = pnl >= 0;
+
+  document.getElementById('pl-cost').textContent     = `NPR ${fmt(totalCost)}`;
+  document.getElementById('pl-curr-val').textContent = `NPR ${fmt(currValue)}`;
+  document.getElementById('pl-pnl').textContent      = `${isProfit ? '+' : ''}NPR ${fmt(pnl)}`;
+  document.getElementById('pl-pct').textContent      = `${isProfit ? '+' : ''}${pct.toFixed(2)}%`;
+
+  const tile = document.getElementById('pl-pnl-tile');
+  tile.className = 'result-tile ' + (isProfit ? 'profit' : 'loss');
+  document.getElementById('pl-result').style.display = 'grid';
+});
+
+/* ── Gold Loan Calculator ── */
+document.getElementById('loan-calc-btn').addEventListener('click', () => {
+  const weight  = parseFloat(document.getElementById('loan-weight').value);
+  const purity  = parseFloat(document.getElementById('loan-purity').value);
+  const ltv     = parseFloat(document.getElementById('loan-ltv').value) || 75;
+  if (!weight || !purity) { alert('Please enter weight and purity.'); return; }
+
+  // Use 24K price from state (exposed by main.js)
+  const price24k = window._gpnState?.nepal24kTola || 0;
+  if (!price24k) { alert('Live gold price not loaded yet. Please wait a moment and try again.'); return; }
+
+  const goldVal  = price24k * purity * weight;
+  const loanAmt  = goldVal * (ltv / 100);
+
+  document.getElementById('loan-gold-val').textContent  = `NPR ${fmt(goldVal)}`;
+  document.getElementById('loan-amount').textContent    = `NPR ${fmt(loanAmt)}`;
+  document.getElementById('loan-ltv-shown').textContent = `${ltv}%`;
+  document.getElementById('loan-result').style.display  = 'grid';
+});
+
+/* ── Making Charges Calculator ── */
+document.getElementById('mc-calc-btn').addEventListener('click', () => {
+  const weight   = parseFloat(document.getElementById('mc-weight').value);
+  const purityK  = document.getElementById('mc-purity').value;
+  const mcRate   = parseFloat(document.getElementById('mc-rate').value) || 12;
+  const vatRate  = parseFloat(document.getElementById('mc-vat').value) || 13;
+  if (!weight) { alert('Please enter weight.'); return; }
+
+  const price24k = window._gpnState?.nepal24kTola || 0;
+  if (!price24k) { alert('Live gold price not loaded yet.'); return; }
+
+  const purities = { '24k':1, '22k':22/24, '18k':18/24 };
+  const pricePerTola = price24k * (purities[purityK] || 22/24);
+  const goldVal   = pricePerTola * weight;
+  const makingVal = goldVal * (mcRate / 100);
+  const vatVal    = makingVal * (vatRate / 100);
+  const total     = goldVal + makingVal + vatVal;
+
+  document.getElementById('mc-gold-val').textContent   = `NPR ${fmt(goldVal)}`;
+  document.getElementById('mc-making-val').textContent = `NPR ${fmt(makingVal)}`;
+  document.getElementById('mc-vat-val').textContent    = `NPR ${fmt(vatVal)}`;
+  document.getElementById('mc-total').textContent      = `NPR ${fmt(total)}`;
+  document.getElementById('mc-result').style.display   = 'grid';
+});
+
+/* ── Savings Goal Calculator ── */
+document.getElementById('sg-calc-btn').addEventListener('click', () => {
+  const targetTola = parseFloat(document.getElementById('sg-target-tola').value);
+  const purityK    = document.getElementById('sg-purity').value;
+  const months     = parseInt(document.getElementById('sg-months').value) || 12;
+  const saved      = parseFloat(document.getElementById('sg-saved').value) || 0;
+  if (!targetTola) { alert('Please enter target weight.'); return; }
+
+  const price24k = window._gpnState?.nepal24kTola || 0;
+  if (!price24k) { alert('Live gold price not loaded yet.'); return; }
+
+  const purities = { '24k':1, '22k':22/24 };
+  const pricePerTola = price24k * (purities[purityK] || 22/24);
+  const totalCost    = pricePerTola * targetTola;
+  const remaining    = Math.max(0, totalCost - saved);
+  const monthly      = remaining / months;
+  const daily        = remaining / (months * 30);
+
+  document.getElementById('sg-total-cost').textContent = `NPR ${fmt(totalCost)}`;
+  document.getElementById('sg-remaining').textContent  = `NPR ${fmt(remaining)}`;
+  document.getElementById('sg-monthly').textContent    = `NPR ${fmt(monthly)}`;
+  document.getElementById('sg-daily').textContent      = `NPR ${fmt(daily)}`;
+  document.getElementById('sg-result').style.display   = 'grid';
+});
+</script>
+</body>
+</html>

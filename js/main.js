@@ -35,6 +35,7 @@ const state = {
   chartType:        'line',
   apexChart:        null
 };
+window._gpnState = state;
 
 /* ── helpers ── */
 const fmt = n  => n ? Math.round(n).toLocaleString('en-NP') : '—';
