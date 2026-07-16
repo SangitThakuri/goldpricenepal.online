@@ -265,15 +265,16 @@
       </a>
 
       <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
-        <a href="index.html" class="active">Home</a>
-        <a href="index.html#rates">Today's Rate</a>
-        <a href="gold-calculator.html">Calculator</a>
-        <a href="index.html#chart">Chart</a>
-        <a href="history.html">History</a>
-        <a href="index.html#tracker">Tracker</a>
-        <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
+        <a href="index.html" class="active" data-i18n="nav.home">Home</a>
+        <a href="index.html#rates" data-i18n="nav.rates">Today's Rate</a>
+        <a href="gold-calculator.html" data-i18n="nav.calculator">Calculator</a>
+        <a href="index.html#chart" data-i18n="nav.chart">Chart</a>
+        <a href="history.html" data-i18n="nav.history">History</a>
+        <a href="index.html#tracker" data-i18n="nav.tracker">Tracker</a>
+        <a href="about.html" data-i18n="nav.about">About</a>
+        <a href="contact.html" data-i18n="nav.contact">Contact</a>
       </nav>
+      <button id="lang-toggle-btn" class="lang-toggle-btn" aria-label="Switch to Nepali">नेपाली</button>
 
       <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -345,12 +346,26 @@
     <div class="hero-inner">
 
       <div class="hero-text">
-        <h1>Today's Gold Price<br>in <span>Nepal</span></h1>
-        <p>Live gold rates from <strong>FENEGOSIDA</strong>, updated every 5 minutes</p>
+        <div class="bs-date-row">
+          <span id="bs-date-en" class="bs-date-en"></span>
+          <span class="bs-date-sep">·</span>
+          <span id="bs-date-np" class="bs-date-np"></span>
+        </div>
+        <h1 data-i18n="hero.h1">Today's Gold Price<br>in <span>Nepal</span></h1>
+        <p data-i18n="hero.sub">Live gold rates from <strong>FENEGOSIDA</strong>, updated every 5 minutes</p>
         <div class="last-updated">
           <span class="live-dot"></span>
-          Auto-updated · Last: <strong class="last-updated-time">—</strong>
+          <span data-i18n="hero.auto">Auto-updated · Last:</span> <strong class="last-updated-time">—</strong>
         </div>
+        <!-- Market closed banner -->
+        <div id="market-closed-banner" class="market-closed-banner" hidden>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span data-i18n="mkt.closed">Market closed today —</span>
+          <span id="market-closed-reason"></span>.
+          <span data-i18n="mkt.last">Showing last traded rate.</span>
+        </div>
+        <!-- Price alert notification -->
+        <div id="alert-notification" class="alert-notification" hidden role="alert" aria-live="assertive"></div>
 
         <!-- Error banner -->
         <div class="error-banner" role="alert">
@@ -375,29 +390,32 @@
         <div class="price-cards">
           <!-- 24K -->
           <div class="price-card featured">
-            <div class="purity">Fine Gold (24K)</div>
+            <div class="purity" data-i18n="card.24k">Fine Gold (24K)</div>
             <div class="price-amount skeleton" id="price-24k">—</div>
-            <div class="price-unit">per tola (11.664g)</div>
+            <div class="price-unit" data-i18n="pertola.lg">per tola (11.664g)</div>
             <div class="price-change" id="change-24k">—</div>
             <div class="price-unit" style="margin-top:6px" id="price-24k-gram">—</div>
           </div>
           <!-- 22K Tejabi -->
           <div class="price-card">
-            <div class="purity">Tejabi Gold (22K)</div>
+            <div class="purity" data-i18n="card.22k">Tejabi Gold (22K)</div>
             <div class="price-amount skeleton" id="price-22k">—</div>
-            <div class="price-unit">per tola</div>
+            <div class="price-unit" data-i18n="pertola.sm">per tola</div>
             <div class="price-change" id="change-22k">—</div>
             <div class="price-unit" style="margin-top:6px" id="price-22k-gram">—</div>
           </div>
           <!-- Silver -->
           <div class="price-card silver-hero-card">
-            <div class="purity">Silver (Chandi)</div>
+            <div class="purity" data-i18n="card.silver">Silver (Chandi)</div>
             <div class="price-amount skeleton" id="hero-silver-tola">—</div>
-            <div class="price-unit">per tola</div>
+            <div class="price-unit" data-i18n="pertola.sm">per tola</div>
             <div class="price-change" id="hero-silver-change">&nbsp;</div>
             <div class="price-unit" style="margin-top:6px" id="hero-silver-gram">—</div>
           </div>
         </div>
+        <!-- Price context + USD -->
+        <div id="price-context" class="price-context" hidden></div>
+        <div class="gold-usd-row"><span id="gold-usd-val" class="gold-usd-val"></span></div>
 
         <!-- Silver + Forex -->
         <div class="hero-secondary" style="margin-top:16px">
@@ -422,10 +440,25 @@
 
         <!-- Share today's rates -->
         <div class="hero-share-row">
-          <button id="shareRatesBtn" class="share-rates-btn" aria-label="Share today's gold rates">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Share Today's Rates
-          </button>
+          <span class="share-label" data-i18n="share.label">Share today's rate:</span>
+          <div class="share-btns">
+            <button id="share-whatsapp" class="share-btn share-wa" aria-label="Share on WhatsApp">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+              <span data-i18n="share.wa">WhatsApp</span>
+            </button>
+            <button id="share-viber" class="share-btn share-viber" aria-label="Share on Viber">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.398.002C8.473-.028 3.331.774 1.166 6.95c-.86 2.446-.927 5.493-.76 8.018.11 1.664.32 3.298.65 4.47.66 2.375 2.628 4.067 5.119 4.426l.093.013V21.5l2.45-2.394.16.013c2.98.247 8.098.26 11.012-2.394 1.61-1.47 2.52-3.64 2.914-7.046.107-.925.15-4.88-.04-5.814-.824-4.1-4.024-5.745-4.024-5.745-1.8-.98-4.052-1.604-7.342-1.118zm.014 1.528c3.01-.46 5.017.061 6.616.945l.11.063c.003.002 2.773 1.413 3.452 4.783.167.836.14 4.732.034 5.632-.358 3.11-1.137 5.002-2.484 6.234-2.418 2.208-7.003 2.15-9.785 1.937l-.276-.022-2.39 2.335v-2.504l-.361-.052c-2.09-.304-3.704-1.7-4.23-3.607-.306-1.1-.503-2.684-.606-4.264-.16-2.41-.09-5.27.69-7.493 1.853-5.28 6.286-5.92 9.22-5.987zM8.3 4.857c-.177.003-.38.05-.57.167-.332.2-.614.46-.857.735-.19.215-.407.468-.48.773-.077.317-.039.625.053.882.456 1.27 1.13 2.363 1.908 3.36l.004.004.002.003c1.095 1.397 2.414 2.618 3.945 3.507.475.272.97.513 1.467.67.283.09.571.12.849.055.34-.08.6-.3.82-.54.236-.256.498-.546.68-.864.248-.437.234-.9-.019-1.195-.67-.778-1.443-1.467-2.214-2.12-.296-.25-.688-.278-1.025-.086l-.47.274c-.224.133-.49.222-.655.045-.35-.38-.69-.836-1.003-1.317-.316-.483-.598-.985-.815-1.495-.118-.278-.074-.571.092-.78l.213-.258c.264-.32.38-.66.284-.987-.095-.321-.264-.584-.435-.842l-.166-.25c-.223-.334-.41-.617-.647-.78a.989.989 0 00-.561-.161z"/></svg>
+              <span data-i18n="share.viber">Viber</span>
+            </button>
+            <button id="share-copy" class="share-btn share-copy" aria-label="Copy rate to clipboard">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span data-i18n="share.copy">Copy</span>
+            </button>
+            <button id="share-twitter" class="share-btn share-x" aria-label="Share on X / Twitter">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.851L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <span data-i18n="share.x">X / Twitter</span>
+            </button>
+          </div>
           <span id="shareToast" class="share-toast" aria-live="polite" role="status"></span>
         </div>
       </div>
@@ -465,13 +498,24 @@
   </div>
 </div>
 
+<!-- ======= FESTIVAL COUNTDOWN ======= -->
+<section class="festival-section" aria-label="Upcoming Nepal festivals">
+  <div class="container">
+    <div class="festival-header">
+      <span class="festival-heading-icon">🎉</span>
+      <span class="festival-heading-text" data-i18n="festival.heading">Upcoming Festivals &amp; Gold Demand</span>
+    </div>
+    <div id="festival-countdown" class="festival-countdown"></div>
+  </div>
+</section>
+
 <!-- ======= RATES & CHART (merged with toggle) ======= -->
 <section class="section rate-chart-section" id="rates">
   <div class="container">
 
     <div class="rates-chart-header">
       <div>
-        <h2>Gold &amp; Silver Rates — Nepal Today</h2>
+        <h2 data-i18n="sec.rates">Gold &amp; Silver Rates — Nepal Today</h2>
         <p>Live prices from <strong>FENEGOSIDA</strong> · Refreshed every 5 minutes</p>
         <div class="divider"></div>
       </div>
@@ -608,8 +652,8 @@
 <section class="section calculator-section" id="calculator">
   <div class="container">
     <div class="section-header">
-      <h2>Gold &amp; Silver Price Calculator — Nepal</h2>
-      <p>Type in any unit — Tola, Aana, Lal, or Grams — all values update automatically</p>
+      <h2 data-i18n="sec.calc">Gold &amp; Silver Price Calculator — Nepal</h2>
+      <p data-i18n="sec.calc.sub">Type in any unit — Tola, Aana, Lal, or Grams — all values update automatically</p>
       <div class="divider"></div>
     </div>
 
@@ -693,8 +737,8 @@
 <section class="section planner-section" id="planner">
   <div class="container">
     <div class="section-header">
-      <h2>Gold Purchase Planner</h2>
-      <p>Set a savings target — find out exactly how much to put away each month to reach your gold ownership goal</p>
+      <h2 data-i18n="sec.planner">Gold Purchase Planner</h2>
+      <p data-i18n="sec.planner.sub">Set a savings target — find out exactly how much to put away each month to reach your gold ownership goal</p>
       <div class="divider"></div>
     </div>
 
@@ -753,8 +797,8 @@
 <section class="section tracker-section" id="tracker">
   <div class="container">
     <div class="section-header">
-      <h2>Gold Investment Tracker</h2>
-      <p>Save your gold purchases and see live profit/loss against today's FENEGOSIDA rate</p>
+      <h2 data-i18n="sec.tracker">Gold Investment Tracker</h2>
+      <p data-i18n="sec.tracker.sub">Save your gold purchases and see live profit/loss against today's FENEGOSIDA rate</p>
       <div class="divider"></div>
     </div>
 
@@ -833,6 +877,31 @@
     <div id="trackerEmpty" class="tracker-empty">
       <div class="tracker-empty-icon">📊</div>
       <p>No investments yet. Add your first gold purchase above to start tracking its value against today's FENEGOSIDA rate.</p>
+    </div>
+
+    <!-- Price Alert UI -->
+    <div class="card alert-card" style="margin-top:24px">
+      <div class="alert-card-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span data-i18n="alert.title">Price Alerts</span>
+      </div>
+      <div class="alert-form-row">
+        <div class="wc-field">
+          <label for="alert-threshold" class="wc-label" data-i18n="alert.label">Alert me when 24K gold reaches (NPR / tola)</label>
+          <input type="number" id="alert-threshold" class="wc-input" placeholder="e.g. 220000" min="1" inputmode="decimal">
+        </div>
+        <div class="wc-field alert-dir-field">
+          <label class="wc-label" data-i18n="alert.dir">Direction</label>
+          <select id="alert-direction" class="wc-input alert-select">
+            <option value="above" data-i18n="alert.above">Above threshold</option>
+            <option value="below" data-i18n="alert.below">Below threshold</option>
+          </select>
+        </div>
+        <div class="alert-btn-wrap">
+          <button id="alert-add-btn" class="btn btn-gold" data-i18n="alert.add">Add Alert</button>
+        </div>
+      </div>
+      <div id="alert-list" class="alert-list"></div>
     </div>
 
     <div class="info-box" style="margin-top:24px">
@@ -929,8 +998,8 @@
 <section class="section faq-section" id="faq">
   <div class="container">
     <div class="section-header text-center" style="margin:0 auto 32px;max-width:700px">
-      <h2>Frequently Asked Questions — Gold Price Nepal</h2>
-      <p>Common questions about today's gold rate in Nepal, FENEGOSIDA, tola to gram conversion, and buying gold</p>
+      <h2 data-i18n="sec.faq">Frequently Asked Questions — Gold Price Nepal</h2>
+      <p data-i18n="sec.faq.sub">Common questions about today's gold rate in Nepal, FENEGOSIDA, tola to gram conversion, and buying gold</p>
       <div class="divider" style="margin:12px auto 0"></div>
     </div>
 
@@ -1102,6 +1171,7 @@
           <li><a href="gold-calculator.html#loan">Loan Calculator</a></li>
           <li><a href="index.html#planner">Gold Planner</a></li>
           <li><a href="index.html#tracker">Investment Tracker</a></li>
+          <li><a href="widget.html">Embed Widget</a></li>
         </ul>
       </div>
 

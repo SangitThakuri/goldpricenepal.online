@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Price Nepal Widget — Embeddable Price Ticker</title>
+  <meta name="description" content="Embed a live Nepal gold and silver price widget on your website. Self-contained iframe widget showing FENEGOSIDA daily rates." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://goldpricenepal.online/widget.html" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    body { background: #f4f4f4; }
+    .widget-demo-page { padding: 40px 0; }
+    .widget-demo-page h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .widget-demo-page p  { color: var(--dark-500); margin-bottom: 28px; font-size: .9rem; }
+
+    .embed-code-block {
+      background: #1E293B; color: #E2E8F0;
+      border-radius: 8px; padding: 18px 20px;
+      font-family: 'Courier New', monospace; font-size: .82rem;
+      line-height: 1.6; overflow-x: auto;
+      margin-bottom: 32px; position: relative;
+    }
+    .embed-copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; border-radius: 6px; padding: 4px 10px;
+      font-size: .74rem; cursor: pointer; transition: background .15s;
+    }
+    .embed-copy-btn:hover { background: rgba(255,255,255,.2); }
+
+    .widget-preview-label {
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--dark-400); font-weight: 700; margin-bottom: 12px;
+    }
+
+    /* ——— the actual widget styles ——— */
+    .gpn-widget {
+      display: inline-flex; flex-direction: column; gap: 0;
+      background: #1A1200;
+      border: 1px solid #3D2E00;
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-width: 240px; max-width: 320px;
+      color: #F5F0E0;
+      box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    }
+    .gpn-widget-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 8px;
+      background: #0E0A00;
+      border-bottom: 1px solid #3D2E00;
+    }
+    .gpn-widget-brand {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .73rem; font-weight: 700; letter-spacing: .3px;
+      color: #E4B84D; text-decoration: none;
+    }
+    .gpn-widget-live {
+      display: flex; align-items: center; gap: 5px;
+      font-size: .65rem; color: #86EFAC;
+    }
+    .gpn-widget-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #4ADE80;
+      animation: gpn-pulse 2s infinite;
+    }
+    @keyframes gpn-pulse {
+      0%,100% { opacity:1; } 50% { opacity:.35; }
+    }
+
+    .gpn-widget-rows { padding: 8px 0; }
+    .gpn-widget-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      transition: background .15s;
+    }
+    .gpn-widget-row:last-child { border-bottom: none; }
+    .gpn-widget-row:hover { background: rgba(228,184,77,.06); }
+
+    .gpn-widget-metal { font-size: .78rem; color: #B8A882; }
+    .gpn-widget-purity { font-size: .65rem; color: #6B5E3E; margin-top: 1px; }
+    .gpn-widget-price {
+      text-align: right;
+    }
+    .gpn-widget-val {
+      font-size: .92rem; font-weight: 700; color: #E4B84D;
+      font-variant-numeric: tabular-nums;
+    }
+    .gpn-widget-change { font-size: .65rem; margin-top: 2px; }
+    .gpn-widget-change.up   { color: #4ADE80; }
+    .gpn-widget-change.down { color: #F87171; }
+    .gpn-widget-change.flat { color: #6B7280; }
+
+    .gpn-widget-footer {
+      padding: 7px 14px;
+      background: #0E0A00;
+      border-top: 1px solid #3D2E00;
+      font-size: .62rem; color: #4B3F2A;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .gpn-widget-footer a { color: #7A6340; text-decoration: none; }
+    .gpn-widget-footer a:hover { color: #E4B84D; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+        <div>Gold Price <span>Nepal</span></div>
+      </a>
+      <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#rates">Today's Rate</a>
+        <a href="gold-calculator.html">Calculator</a>
+        <a href="history.html">History</a>
+        <a href="about.html">About</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span>
+      <span>Embeddable Widget</span>
+    </div>
+    <h1>Embed Gold Price Widget</h1>
+    <p>Add a live Nepal gold price ticker to your website for free</p>
+  </div>
+</section>
+
+<section class="page-content widget-demo-page">
+  <div class="container">
+
+    <div class="prose">
+      <p>Copy the code below and paste it anywhere on your website. The widget fetches live prices from our API automatically.</p>
+    </div>
+
+    <div class="widget-preview-label">Live preview</div>
+    <!-- WIDGET PREVIEW — rendered by JS below -->
+    <div id="gpn-widget-preview"></div>
+
+    <br>
+
+    <div class="widget-preview-label" style="margin-top:24px">Embed code</div>
+    <div class="embed-code-block" id="embedCodeBlock">
+      <button class="embed-copy-btn" id="embedCopyBtn">Copy</button>
+      <code id="embedCodeText">&lt;iframe
+  src="https://goldpricenepal.online/widget-frame.html"
+  width="300"
+  height="190"
+  frameborder="0"
+  scrolling="no"
+  title="Nepal Gold Price Widget — goldpricenepal.online"
+  style="border-radius:10px;overflow:hidden"
+&gt;&lt;/iframe&gt;</code>
+    </div>
+
+    <div class="card" style="margin-top:0;padding:20px 24px">
+      <h3 style="font-size:1rem;margin-bottom:12px">Usage notes</h3>
+      <ul style="font-size:.88rem;line-height:1.9;color:var(--dark-600)">
+        <li>The widget is <strong>free to use</strong> for any Nepal-focused website. Attribution link is included automatically.</li>
+        <li>Prices update every <strong>5 minutes</strong> automatically — no JavaScript needed on your end.</li>
+        <li>Dimensions: recommended <code>300 × 190px</code>. The widget is fully self-contained.</li>
+        <li>For custom sizes or white-label options, <a href="contact.html">contact us</a>.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+          <div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div>
+        </a>
+        <p style="margin-top:12px">Nepal's trusted source for live gold and silver prices. Updated daily from FENEGOSIDA.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Live Prices</h4>
+        <ul>
+          <li><a href="index.html#rates">Today's Rate Table</a></li>
+          <li><a href="24k-gold-price-nepal.html">24K Gold Price</a></li>
+          <li><a href="22k-gold-price-nepal.html">22K Gold Price</a></li>
+          <li><a href="silver-price-nepal.html">Silver Price</a></li>
+          <li><a href="history.html">Historical Rates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="gold-calculator.html">Gold Calculator</a></li>
+          <li><a href="gold-calculator.html#profit">Profit Calculator</a></li>
+          <li><a href="gold-calculator.html#loan">Loan Calculator</a></li>
+          <li><a href="index.html#planner">Gold Planner</a></li>
+          <li><a href="index.html#tracker">Investment Tracker</a></li>
+          <li><a href="widget.html">Embed Widget</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="editorial-policy.html">Editorial Policy</a></li>
+          <li><a href="data-sources.html">Data Sources</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 goldpricenepal.online · All rights reserved</p>
+      <p class="footer-disclaimer">Prices are indicative. Not financial advice. Verify with official FENEGOSIDA rates before transactions.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+(function() {
+  function renderWidget(state) {
+    var s = state || {};
+    var p24 = s.nepal24kTola ? 'NPR ' + Math.round(s.nepal24kTola).toLocaleString('en-NP') : '…';
+    var p22 = s.nepal22kTola ? 'NPR ' + Math.round(s.nepal22kTola).toLocaleString('en-NP') : '…';
+    var pSv = s.nepalSilverTola ? 'NPR ' + Math.round(s.nepalSilverTola).toLocaleString('en-NP') : '…';
+    var ch24 = s.nepal24kTolaPrev ? s.nepal24kTola - s.nepal24kTolaPrev : 0;
+    var chClass = ch24 > 0 ? 'up' : ch24 < 0 ? 'down' : 'flat';
+    var chText  = ch24 > 0 ? '+'+Math.round(ch24).toLocaleString('en-NP') : ch24 < 0 ? Math.round(ch24).toLocaleString('en-NP') : '—';
+    var updated = s.lastUpdated ? new Date(s.lastUpdated).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '…';
+    document.getElementById('gpn-widget-preview').innerHTML =
+      '<div class="gpn-widget">' +
+        '<div class="gpn-widget-header">' +
+          '<a class="gpn-widget-brand" href="https://goldpricenepal.online/" target="_blank" rel="noopener">' +
+            '<svg width="16" height="14" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg>' +
+            'Gold Price Nepal' +
+          '</a>' +
+          '<div class="gpn-widget-live"><div class="gpn-widget-dot"></div>LIVE</div>' +
+        '</div>' +
+        '<div class="gpn-widget-rows">' +
+          '<div class="gpn-widget-row">' +
+            '<div><div class="gpn-widget-metal">Fine Gold</div><div class="gpn-widget-purity">24K · per tola</div></div>' +
+            '<div class="gpn-widget-price"><div class="gpn-widget-val">' + p24 + '</div><div class="gpn-widget-change ' + chClass + '">' + chText + '</div></div>' +
+          '</div>' +
+          '<div class="gpn-widget-row">' +
+            '<div><div class="gpn-widget-metal">Tejabi Gold</div><div class="gpn-widget-purity">22K · per tola</div></div>' +
+            '<div class="gpn-widget-price"><div class="gpn-widget-val">' + p22 + '</div></div>' +
+          '</div>' +
+          '<div class="gpn-widget-row">' +
+            '<div><div class="gpn-widget-metal">Silver (Chandi)</div><div class="gpn-widget-purity">per tola</div></div>' +
+            '<div class="gpn-widget-price"><div class="gpn-widget-val" style="font-size:.8rem;color:#94A3B8">' + pSv + '</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="gpn-widget-footer">' +
+          '<span>Updated ' + updated + '</span>' +
+          '<a href="https://goldpricenepal.online/" target="_blank" rel="noopener">goldpricenepal.online</a>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // Try to use live state after main.js loads
+  var tries = 0;
+  var iv = setInterval(function() {
+    if (window._gpnState && window._gpnState.nepal24kTola) {
+      clearInterval(iv);
+      renderWidget(window._gpnState);
+    } else if (++tries > 30) {
+      clearInterval(iv);
+      renderWidget({});
+    }
+  }, 300);
+
+  // Copy embed code
+  document.getElementById('embedCopyBtn').addEventListener('click', function() {
+    var code = document.getElementById('embedCodeText').textContent;
+    navigator.clipboard.writeText(code).then(function() {
+      document.getElementById('embedCopyBtn').textContent = 'Copied!';
+      setTimeout(function(){ document.getElementById('embedCopyBtn').textContent = 'Copy'; }, 2000);
+    });
+  });
+})();
+</script>
+</body>
+</html>

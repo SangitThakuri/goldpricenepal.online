@@ -324,12 +324,15 @@ function renderUI() {
     set('tbl-silver-10g',  `NPR ${fmt(p.silver.per10g)}`);
   }
 
-  /* refresh calculator, tracker, planner, schema, and push notification check */
+  /* refresh calculator, tracker, planner, schema, push notification, new features */
   updateShowroom();
   renderTracker();
   updateGoalPlanner();
   injectPriceSchema();
   maybeSendPriceNotification(nepal24kTola);
+  renderPriceContext();
+  renderGoldUSD();
+  checkPriceAlerts();
 
   /* timestamps */
   const t = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -1353,6 +1356,362 @@ function initTickerScroll() {
   track.parentElement.appendChild(clone);
 }
 
+/* ══════════════════════════════════════════
+   BIKRAM SAMBAT CALENDAR
+══════════════════════════════════════════ */
+const BS_DATA = {
+  2080: { start: '2023-04-14', days: [31,32,31,32,31,30,30,30,29,29,30,31] },
+  2081: { start: '2024-04-13', days: [31,31,31,32,31,31,30,29,30,29,30,30] },
+  2082: { start: '2025-04-14', days: [31,31,32,31,31,31,30,29,30,29,30,30] },
+  2083: { start: '2026-04-14', days: [31,31,32,32,31,30,30,29,30,29,30,30] },
+  2084: { start: '2027-04-14', days: [31,32,31,32,31,30,30,29,30,29,30,30] },
+  2085: { start: '2028-04-12', days: [31,31,32,32,31,30,30,29,30,29,30,31] },
+};
+const BS_MONTHS_EN = ['Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
+const BS_MONTHS_NP = ['बैशाख','जेठ','असार','श्रावण','भाद्र','आश्विन','कार्तिक','मंसिर','पुष','माघ','फाल्गुन','चैत्र'];
+
+function adToBS(date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const entries = Object.entries(BS_DATA).sort((a, b) => b[0] - a[0]);
+  for (const [yr, { start, days }] of entries) {
+    const s = new Date(start);
+    if (d >= s) {
+      const diff = Math.floor((d - s) / 86400000);
+      let rem = diff;
+      for (let m = 0; m < 12; m++) {
+        if (rem < days[m]) return { year: parseInt(yr), month: m + 1, day: rem + 1 };
+        rem -= days[m];
+      }
+    }
+  }
+  return null;
+}
+
+function renderBSDate() {
+  const bs = adToBS(new Date());
+  if (!bs) return;
+  const enEl = el('bs-date-en');
+  const npEl = el('bs-date-np');
+  if (enEl) enEl.textContent = `${bs.day} ${BS_MONTHS_EN[bs.month - 1]} ${bs.year} BS`;
+  if (npEl) npEl.textContent = `${bs.day} ${BS_MONTHS_NP[bs.month - 1]} ${bs.year} बि.सं.`;
+}
+
+/* ══════════════════════════════════════════
+   MARKET STATUS
+══════════════════════════════════════════ */
+const NEPAL_HOLIDAYS = new Set([
+  '2026-01-11','2026-01-15','2026-02-19','2026-03-08','2026-04-14',
+  '2026-05-12','2026-08-27','2026-09-17','2026-10-02','2026-10-09',
+  '2026-10-10','2026-10-11','2026-10-12','2026-10-15','2026-10-26',
+  '2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-11-28',
+  '2027-01-11','2027-01-14','2027-03-10','2027-04-14','2027-05-11',
+]);
+
+function getMarketStatus() {
+  const now = new Date();
+  if (now.getDay() === 6) return { open: false, reason: 'Saturday', reasonNP: 'शनिबार' };
+  const ds = isoDate(0);
+  if (NEPAL_HOLIDAYS.has(ds)) return { open: false, reason: 'Public Holiday', reasonNP: 'सार्वजनिक बिदा' };
+  return { open: true };
+}
+
+function renderMarketStatus() {
+  const banner = el('market-closed-banner');
+  if (!banner) return;
+  const status = getMarketStatus();
+  if (!status.open) {
+    banner.hidden = false;
+    const r = el('market-closed-reason');
+    if (r) r.textContent = status.reason;
+  }
+}
+
+/* ══════════════════════════════════════════
+   SHARE BUTTONS (WhatsApp / Viber / Copy / X)
+══════════════════════════════════════════ */
+function buildShareText() {
+  const p = state.nepal24kTola;
+  const s = state.silverTolaNPR;
+  const bs = adToBS(new Date());
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const bsStr = bs ? ` (${bs.day} ${BS_MONTHS_EN[bs.month - 1]} ${bs.year} BS)` : '';
+  return (
+    `🏅 Gold Price Nepal — ${today}${bsStr}\n\n` +
+    `24K Fine Gold:  NPR ${Math.round(p).toLocaleString('en-NP')}/tola\n` +
+    `22K Tejabi:    NPR ${Math.round(p * 22 / 24).toLocaleString('en-NP')}/tola\n` +
+    (s ? `Silver (Chandi): NPR ${Math.round(s).toLocaleString('en-NP')}/tola\n` : '') +
+    `\nSource: FENEGOSIDA (Official Rate)\n🔗 goldpricenepal.online`
+  );
+}
+
+function setupWhatsAppShare() {
+  const wa  = el('share-whatsapp');
+  const vib = el('share-viber');
+  const cp  = el('share-copy');
+  const tw  = el('share-twitter');
+
+  if (wa)  wa.addEventListener('click',  () => window.open(`https://wa.me/?text=${encodeURIComponent(buildShareText())}`, '_blank', 'noopener'));
+  if (vib) vib.addEventListener('click', () => window.open(`viber://forward?text=${encodeURIComponent(buildShareText())}`, '_blank', 'noopener'));
+  if (tw)  tw.addEventListener('click',  () => {
+    const price = Math.round(state.nepal24kTola).toLocaleString('en-NP');
+    const tweet = `Gold price in Nepal today: NPR ${price}/tola (24K Fine Gold) 🏅 Source: FENEGOSIDA #GoldPriceNepal #Nepal`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}&url=${encodeURIComponent('https://goldpricenepal.online')}`, '_blank', 'noopener');
+  });
+  if (cp)  cp.addEventListener('click', async () => {
+    const text = buildShareText();
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    cp.textContent = '✓ Copied!';
+    setTimeout(() => { cp.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy'; }, 2000);
+  });
+}
+
+/* ══════════════════════════════════════════
+   PRICE CONTEXT (day-over-day + trend)
+══════════════════════════════════════════ */
+function renderPriceContext() {
+  const curr = state.nepal24kTola;
+  const prev = state.nepal24kTolaPrev;
+  const ctxEl = el('price-context');
+  if (!ctxEl || !curr || !prev) return;
+
+  const changePct = ((curr - prev) / prev) * 100;
+  let msg, cls;
+
+  if (Math.abs(changePct) < 0.05) {
+    msg  = '≡  Unchanged from yesterday';
+    cls  = 'ctx-flat';
+  } else if (changePct > 0) {
+    msg  = `▲ ${changePct.toFixed(2)}% above yesterday — price is rising`;
+    cls  = 'ctx-up';
+  } else {
+    msg  = `▼ ${Math.abs(changePct).toFixed(2)}% below yesterday — may be a buying window`;
+    cls  = 'ctx-down';
+  }
+
+  ctxEl.textContent = msg;
+  ctxEl.className   = 'price-context ' + cls;
+  ctxEl.hidden      = false;
+}
+
+/* ══════════════════════════════════════════
+   GOLD-TO-USD INLINE CONVERTER
+══════════════════════════════════════════ */
+function renderGoldUSD() {
+  const usd = el('gold-usd-val');
+  if (!usd || !state.nepal24kTola || !state.usdNPR) return;
+  const usdPerTola = state.nepal24kTola / state.usdNPR;
+  usd.textContent = `≈ $${usdPerTola.toFixed(0)} USD / tola`;
+}
+
+/* ══════════════════════════════════════════
+   FESTIVAL COUNTDOWN
+══════════════════════════════════════════ */
+const FESTIVALS = [
+  { name:'Teej',         nameNP:'तीज',           date:'2026-08-27', desc:'Gold demand rises sharply',      descNP:'सुनको माग बढ्छ' },
+  { name:'Dashain',      nameNP:'दशैं',           date:'2026-10-12', desc:"Nepal's biggest gold buying season", descNP:'नेपालको सबैभन्दा ठूलो सुन मौसम' },
+  { name:'Tihar',        nameNP:'तिहार',          date:'2026-10-28', desc:'Gold gifting tradition',         descNP:'सुन उपहार दिने परम्परा' },
+  { name:'Chhath',       nameNP:'छठ',             date:'2026-10-30', desc:'Gold ornament demand rises',     descNP:'सुन गहनाको माग बढ्छ' },
+  { name:'Baisakh 1',    nameNP:'बैशाख १',        date:'2027-04-14', desc:'New Year — auspicious for gold', descNP:'नयाँ वर्ष — सुन किन्न शुभ' },
+  { name:'Buddha Jayanti', nameNP:'बुद्ध जयन्ती', date:'2027-05-11', desc:'Gold gifting occasion',         descNP:'सुन दिने अवसर' },
+];
+
+function renderFestivalCountdown() {
+  const container = el('festival-countdown');
+  if (!container) return;
+  const now = Date.now();
+  const upcoming = FESTIVALS
+    .map(f => ({ ...f, ms: new Date(f.date) - now }))
+    .filter(f => f.ms > 0)
+    .sort((a, b) => a.ms - b.ms)
+    .slice(0, 3);
+
+  if (!upcoming.length) { container.closest?.('.festival-section')?.remove(); return; }
+
+  container.innerHTML = upcoming.map(f => {
+    const days = Math.ceil(f.ms / 86400000);
+    const nm   = currentLang === 'np' ? f.nameNP : f.name;
+    const dc   = currentLang === 'np' ? f.descNP : f.desc;
+    const hot  = days <= 14 ? ' festival-hot' : days <= 45 ? ' festival-warm' : '';
+    return `<div class="festival-card${hot}">
+      <div class="festival-days-wrap"><div class="festival-days">${days}</div><div class="festival-days-label">${currentLang === 'np' ? 'दिन' : 'days'}</div></div>
+      <div class="festival-info"><div class="festival-name">${nm}</div><div class="festival-desc">${dc}</div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   NEPALI LANGUAGE TOGGLE
+══════════════════════════════════════════ */
+let currentLang = localStorage.getItem('gpn_lang') || 'en';
+
+const TRANS = {
+  en: {
+    'nav.home':'Home','nav.rates':"Today's Rate",'nav.calculator':'Calculator',
+    'nav.chart':'Chart','nav.history':'History','nav.tracker':'Tracker',
+    'nav.about':'About','nav.contact':'Contact',
+    'hero.h1':"Today's Gold Price<br>in <span>Nepal</span>",
+    'hero.sub':'Live gold rates from <strong>FENEGOSIDA</strong>, updated every 5 minutes',
+    'hero.auto':'Auto-updated · Last:',
+    'card.24k':'Fine Gold (24K)','card.22k':'Tejabi Gold (22K)','card.silver':'Silver (Chandi)',
+    'pertola.lg':'per tola (11.664g)','pertola.sm':'per tola',
+    'sec.rates':'Gold &amp; Silver Rates — Nepal Today',
+    'sec.calc':'Gold &amp; Silver Price Calculator — Nepal',
+    'sec.calc.sub':'Type in any unit — Tola, Aana, Lal, or Grams — all values update automatically',
+    'sec.planner':'Gold Purchase Planner',
+    'sec.planner.sub':'Set a savings target — find out exactly how much to put away each month to reach your gold ownership goal',
+    'sec.tracker':'Gold Investment Tracker',
+    'sec.tracker.sub':'Save your gold purchases and see live profit/loss against today\'s FENEGOSIDA rate',
+    'sec.faq':'Frequently Asked Questions — Gold Price Nepal',
+    'sec.faq.sub':'Common questions about today\'s gold rate in Nepal, FENEGOSIDA, tola to gram conversion, and buying gold',
+    'calc.metal':'Metal / Purity','calc.weight':'Weight',
+    'calc.making':'Making Charges / Banauni (बनाउनी)',
+    'calc.gold-val':'Gold Value (Raw)','calc.making-lbl':'Making Charges',
+    'calc.total':'Estimated Showroom Price',
+    'calc.note':'Indicative estimate only. Actual showroom price may vary by dealer.',
+    'share.label':'Share today\'s rate:',
+    'share.wa':'WhatsApp','share.viber':'Viber','share.copy':'Copy','share.x':'X / Twitter',
+    'mkt.closed':'Market closed today —','mkt.last':'Showing last traded rate.',
+    'festival.heading':'Upcoming Festivals & Gold Demand',
+    'alert.heading':'Price Alerts','alert.placeholder':'e.g. 175000',
+    'alert.title':'Price Alerts',
+    'alert.label':'Alert me when 24K gold reaches (NPR / tola)',
+    'alert.dir':'Direction',
+    'alert.above':'Above threshold',
+    'alert.below':'Below threshold',
+    'alert.add':'Add Alert','alert.empty':'No alerts set.',
+  },
+  np: {
+    'nav.home':'गृहपृष्ठ','nav.rates':'आजको भाउ','nav.calculator':'क्याल्कुलेटर',
+    'nav.chart':'चार्ट','nav.history':'इतिहास','nav.tracker':'ट्र्याकर',
+    'nav.about':'हाम्रोबारे','nav.contact':'सम्पर्क',
+    'hero.h1':'नेपालमा<br>आजको सुनको भाउ',
+    'hero.sub':'<strong>फेनेगोसिडा</strong>को आधिकारिक सुन भाउ, प्रत्येक ५ मिनेटमा अद्यावधिक',
+    'hero.auto':'स्वत: अद्यावधिक · अन्तिम:',
+    'card.24k':'असल सुन (२४ क्यारेट)','card.22k':'तेजाबी सुन (२२ क्यारेट)','card.silver':'चाँदी',
+    'pertola.lg':'प्रति तोला (११.६६४ ग्राम)','pertola.sm':'प्रति तोला',
+    'sec.rates':'नेपालमा सुन र चाँदीको भाउ — आज',
+    'sec.calc':'सुन र चाँदी मूल्य क्याल्कुलेटर — नेपाल',
+    'sec.calc.sub':'तोला, आना, लाल वा ग्राम — जुनसुकै एकाइमा टाइप गर्नुहोस्',
+    'sec.planner':'सुन खरिद योजना',
+    'sec.planner.sub':'बचत लक्ष्य तय गर्नुहोस् — आफ्नो सुन स्वामित्व लक्ष्य पुग्न प्रत्येक महिना कति बचत गर्ने थाहा पाउनुहोस्',
+    'sec.tracker':'सुन लगानी ट्र्याकर',
+    'sec.tracker.sub':'आफ्नो सुन खरिद रेकर्ड गर्नुहोस् र आजको फेनेगोसिडा भाउमा नाफा/नोक्सान हेर्नुहोस्',
+    'sec.faq':'बारम्बार सोधिने प्रश्नहरू — नेपाल सुन भाउ',
+    'sec.faq.sub':'नेपालमा आजको सुन भाउ, फेनेगोसिडा, तोला र ग्राम रूपान्तरण र सुन खरिद बारे सामान्य प्रश्नहरू',
+    'calc.metal':'धातु / शुद्धता','calc.weight':'तौल',
+    'calc.making':'बनाउनी शुल्क',
+    'calc.gold-val':'सुनको मूल्य (कच्चा)','calc.making-lbl':'बनाउनी शुल्क',
+    'calc.total':'अनुमानित शोरूम मूल्य',
+    'calc.note':'अनुमानित मूल्य मात्र। वास्तविक मूल्य पसलअनुसार फरक हुन सक्छ।',
+    'share.label':'आजको भाउ साझा गर्नुहोस्:',
+    'share.wa':'ह्वाट्सएप','share.viber':'भाइबर','share.copy':'कपी गर्नुहोस्','share.x':'ट्विटर/X',
+    'mkt.closed':'आज बजार बन्द छ —','mkt.last':'अन्तिम कारोबार भाउ देखाइएको छ।',
+    'festival.heading':'आगामी चाडपर्व र सुन माग',
+    'alert.heading':'भाउ सूचना','alert.placeholder':'जस्तै: १७५०००',
+    'alert.title':'भाउ सूचना',
+    'alert.label':'२४ क्यारेट सुन यो भाउमा पुग्दा सूचना दिनुहोस् (NPR / तोला)',
+    'alert.dir':'दिशा',
+    'alert.above':'थ्रेसहोल्डभन्दा माथि',
+    'alert.below':'थ्रेसहोल्डभन्दा तल',
+    'alert.add':'सूचना थप्नुहोस्','alert.empty':'कुनै सूचना छैन।',
+  },
+};
+
+function tl(key) { return TRANS[currentLang]?.[key] ?? TRANS.en[key] ?? key; }
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    const k = node.dataset.i18n;
+    const v = TRANS[currentLang]?.[k];
+    if (v !== undefined) node.innerHTML = v;
+  });
+  document.documentElement.lang = currentLang === 'np' ? 'ne' : 'en';
+  const btn = el('lang-toggle-btn');
+  if (btn) btn.textContent = currentLang === 'en' ? 'नेपाली' : 'English';
+  renderFestivalCountdown();
+}
+
+function setupLanguageToggle() {
+  const btn = el('lang-toggle-btn');
+  if (!btn) return;
+  if (currentLang === 'np') { document.documentElement.lang = 'ne'; applyTranslations(); }
+  btn.textContent = currentLang === 'en' ? 'नेपाली' : 'English';
+  btn.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'np' : 'en';
+    localStorage.setItem('gpn_lang', currentLang);
+    applyTranslations();
+  });
+}
+
+/* ══════════════════════════════════════════
+   PRICE ALERTS (localStorage-based)
+══════════════════════════════════════════ */
+const ALERT_STORE = 'gpn_price_alerts_v1';
+function loadAlerts() { try { return JSON.parse(localStorage.getItem(ALERT_STORE) || '[]'); } catch { return []; } }
+function saveAlerts(a) { try { localStorage.setItem(ALERT_STORE, JSON.stringify(a)); } catch {} }
+
+function renderAlertList() {
+  const list = el('alert-list');
+  if (!list) return;
+  const alerts = loadAlerts();
+  if (!alerts.length) { list.innerHTML = `<p class="alert-empty" data-i18n="alert.empty">${tl('alert.empty')}</p>`; return; }
+  list.innerHTML = alerts.map(a =>
+    `<div class="alert-item">
+      <span class="alert-icon">${a.dir === 'below' ? '📉' : '📈'}</span>
+      <span>Alert when 24K goes <strong>${a.dir}</strong> NPR <strong>${Math.round(a.threshold).toLocaleString('en-NP')}</strong>/tola</span>
+      <button class="alert-del" data-id="${a.id}" aria-label="Remove alert">✕</button>
+    </div>`
+  ).join('');
+  list.querySelectorAll('.alert-del').forEach(b => b.addEventListener('click', () => {
+    saveAlerts(loadAlerts().filter(a => a.id !== parseInt(b.dataset.id)));
+    renderAlertList();
+  }));
+}
+
+function setupPriceAlerts() {
+  const addBtn = el('alert-add-btn');
+  if (!addBtn) return;
+  renderAlertList();
+  addBtn.addEventListener('click', () => {
+    const inp = el('alert-threshold');
+    const dir = el('alert-direction');
+    const val = parseFloat(inp?.value);
+    if (!val || val < 50000 || val > 900000) { inp?.focus(); return; }
+    const alerts = loadAlerts();
+    alerts.push({ id: Date.now(), threshold: val, dir: dir?.value || 'below' });
+    saveAlerts(alerts);
+    if (inp) inp.value = '';
+    renderAlertList();
+  });
+}
+
+function checkPriceAlerts() {
+  const curr = state.nepal24kTola;
+  if (!curr) return;
+  loadAlerts().forEach(a => {
+    const hit = (a.dir === 'below' && curr < a.threshold) || (a.dir === 'above' && curr > a.threshold);
+    if (!hit) return;
+    const notif = el('alert-notification');
+    if (notif) {
+      notif.textContent = `🔔 Gold price alert: 24K is NPR ${Math.round(curr).toLocaleString('en-NP')}/tola — ${a.dir} your target of NPR ${Math.round(a.threshold).toLocaleString('en-NP')}`;
+      notif.hidden = false;
+      setTimeout(() => { notif.hidden = true; }, 10000);
+    }
+    if (Notification.permission === 'granted') {
+      new Notification('Gold Price Alert — Nepal', {
+        body: `24K is now NPR ${Math.round(curr).toLocaleString('en-NP')}/tola`,
+        icon: '/favicon.svg',
+      });
+    }
+  });
+}
+
 /* ── boot ── */
 document.addEventListener('DOMContentLoaded', async () => {
   setupNav(); setupFAQ(); setupContactForm();
@@ -1363,6 +1722,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupPWAInstall();
   setupConnectionStatus();
   setupGoalPlanner();
+  /* new features */
+  renderBSDate();
+  renderMarketStatus();
+  setupWhatsAppShare();
+  setupLanguageToggle();
+  setupPriceAlerts();
+  renderFestivalCountdown();
   await fetchPrices();
   fetchRemitRates();           // parallel — doesn't block price render
   initTickerScroll();

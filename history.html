@@ -226,6 +226,10 @@
         <p>Newest first · <span id="histRecordCount">—</span></p>
       </div>
       <div class="hist-table-actions">
+        <button id="csvExportBtn" class="btn btn-outline hist-download-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
         <a href="data/history.json" download="nepal-gold-price-history.json" class="btn btn-outline hist-download-btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download JSON
@@ -328,5 +332,37 @@
 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 <script src="js/history.js"></script>
+<script>
+(function() {
+  document.getElementById('csvExportBtn').addEventListener('click', async function() {
+    try {
+      const res = await fetch('data/history.json');
+      const data = await res.json();
+      const rows = [['Date','24K Fine Gold (NPR/tola)','22K Tejabi (NPR/tola)','Silver (NPR/tola)','24K Day Change (NPR)']];
+      data.forEach(function(d) {
+        rows.push([
+          d.date || '',
+          d.gold24k || d.nepal24kTola || '',
+          d.gold22k || d.nepal22kTola || '',
+          d.silver  || d.nepalSilverTola || '',
+          d.change24k ?? ''
+        ]);
+      });
+      const csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'nepal-gold-price-history.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch(e) {
+      alert('Could not export CSV: ' + e.message);
+    }
+  });
+})();
+</script>
 </body>
 </html>
