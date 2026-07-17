@@ -1,0 +1,30 @@
+{
+  "name": "goldpricenepal.online",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SangitThakuri/goldpricenepal.online.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SangitThakuri/goldpricenepal.online/issues"
+  },
+  "homepage": "https://github.com/SangitThakuri/goldpricenepal.online#readme",
+  "devDependencies": {
+    "wrangler": "^4.112.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "sharp@0.34.5": true,
+    "workerd@1.20260714.1": true
+  }
+}

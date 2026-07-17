@@ -1,0 +1,10 @@
+# Cloudflare Workers — exclude non-web files from asset upload
+wrangler.jsonc
+package.json
+package-lock.json
+node_modules/
+.git/
+.gitignore
+CNAME
+social-automation/
+*.md
