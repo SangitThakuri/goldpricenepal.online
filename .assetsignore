@@ -5,6 +5,8 @@ package-lock.json
 node_modules/
 .git/
 .gitignore
+.wrangler/
+.claude/
 CNAME
 social-automation/
 *.md
