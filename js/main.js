@@ -347,12 +347,23 @@ function renderUI() {
     els('.skeleton').forEach(s => s.classList.remove('skeleton'));
   }
 
-  renderChart();
+  // Only re-render chart if chart view is currently active
+  const chartView = el('view-chart');
+  if (chartView && chartView.style.display !== 'none' && window.ApexCharts) renderChart();
 }
 
 /* ══════════════════════════════════════════
-   ApexCharts
+   ApexCharts — lazy-loaded on first chart view
 ══════════════════════════════════════════ */
+function loadApexCharts(cb) {
+  if (window.ApexCharts) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js';
+  s.onload = cb;
+  s.onerror = () => console.warn('[GPN] ApexCharts failed to load');
+  document.head.appendChild(s);
+}
+
 // null = intraday (24 hourly pts), number = daily pts
 const DAYS_MAP = { '1d': null, '7d': 7, '1m': 30, '3m': 90 };
 
@@ -1297,7 +1308,7 @@ function setupViewToggle() {
       const tableEl = el('view-table'), chartEl = el('view-chart');
       if (tableEl) tableEl.style.display = view === 'table' ? '' : 'none';
       if (chartEl) chartEl.style.display = view === 'chart' ? '' : 'none';
-      if (view === 'chart') renderChart();
+      if (view === 'chart') loadApexCharts(renderChart);
     });
   });
 }
@@ -1650,6 +1661,36 @@ function setupLanguageToggle() {
 }
 
 /* ══════════════════════════════════════════
+   DARK MODE TOGGLE
+══════════════════════════════════════════ */
+function setupDarkMode() {
+  const STORE = 'gpn_theme';
+  const root  = document.documentElement;
+  const btn   = el('dark-toggle-btn');
+  const saved = localStorage.getItem(STORE); // 'dark' | 'light' | null
+
+  function applyTheme(theme) {
+    if (theme === 'dark')  { root.setAttribute('data-theme', 'dark');  if (btn) btn.textContent = '☀️'; }
+    else if (theme === 'light') { root.setAttribute('data-theme', 'light'); if (btn) btn.textContent = '🌙'; }
+    else { root.removeAttribute('data-theme'); if (btn) btn.textContent = prefersDark() ? '☀️' : '🌙'; }
+  }
+  function prefersDark() { return window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function currentTheme() { return root.getAttribute('data-theme') || (prefersDark() ? 'dark' : 'light'); }
+
+  applyTheme(saved);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(STORE, next);
+      applyTheme(next);
+    });
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!localStorage.getItem(STORE)) applyTheme(null);
+  });
+}
+
+/* ══════════════════════════════════════════
    PRICE ALERTS (localStorage-based)
 ══════════════════════════════════════════ */
 const ALERT_STORE = 'gpn_price_alerts_v1';
@@ -1723,6 +1764,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupConnectionStatus();
   setupGoalPlanner();
   /* new features */
+  setupDarkMode();
   renderBSDate();
   renderMarketStatus();
   setupWhatsAppShare();
