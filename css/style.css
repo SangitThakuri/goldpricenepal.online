@@ -1,5 +1,6 @@
 /* ===== CSS VARIABLES ===== */
 :root {
+  color-scheme: light only;
   --gold-400: #E4B84D;
   --gold-500: #C9972E;
   --gold-600: #A07A22;
