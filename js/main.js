@@ -1661,36 +1661,6 @@ function setupLanguageToggle() {
 }
 
 /* ══════════════════════════════════════════
-   DARK MODE TOGGLE
-══════════════════════════════════════════ */
-function setupDarkMode() {
-  const STORE = 'gpn_theme';
-  const root  = document.documentElement;
-  const btn   = el('dark-toggle-btn');
-  const saved = localStorage.getItem(STORE); // 'dark' | 'light' | null
-
-  function applyTheme(theme) {
-    if (theme === 'dark')  { root.setAttribute('data-theme', 'dark');  if (btn) btn.textContent = '☀️'; }
-    else if (theme === 'light') { root.setAttribute('data-theme', 'light'); if (btn) btn.textContent = '🌙'; }
-    else { root.removeAttribute('data-theme'); if (btn) btn.textContent = prefersDark() ? '☀️' : '🌙'; }
-  }
-  function prefersDark() { return window.matchMedia('(prefers-color-scheme: dark)').matches; }
-  function currentTheme() { return root.getAttribute('data-theme') || (prefersDark() ? 'dark' : 'light'); }
-
-  applyTheme(saved);
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const next = currentTheme() === 'dark' ? 'light' : 'dark';
-      localStorage.setItem(STORE, next);
-      applyTheme(next);
-    });
-  }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (!localStorage.getItem(STORE)) applyTheme(null);
-  });
-}
-
-/* ══════════════════════════════════════════
    PRICE ALERTS (localStorage-based)
 ══════════════════════════════════════════ */
 const ALERT_STORE = 'gpn_price_alerts_v1';
@@ -1764,7 +1734,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupConnectionStatus();
   setupGoalPlanner();
   /* new features */
-  setupDarkMode();
   renderBSDate();
   renderMarketStatus();
   setupWhatsAppShare();

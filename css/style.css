@@ -160,22 +160,6 @@
 :root[data-theme="dark"] .calc-tabs { border-color: #374151; }
 :root[data-theme="dark"] .making-scale { color: #9CA3AF; }
 
-/* ===== DARK MODE TOGGLE BUTTON ===== */
-.dark-toggle-btn {
-  background: transparent;
-  border: 1px solid var(--dark-200);
-  color: var(--dark-600);
-  border-radius: 50%;
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
-  flex-shrink: 0;
-  font-size: 1rem;
-  line-height: 1;
-}
-.dark-toggle-btn:hover { background: var(--gold-100); border-color: var(--gold-400); color: var(--gold-500); }
-
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; font-size: 16px; }

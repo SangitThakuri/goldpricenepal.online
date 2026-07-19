@@ -85,7 +85,6 @@
         <a href="contact.html">Contact</a>
       </nav>
 
-      <button id="dark-toggle-btn" class="dark-toggle-btn" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
       <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -333,26 +332,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 <script src="js/history.js"></script>
-<script>
-(function(){
-  var STORE='gpn_theme', root=document.documentElement, btn=document.getElementById('dark-toggle-btn');
-  function prefersDark(){ return window.matchMedia('(prefers-color-scheme:dark)').matches; }
-  function currentTheme(){ return root.getAttribute('data-theme')||(prefersDark()?'dark':'light'); }
-  function applyTheme(t){
-    if(t==='dark'){ root.setAttribute('data-theme','dark'); if(btn) btn.textContent='☀️'; }
-    else if(t==='light'){ root.setAttribute('data-theme','light'); if(btn) btn.textContent='🌙'; }
-    else{ root.removeAttribute('data-theme'); if(btn) btn.textContent=prefersDark()?'☀️':'🌙'; }
-  }
-  applyTheme(localStorage.getItem(STORE));
-  if(btn) btn.addEventListener('click',function(){
-    var next=currentTheme()==='dark'?'light':'dark';
-    localStorage.setItem(STORE,next); applyTheme(next);
-  });
-  window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){
-    if(!localStorage.getItem(STORE)) applyTheme(null);
-  });
-})();
-</script>
 <script>
 (function() {
   document.getElementById('csvExportBtn').addEventListener('click', async function() {
