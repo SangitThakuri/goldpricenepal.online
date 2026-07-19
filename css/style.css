@@ -367,8 +367,8 @@ ul { list-style: none; }
 
 /* ===== HERO ===== */
 .hero {
-  background: linear-gradient(135deg, var(--dark-900) 0%, #1e2d3d 100%);
-  color: var(--white);
+  background: linear-gradient(135deg, #111827 0%, #1e2d3d 100%);
+  color: #FFFFFF;
   padding: 52px 0 64px;
   position: relative;
   overflow: hidden;
@@ -385,6 +385,7 @@ ul { list-style: none; }
 .hero-text h1 {
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 800; line-height: 1.2; margin-bottom: 12px;
+  color: #FFFFFF;
 }
 .hero-text h1 span { color: var(--gold-400); }
 .hero-text p { color: #9CA3AF; font-size: 1rem; margin-bottom: 20px; }
@@ -447,7 +448,7 @@ ul { list-style: none; }
   display: flex; justify-content: space-between; align-items: center;
 }
 .silver-card .label, .forex-card .label { font-size: .8rem; color: #9CA3AF; }
-.silver-card .val, .forex-card .val { font-size: 1.1rem; font-weight: 700; color: var(--white); }
+.silver-card .val, .forex-card .val { font-size: 1.1rem; font-weight: 700; color: #FFFFFF; }
 
 /* ===== STATS STRIP ===== */
 .stats-strip {
@@ -709,9 +710,9 @@ ul { list-style: none; }
   display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 40px; margin-bottom: 40px;
 }
-.footer-brand .logo { color: var(--white); font-size: 1.2rem; margin-bottom: 14px; }
+.footer-brand .logo { color: #FFFFFF; font-size: 1.2rem; margin-bottom: 14px; }
 .footer-brand p { font-size: .88rem; line-height: 1.7; color: #6B7280; max-width: 260px; }
-.footer-col h4 { color: var(--white); font-size: .9rem; font-weight: 700; margin-bottom: 14px; }
+.footer-col h4 { color: #FFFFFF; font-size: .9rem; font-weight: 700; margin-bottom: 14px; }
 .footer-col ul { display: flex; flex-direction: column; gap: 8px; }
 .footer-col ul li a { font-size: .86rem; color: #6B7280; transition: color var(--transition); }
 .footer-col ul li a:hover { color: var(--gold-400); }
@@ -1157,7 +1158,7 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   text-transform: uppercase; color: var(--gold-400); margin-bottom: 8px;
 }
 .planner-result-amount {
-  font-size: 2.1rem; font-weight: 900; color: var(--white);
+  font-size: 2.1rem; font-weight: 900; color: #FFFFFF;
   line-height: 1.1; letter-spacing: -.5px;
 }
 .planner-result-sub { font-size: .8rem; color: #9CA3AF; margin-top: 6px; }
@@ -1352,7 +1353,7 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   width: 28px; height: 28px; border-radius: 7px; object-fit: contain; flex-shrink: 0;
 }
 .pwa-install-text { font-size: .85rem; color: #D1D5DB; line-height: 1.4; }
-.pwa-install-text strong { color: var(--white); }
+.pwa-install-text strong { color: #FFFFFF; }
 .pwa-install-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .pwa-install-btn { padding: 8px 22px; font-size: .85rem; }
 .pwa-dismiss-btn {
@@ -1457,8 +1458,8 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   -webkit-overflow-scrolling: touch;
   /* subtle right-fade hint on mobile */
   background:
-    linear-gradient(to right, var(--white) 0%, transparent 24px) left center / 24px 100% no-repeat,
-    linear-gradient(to left,  var(--white) 0%, transparent 24px) right center / 24px 100% no-repeat,
+    linear-gradient(to right, var(--dark-100) 0%, transparent 24px) left center / 24px 100% no-repeat,
+    linear-gradient(to left,  var(--dark-100) 0%, transparent 24px) right center / 24px 100% no-repeat,
     linear-gradient(to right, rgba(0,0,0,.06) 0%, transparent 12px) left center / 12px 100% no-repeat,
     linear-gradient(to left,  rgba(0,0,0,.06) 0%, transparent 12px) right center / 12px 100% no-repeat;
   background-attachment: local, local, scroll, scroll;
@@ -1572,7 +1573,7 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   color: #9CA3AF; margin-bottom: 6px;
 }
 .tracker-sum-val {
-  font-size: 1.05rem; font-weight: 800; color: var(--white); line-height: 1.3;
+  font-size: 1.05rem; font-weight: 800; color: #FFFFFF; line-height: 1.3;
 }
 .tracker-sum-val .text-green { color: var(--green); }
 .tracker-sum-val .text-red   { color: var(--red); }
@@ -1764,8 +1765,9 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   border-bottom: 1px solid #FDE68A;
 }
 @media (prefers-color-scheme: dark) {
-  .festival-section { background: linear-gradient(135deg, rgba(201,151,46,.06) 0%, rgba(201,151,46,.12) 100%); border-color: rgba(201,151,46,.2); }
+  :root:not([data-theme="light"]) .festival-section { background: linear-gradient(135deg, rgba(201,151,46,.06) 0%, rgba(201,151,46,.12) 100%); border-color: rgba(201,151,46,.2); }
 }
+:root[data-theme="dark"] .festival-section { background: linear-gradient(135deg, rgba(201,151,46,.06) 0%, rgba(201,151,46,.12) 100%); border-color: rgba(201,151,46,.2); }
 
 .festival-header {
   display: flex; align-items: center; gap: 8px;
@@ -1775,9 +1777,12 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 .festival-heading-text {
   font-size: .9rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: .8px;
-  color: var(--dark-600);
+  color: #78716C;
 }
-@media (prefers-color-scheme: dark) { .festival-heading-text { color: var(--dark-300); } }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .festival-heading-text { color: #D1D5DB; }
+}
+:root[data-theme="dark"] .festival-heading-text { color: #D1D5DB; }
 
 .festival-countdown {
   display: grid;
@@ -1786,7 +1791,7 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 }
 
 .festival-card {
-  background: var(--white);
+  background: rgba(255,255,255,.85);
   border: 1px solid #FDE68A;
   border-radius: var(--radius);
   padding: 16px 18px;
@@ -1796,12 +1801,21 @@ textarea.form-control { resize: vertical; min-height: 130px; }
 }
 .festival-card:hover { box-shadow: 0 4px 12px rgba(201,151,46,.18); transform: translateY(-2px); }
 @media (prefers-color-scheme: dark) {
-  .festival-card { background: rgba(255,255,255,.04); border-color: rgba(201,151,46,.25); }
+  :root:not([data-theme="light"]) .festival-card { background: rgba(255,255,255,.05); border-color: rgba(201,151,46,.25); }
+  :root:not([data-theme="light"]) .festival-name-en { color: #E5E7EB; }
+  :root:not([data-theme="light"]) .festival-name-np { color: #9CA3AF; }
+  :root:not([data-theme="light"]) .festival-date { color: #6B7280; }
+  :root:not([data-theme="light"]) .festival-days-label { color: #9CA3AF; }
 }
+:root[data-theme="dark"] .festival-card { background: rgba(255,255,255,.05); border-color: rgba(201,151,46,.25); }
+:root[data-theme="dark"] .festival-name-en { color: #E5E7EB; }
+:root[data-theme="dark"] .festival-name-np { color: #9CA3AF; }
+:root[data-theme="dark"] .festival-date { color: #6B7280; }
+:root[data-theme="dark"] .festival-days-label { color: #9CA3AF; }
 
-.festival-name-en { font-size: .82rem; font-weight: 700; color: var(--dark-700); }
-.festival-name-np { font-size: .88rem; font-family: serif; color: var(--dark-500); }
-.festival-date    { font-size: .76rem; color: var(--dark-400); margin-top: 2px; }
+.festival-name-en { font-size: .82rem; font-weight: 700; color: #44403C; }
+.festival-name-np { font-size: .88rem; font-family: serif; color: #57534E; }
+.festival-date    { font-size: .76rem; color: #78716C; margin-top: 2px; }
 .festival-days-wrap {
   display: flex; align-items: baseline; gap: 4px; margin-top: 4px;
 }
@@ -1811,14 +1825,17 @@ textarea.form-control { resize: vertical; min-height: 130px; }
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.festival-days-label { font-size: .72rem; color: var(--dark-500); font-weight: 600; }
+.festival-days-label { font-size: .72rem; color: #78716C; font-weight: 600; }
 .festival-demand {
-  font-size: .72rem; color: var(--dark-500);
+  font-size: .72rem; color: #78716C;
   margin-top: 2px; line-height: 1.4;
-  border-top: 1px dashed rgba(0,0,0,.08);
+  border-top: 1px dashed rgba(0,0,0,.12);
   padding-top: 6px;
 }
-@media (prefers-color-scheme: dark) { .festival-demand { border-color: rgba(255,255,255,.08); } }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .festival-demand { border-color: rgba(255,255,255,.08); color: #6B7280; }
+}
+:root[data-theme="dark"] .festival-demand { border-color: rgba(255,255,255,.08); color: #6B7280; }
 
 @media (max-width: 600px) {
   .festival-countdown { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
