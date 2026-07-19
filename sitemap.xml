@@ -6,98 +6,191 @@
 
   <url>
     <loc>https://goldpricenepal.online/</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/24k-gold-price-nepal.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/22k-gold-price-nepal.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
+    <loc>https://goldpricenepal.online/18k-gold-price-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
     <loc>https://goldpricenepal.online/silver-price-nepal.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/gold-calculator.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/history.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- Blog -->
+  <url>
+    <loc>https://goldpricenepal.online/blog/</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-price-today-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/how-to-buy-gold-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/24k-vs-22k-gold-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-price-history-nepal-2025.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-investment-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/fenegosida-gold-price.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-loan-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/wedding-gold-jewelry-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/1-tola-gold-price-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-vs-real-estate-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <url>
+    <loc>https://goldpricenepal.online/blog/gold-purity-guide-nepal.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.72</priority>
+  </url>
+
+  <!-- Company -->
   <url>
     <loc>https://goldpricenepal.online/about.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/editorial-policy.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/data-sources.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/contact.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/privacy-policy.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/terms.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/disclaimer.html</loc>
-    <lastmod>2026-07-07</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
     <loc>https://goldpricenepal.online/widget.html</loc>
-    <lastmod>2026-07-17</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
