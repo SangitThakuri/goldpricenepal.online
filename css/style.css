@@ -556,9 +556,20 @@ ul { list-style: none; }
   padding: 52px 0 0;
 }
 .footer-grid {
-  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px; margin-bottom: 40px;
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1.4fr;
+  gap: 32px; margin-bottom: 40px;
 }
+.footer-blog-list { display: flex; flex-direction: column; gap: 10px; }
+.footer-blog-list li a {
+  font-size: .82rem; color: #6B7280; line-height: 1.4;
+  transition: color var(--transition); display: block;
+}
+.footer-blog-list li a:hover { color: var(--gold-400); }
+.footer-blog-more {
+  display: inline-block; margin-top: 6px; font-size: .8rem;
+  color: var(--gold-400); font-weight: 600;
+}
+.footer-blog-more:hover { color: var(--gold-300); }
 .footer-brand .logo { color: #FFFFFF; font-size: 1.2rem; margin-bottom: 14px; }
 .footer-brand p { font-size: .88rem; line-height: 1.7; color: #6B7280; max-width: 260px; }
 .footer-col h4 { color: #FFFFFF; font-size: .9rem; font-weight: 700; margin-bottom: 14px; }
