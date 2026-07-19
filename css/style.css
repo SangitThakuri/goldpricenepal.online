@@ -102,12 +102,12 @@ ul { list-style: none; }
 .logo span { color: var(--gold-400); }
 
 .nav-menu {
-  display: flex; align-items: center; gap: 4px;
+  display: flex; align-items: center; gap: 1px;
 }
 .nav-menu a {
-  padding: 7px 13px; border-radius: var(--radius-sm);
-  font-size: .9rem; font-weight: 500; color: var(--dark-700);
-  transition: all var(--transition);
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: .84rem; font-weight: 500; color: var(--dark-700);
+  white-space: nowrap; transition: all var(--transition);
 }
 .nav-menu a:hover, .nav-menu a.active {
   background: var(--gold-100); color: var(--gold-600);
