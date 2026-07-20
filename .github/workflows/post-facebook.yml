@@ -2,69 +2,66 @@ name: Post Daily Gold Price to Facebook
 
 on:
   schedule:
-    # 9:15 AM Nepal Time = 3:30 AM UTC
     - cron: '30 3 * * 1-6'
-  workflow_dispatch: # allow manual trigger
+  workflow_dispatch:
 
 jobs:
   post-to-facebook:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Fetch gold price and post to Facebook
+      - name: Fetch price and post to Facebook
         run: |
-          # Fetch latest rates
-          RATES=$(curl -s "https://goldpricenepal.online/data/prices.json" 2>/dev/null || echo "{}")
+          python3 << 'PYEOF'
+          import urllib.request, urllib.parse, json, sys, os
+          from datetime import datetime
+          import pytz
 
-          GOLD_24K=$(echo "$RATES" | python3 -c "
-          import sys, json
+          # Fetch prices
           try:
-            d = json.load(sys.stdin)
-            v = d.get('gold24kTola', 0)
-            print('{:,.0f}'.format(v) if v else '')
-          except: print('')
-          ")
+              with urllib.request.urlopen("https://goldpricenepal.online/data/prices.json", timeout=10) as r:
+                  data = json.loads(r.read())
+          except Exception as e:
+              print(f"Failed to fetch prices: {e}")
+              sys.exit(0)
 
-          GOLD_22K=$(echo "$RATES" | python3 -c "
-          import sys, json
+          gold24 = data.get("gold24kTola", 0)
+          if not gold24:
+              print("No gold price found, skipping.")
+              sys.exit(0)
+
+          gold22 = gold24 * 22 / 24
+
+          # Nepal time
+          npt = pytz.timezone("Asia/Kathmandu")
+          now = datetime.now(npt)
+          date_str = now.strftime("%B %d, %Y")
+          day_str = now.strftime("%A")
+
+          message = (
+              f"\U0001f3c5 Gold Price Nepal - {date_str} ({day_str})\n\n"
+              f"\U0001f947 24K Fine Gold:   NPR {gold24:,.0f} / tola\n"
+              f"\U0001f948 22K Tejabi Gold: NPR {gold22:,.0f} / tola\n\n"
+              f"Sun Ko Bhau - Aajako FENEGOSIDA Rate\n\n"
+              f"Live rates & calculator:\nhttps://goldpricenepal.online\n\n"
+              f"#GoldPriceNepal #SunKoBhau #NepalGold #FENEGOSIDA #SunaKoBhau"
+          )
+
+          page_id = os.environ["FB_PAGE_ID"]
+          token   = os.environ["FB_PAGE_ACCESS_TOKEN"]
+
+          url  = f"https://graph.facebook.com/v19.0/{page_id}/feed"
+          body = urllib.parse.urlencode({"message": message, "access_token": token}).encode()
+
+          req = urllib.request.Request(url, data=body, method="POST")
           try:
-            d = json.load(sys.stdin)
-            v = d.get('gold24kTola', 0)
-            v22 = v * 22 / 24
-            print('{:,.0f}'.format(v22) if v else '')
-          except: print('')
-          ")
-
-          DATE=$(TZ='Asia/Kathmandu' date '+%B %d, %Y')
-          DAY=$(TZ='Asia/Kathmandu' date '+%A')
-
-          if [ -z "$GOLD_24K" ]; then
-            echo "Could not fetch gold price. Skipping post."
-            exit 0
-          fi
-
-          MESSAGE="🏅 आजको सुनको भाउ — ${DATE} (${DAY})
-
-🥇 24K Fine Gold:   NPR ${GOLD_24K} / tola
-🥈 22K Tejabi Gold: NPR ${GOLD_22K} / tola
-
-📊 Live rates, calculator & price history:
-👉 https://goldpricenepal.online
-
-#सुनकोभाउ #GoldPriceNepal #SunKoBhau #NepalGold #FENEGOSIDA"
-
-          RESPONSE=$(curl -s -X POST \
-            "https://graph.facebook.com/v19.0/${{ secrets.FB_PAGE_ID }}/feed" \
-            --data-urlencode "message=${MESSAGE}" \
-            -d "access_token=${{ secrets.FB_PAGE_ACCESS_TOKEN }}")
-
-          echo "Facebook response: $RESPONSE"
-
-          # Check for error
-          if echo "$RESPONSE" | grep -q '"error"'; then
-            echo "ERROR posting to Facebook!"
-            exit 1
-          else
-            POST_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id','unknown'))")
-            echo "Posted successfully! Post ID: $POST_ID"
-          fi
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  resp = json.loads(r.read())
+              print(f"Posted! ID: {resp.get('id')}")
+          except urllib.error.HTTPError as e:
+              err = json.loads(e.read())
+              print(f"Facebook error: {err}")
+              sys.exit(1)
+          PYEOF
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
