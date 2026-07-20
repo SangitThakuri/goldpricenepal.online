@@ -252,15 +252,13 @@ ul { list-style: none; }
   gap: 16px; width: 100%; max-width: 720px;
 }
 .price-card {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
+  background: #1a2640;
+  border: 1px solid rgba(255,255,255,.18);
   border-radius: var(--radius);
   padding: 20px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.price-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.price-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 .price-card .purity {
   font-size: .78rem; font-weight: 700; letter-spacing: .8px;
   text-transform: uppercase; color: var(--gold-400); margin-bottom: 6px;
@@ -280,18 +278,19 @@ ul { list-style: none; }
   padding: 3px 10px; border-radius: 50px; font-size: .78rem; font-weight: 700;
   letter-spacing: .01em;
 }
-.trend-pill.up   { background: rgba(16,185,129,0.12); color: #059669; }
-.trend-pill.down { background: rgba(239,68,68,0.10);  color: #DC2626; }
+.trend-pill.up   { background: rgba(16,185,129,0.18); color: #059669; }
+.trend-pill.down { background: rgba(239,68,68,0.15);  color: #DC2626; }
 .price-card.featured {
-  background: linear-gradient(135deg, rgba(201,151,46,.25), rgba(201,151,46,.12));
-  border-color: rgba(201,151,46,.5);
+  background: linear-gradient(135deg, #2a1f08, #3d2e08);
+  border-color: rgba(201,151,46,.6);
+  box-shadow: 0 0 0 1px rgba(201,151,46,.2);
 }
 
 /* Hero secondary card */
 .hero-secondary { display: flex; flex-direction: column; gap: 14px; }
 .silver-card, .forex-card {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.1);
+  background: #1a2640;
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: var(--radius-sm);
   padding: 16px 20px;
   display: flex; justify-content: space-between; align-items: center;
