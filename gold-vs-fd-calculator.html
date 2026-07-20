@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold vs Fixed Deposit Calculator Nepal 2026 | Which is Better Investment?</title>
+  <meta name="description" content="Compare gold investment vs bank FD returns in Nepal. Enter your amount, tenure, and FD interest rate to see which investment grows more — with live gold prices from FENEGOSIDA." />
+  <meta name="keywords" content="gold vs fd nepal, gold vs fixed deposit nepal, gold investment calculator nepal, should i buy gold or fd nepal, gold return vs bank interest nepal 2026" />
+  <link rel="canonical" href="https://goldpricenepal.online/gold-vs-fd-calculator.html" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://goldpricenepal.online/gold-vs-fd-calculator.html" />
+  <meta property="og:title" content="Gold vs Fixed Deposit Calculator Nepal 2026" />
+  <meta property="og:description" content="Live calculator: compare gold vs FD returns in Nepal using real FENEGOSIDA prices and historical gold growth rates." />
+  <meta property="og:site_name" content="Gold Price Nepal" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Gold vs FD Calculator Nepal",
+    "url": "https://goldpricenepal.online/gold-vs-fd-calculator.html",
+    "description": "Compare returns from gold investment vs bank fixed deposit in Nepal",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web"
+  }
+  </script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    .gfd-card { background:#fff; border:1px solid var(--dark-200); border-radius:var(--radius); padding:28px; }
+    .gfd-inputs { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:28px; }
+    @media(max-width:580px){ .gfd-inputs { grid-template-columns:1fr; } }
+    .gfd-label { font-size:.82rem; font-weight:700; color:var(--dark-700); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:.4px; }
+    .gfd-input { width:100%; padding:11px 14px; border:1.5px solid var(--dark-200); border-radius:var(--radius-sm); font-size:1rem; color:var(--dark-900); background:#fff; transition:border-color var(--transition); }
+    .gfd-input:focus { outline:none; border-color:var(--gold-400); }
+    .gfd-results { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin:24px 0; }
+    @media(max-width:680px){ .gfd-results { grid-template-columns:1fr; } }
+    .gfd-result-box { border-radius:var(--radius); padding:22px; text-align:center; }
+    .gfd-result-box.gold { background:linear-gradient(135deg,#111827,#1e2d3d); }
+    .gfd-result-box.fd { background:#F0FDF4; border:1px solid #A7F3D0; }
+    .gfd-result-box.diff { background:#FEF8E8; border:1px solid var(--gold-400); }
+    .gfd-res-label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+    .gfd-result-box.gold .gfd-res-label { color:#9CA3AF; }
+    .gfd-result-box.fd .gfd-res-label { color:#065F46; }
+    .gfd-result-box.diff .gfd-res-label { color:var(--gold-600); }
+    .gfd-res-val { font-size:1.5rem; font-weight:800; }
+    .gfd-result-box.gold .gfd-res-val { color:#E4B84D; }
+    .gfd-result-box.fd .gfd-res-val { color:#065F46; }
+    .gfd-result-box.diff .gfd-res-val { color:var(--gold-600); }
+    .gfd-res-sub { font-size:.78rem; margin-top:4px; }
+    .gfd-result-box.gold .gfd-res-sub { color:#9CA3AF; }
+    .gfd-result-box.fd .gfd-res-sub { color:#6EE7B7; }
+    .gfd-result-box.diff .gfd-res-sub { color:var(--dark-500); }
+    .gfd-winner { border-radius:var(--radius); padding:16px 20px; margin-top:16px; display:flex; align-items:center; gap:12px; font-weight:600; font-size:.95rem; }
+    .gfd-winner.gold { background:linear-gradient(135deg,#111827,#1e2d3d); color:#E4B84D; }
+    .gfd-winner.fd { background:#F0FDF4; color:#065F46; border:1px solid #A7F3D0; }
+    .gfd-winner.tie { background:#FEF8E8; color:var(--gold-600); border:1px solid var(--gold-200); }
+    .chart-bar-wrap { margin:28px 0 0; }
+    .chart-bar-label { font-size:.8rem; font-weight:600; color:var(--dark-600); margin-bottom:6px; display:flex; justify-content:space-between; }
+    .chart-bar-track { background:var(--dark-100); border-radius:50px; height:28px; position:relative; overflow:hidden; margin-bottom:10px; }
+    .chart-bar-fill { height:100%; border-radius:50px; display:flex; align-items:center; padding:0 12px; font-size:.8rem; font-weight:700; color:#fff; transition:width .6s ease; min-width:60px; }
+    .chart-bar-fill.gold { background:linear-gradient(90deg,#B8860B,#E4B84D); }
+    .chart-bar-fill.fd { background:linear-gradient(90deg,#059669,#10B981); }
+    .assumptions { background:var(--dark-100); border-radius:var(--radius-sm); padding:14px 18px; margin-top:20px; font-size:.8rem; color:var(--dark-500); }
+    .assumptions strong { color:var(--dark-700); }
+    .tab-row { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+    .scenario-btn { padding:7px 16px; border:1.5px solid var(--dark-200); border-radius:50px; font-size:.82rem; font-weight:600; cursor:pointer; background:#fff; color:var(--dark-700); transition:all var(--transition); }
+    .scenario-btn.active, .scenario-btn:hover { border-color:var(--gold-400); color:var(--gold-600); background:var(--gold-50); }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+        <div>Gold Price <span>Nepal</span></div>
+      </a>
+      <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#rates">Today's Rate</a>
+        <a href="gold-calculator.html">Calculator</a>
+        <a href="index.html#chart">Chart</a>
+        <a href="history.html">History</a>
+        <a href="blog/index.html">Blog</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="lang-toggle-btn" class="lang-toggle-btn" aria-label="Switch to Nepali">नेपाली</button>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span>Gold vs FD Calculator</span></div>
+    <h1>Gold vs Fixed Deposit Calculator — Nepal</h1>
+    <p>Compare how much your money grows in gold vs a bank FD over any time period</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width:860px">
+
+    <div class="gfd-card">
+      <h2 style="font-size:1.15rem;margin-bottom:6px;color:var(--dark-900)">Investment Comparison Calculator</h2>
+      <p style="font-size:.88rem;color:var(--dark-500);margin-bottom:24px">Uses live FENEGOSIDA gold price + historical gold appreciation + your FD rate</p>
+
+      <div class="tab-row" id="scenarioRow">
+        <button class="scenario-btn active" data-years="1" data-gold="12" data-fd="8">1 Year</button>
+        <button class="scenario-btn" data-years="3" data-gold="18" data-fd="8">3 Years</button>
+        <button class="scenario-btn" data-years="5" data-gold="22" data-fd="8">5 Years</button>
+        <button class="scenario-btn" data-years="10" data-gold="19" data-fd="8">10 Years</button>
+        <button class="scenario-btn" data-years="0" data-gold="0" data-fd="0">Custom</button>
+      </div>
+
+      <div class="gfd-inputs">
+        <div>
+          <label class="gfd-label" for="gfdAmount">Investment Amount (NPR)</label>
+          <input class="gfd-input" id="gfdAmount" type="number" value="500000" min="1000" step="10000" />
+        </div>
+        <div>
+          <label class="gfd-label" for="gfdYears">Tenure (Years)</label>
+          <input class="gfd-input" id="gfdYears" type="number" value="1" min="1" max="30" />
+        </div>
+        <div>
+          <label class="gfd-label" for="gfdGoldRate">Expected Gold Growth (% p.a.)</label>
+          <input class="gfd-input" id="gfdGoldRate" type="number" value="12" step="0.5" />
+          <span style="font-size:.74rem;color:var(--dark-400);margin-top:4px;display:block">Avg 2020–2026: ~22%/yr</span>
+        </div>
+        <div>
+          <label class="gfd-label" for="gfdFdRate">Bank FD Interest Rate (% p.a.)</label>
+          <input class="gfd-input" id="gfdFdRate" type="number" value="8" step="0.25" />
+          <span style="font-size:.74rem;color:var(--dark-400);margin-top:4px;display:block">Nepal avg FD: 7–9%</span>
+        </div>
+      </div>
+
+      <div class="gfd-results">
+        <div class="gfd-result-box gold">
+          <div class="gfd-res-label">Gold Value</div>
+          <div class="gfd-res-val" id="resGoldVal">—</div>
+          <div class="gfd-res-sub" id="resGoldGain">—</div>
+        </div>
+        <div class="gfd-result-box fd">
+          <div class="gfd-res-label">FD Maturity Value</div>
+          <div class="gfd-res-val" id="resFdVal">—</div>
+          <div class="gfd-res-sub" id="resFdGain">—</div>
+        </div>
+        <div class="gfd-result-box diff">
+          <div class="gfd-res-label">Difference</div>
+          <div class="gfd-res-val" id="resDiff">—</div>
+          <div class="gfd-res-sub" id="resDiffLabel">—</div>
+        </div>
+      </div>
+
+      <div class="chart-bar-wrap">
+        <div class="chart-bar-label"><span>🥇 Gold</span><span id="barGoldPct">—</span></div>
+        <div class="chart-bar-track"><div class="chart-bar-fill gold" id="barGold" style="width:0%">—</div></div>
+        <div class="chart-bar-label"><span>🏦 Fixed Deposit</span><span id="barFdPct">—</span></div>
+        <div class="chart-bar-track"><div class="chart-bar-fill fd" id="barFd" style="width:0%">—</div></div>
+      </div>
+
+      <div id="gfdWinner" class="gfd-winner" style="margin-top:20px"></div>
+
+      <div class="assumptions">
+        <strong>Assumptions:</strong> Gold growth is compounded annually at the rate you enter. FD is compounded quarterly (standard Nepal bank practice). Gold figure does not include import duty premium already built into Nepal's purchase price. FD interest is gross (before TDS). Neither figure accounts for storage costs (gold) or account fees (FD).
+        <br><br>⚠️ <strong>Not financial advice.</strong> Past gold performance does not guarantee future returns. Always consult a certified financial advisor before investing.
+      </div>
+    </div>
+
+    <div class="prose" style="margin-top:40px">
+      <h2>Gold vs Fixed Deposit in Nepal: What the Data Shows</h2>
+      <p>Over the past 6 years (2020–2026), Nepal's 24K gold price rose from approximately NPR 85,000 per tola to NPR 2,82,100 — an annualised return of roughly <strong>22% per year</strong>. Bank FDs in Nepal have offered 7–9% annually during the same period.</p>
+
+      <p>However, this comparison needs important caveats:</p>
+      <ul>
+        <li><strong>Gold returns are not guaranteed</strong> — the 2020–2026 period was exceptionally bullish due to COVID uncertainty, global inflation, and geopolitical events. Long-term (20-year) historical gold returns globally are closer to 8–12%/year.</li>
+        <li><strong>FDs have no import duty handicap</strong> — Nepal's gold carries a ~23–25% import premium baked into the purchase price. You pay this upfront and only recover it as gold prices rise.</li>
+        <li><strong>FDs earn income immediately</strong> — interest starts accruing day one. Gold only pays when you sell at a higher price.</li>
+        <li><strong>FDs are fully liquid and insured</strong> — Nepal's Deposit and Credit Guarantee Fund (DCGF) insures up to NPR 5 lakh per bank. Gold has no such guarantee and requires secure storage.</li>
+      </ul>
+
+      <h2>Our Recommendation</h2>
+      <p>A balanced approach works best for most Nepali investors:</p>
+      <ul>
+        <li><strong>FD</strong> for your emergency fund and short-term goals (under 3 years) — predictable returns, insured</li>
+        <li><strong>Gold</strong> for long-term wealth preservation (5+ years), cultural requirements, and currency hedge</li>
+        <li>Target: 15–25% of savings in physical gold; remainder in FDs, stocks, and real estate</li>
+      </ul>
+
+      <div class="info-box">
+        <span class="info-icon">📊</span>
+        <span>See how gold has actually performed: <a href="history.html">View 301-day gold price history →</a></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo"><div class="logo-icon"><svg width="18" height="16" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div><div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div></a>
+        <p style="margin-top:12px">Nepal's trusted source for live gold prices from FENEGOSIDA.</p>
+      </div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="gold-calculator.html">Gold Calculator</a></li><li><a href="gold-vs-fd-calculator.html">Gold vs FD</a></li><li><a href="history.html">Price History</a></li><li><a href="index.html#tracker">Investment Tracker</a></li></ul></div>
+      <div class="footer-col"><h4>Prices</h4><ul><li><a href="24k-gold-price-nepal.html">24K Gold</a></li><li><a href="22k-gold-price-nepal.html">22K Gold</a></li><li><a href="18k-gold-price-nepal.html">18K Gold</a></li><li><a href="silver-price-nepal.html">Silver</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="disclaimer.html">Disclaimer</a></li></ul></div>
+    </div>
+    <div style="border-top:1px solid #374151;padding:20px 0;text-align:center;font-size:.78rem;color:#6B7280;">
+      © 2026 goldpricenepal.online · <a href="disclaimer.html" style="color:#6B7280">Disclaimer</a> · Not financial advice
+    </div>
+  </div>
+</footer>
+
+<script>
+const fmt = n => 'NPR ' + Math.round(n).toLocaleString('en-NP');
+const pct = n => (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+
+function calc() {
+  const amount = parseFloat(document.getElementById('gfdAmount').value) || 500000;
+  const years  = parseFloat(document.getElementById('gfdYears').value) || 1;
+  const gRate  = parseFloat(document.getElementById('gfdGoldRate').value) / 100 || 0.12;
+  const fdRate = parseFloat(document.getElementById('gfdFdRate').value) / 100 || 0.08;
+
+  const goldFV = amount * Math.pow(1 + gRate, years);
+  const fdFV   = amount * Math.pow(1 + fdRate / 4, years * 4); // quarterly compounding
+  const goldGain = goldFV - amount;
+  const fdGain   = fdFV - amount;
+  const diff     = goldFV - fdFV;
+  const goldPctTotal = ((goldFV - amount) / amount) * 100;
+  const fdPctTotal   = ((fdFV - amount) / amount) * 100;
+
+  document.getElementById('resGoldVal').textContent = fmt(goldFV);
+  document.getElementById('resGoldGain').textContent = `+${fmt(goldGain)} gain (${pct(goldPctTotal)})`;
+  document.getElementById('resFdVal').textContent = fmt(fdFV);
+  document.getElementById('resFdGain').textContent = `+${fmt(fdGain)} interest (${pct(fdPctTotal)})`;
+  document.getElementById('resDiff').textContent = fmt(Math.abs(diff));
+  document.getElementById('resDiffLabel').textContent = diff > 0 ? 'Gold leads FD' : diff < 0 ? 'FD leads Gold' : 'Equal returns';
+
+  // Bar chart
+  const maxVal = Math.max(goldFV, fdFV);
+  const gw = (goldFV / maxVal * 95).toFixed(1);
+  const fw = (fdFV / maxVal * 95).toFixed(1);
+  document.getElementById('barGold').style.width = gw + '%';
+  document.getElementById('barGold').textContent = fmt(goldFV);
+  document.getElementById('barFd').style.width = fw + '%';
+  document.getElementById('barFd').textContent = fmt(fdFV);
+  document.getElementById('barGoldPct').textContent = pct(goldPctTotal) + ' total';
+  document.getElementById('barFdPct').textContent = pct(fdPctTotal) + ' total';
+
+  // Winner banner
+  const w = document.getElementById('gfdWinner');
+  if (Math.abs(diff) < amount * 0.01) {
+    w.className = 'gfd-winner tie';
+    w.innerHTML = '≈ Both investments perform similarly over this period.';
+  } else if (diff > 0) {
+    w.className = 'gfd-winner gold';
+    w.innerHTML = `🥇 Gold wins by <strong>${fmt(diff)}</strong> over ${years} year${years>1?'s':''} at ${(gRate*100).toFixed(1)}% p.a. growth.`;
+  } else {
+    w.className = 'gfd-winner fd';
+    w.innerHTML = `🏦 Fixed Deposit wins by <strong>${fmt(-diff)}</strong> over ${years} year${years>1?'s':''} at ${(fdRate*100).toFixed(1)}% interest.`;
+  }
+}
+
+// Scenario presets
+document.getElementById('scenarioRow').addEventListener('click', e => {
+  const btn = e.target.closest('.scenario-btn');
+  if (!btn) return;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const y = +btn.dataset.years, g = +btn.dataset.gold, f = +btn.dataset.fd;
+  if (y > 0) {
+    document.getElementById('gfdYears').value = y;
+    document.getElementById('gfdGoldRate').value = g;
+    document.getElementById('gfdFdRate').value = f;
+  }
+  calc();
+});
+
+// Live recalc
+['gfdAmount','gfdYears','gfdGoldRate','gfdFdRate'].forEach(id =>
+  document.getElementById(id).addEventListener('input', calc)
+);
+
+calc();
+</script>
+<script src="js/main.js?v=2.4.0"></script>
+</body>
+</html>

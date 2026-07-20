@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="light only"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>What If Gold Calculator Nepal — If I Had Bought on Date X | goldpricenepal.online</title>
+  <meta name="description" content="What if I had bought gold in Nepal on a specific date? See how much your investment would be worth today. Retrospective gold return calculator using FENEGOSIDA historical rates."/>
+  <meta name="keywords" content="what if gold calculator nepal, gold investment return calculator nepal, if i bought gold nepal, gold return nepal calculator, gold price nepal history calculator"/>
+  <meta name="robots" content="index,follow"/>
+  <link rel="canonical" href="https://goldpricenepal.online/gold-what-if-calculator.html"/>
+  <meta property="og:title" content="What If I Had Bought Gold in Nepal? — Retrospective Calculator"/>
+  <meta property="og:description" content="Enter a past date and amount to see what your Nepal gold investment would be worth today."/>
+  <meta property="og:type" content="website"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <style>
+    .calc-wrap{max-width:820px;margin:0 auto}
+    .calc-card{background:#fff;border-radius:var(--radius);border:1px solid var(--dark-200);padding:28px;box-shadow:var(--shadow-sm);margin-bottom:20px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+    @media(max-width:580px){.form-row{grid-template-columns:1fr}}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:.82rem;font-weight:600;color:var(--dark-700)}
+    .form-group input,.form-group select{border:1.5px solid var(--dark-300);border-radius:var(--radius-sm);padding:10px 14px;font-size:.95rem;color:var(--dark-900);outline:none;transition:border-color var(--transition)}
+    .form-group input:focus,.form-group select:focus{border-color:var(--gold-400)}
+    .result-banner{border-radius:var(--radius);padding:28px;text-align:center;margin-bottom:20px;display:none}
+    .result-banner.gain{background:linear-gradient(135deg,#064E3B,#065F46);color:#fff}
+    .result-banner.loss{background:linear-gradient(135deg,#7F1D1D,#991B1B);color:#fff}
+    .result-amount{font-size:2.2rem;font-weight:800;margin:8px 0}
+    .result-label{font-size:.88rem;opacity:.85;margin-bottom:4px}
+    .result-meta{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+    .result-meta-item{text-align:center}
+    .result-meta-item .val{font-size:1.3rem;font-weight:700}
+    .result-meta-item .lbl{font-size:.75rem;opacity:.75}
+    .detail-table{width:100%;border-collapse:collapse;font-size:.88rem}
+    .detail-table th{background:#111827;color:#fff;padding:10px 14px;text-align:left}
+    .detail-table td{padding:9px 14px;border-bottom:1px solid var(--dark-200);color:var(--dark-700)}
+    .detail-table tr:nth-child(even) td{background:var(--dark-100)}
+    .quick-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .quick-btn{padding:7px 14px;border-radius:50px;border:1.5px solid var(--dark-300);background:#fff;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--dark-700);transition:all var(--transition)}
+    .quick-btn:hover,.quick-btn.active{border-color:var(--gold-400);background:var(--gold-100);color:var(--gold-700)}
+    .disclaimer-note{background:var(--gold-100);border-left:4px solid var(--gold-400);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:12px 16px;font-size:.8rem;color:var(--dark-700);line-height:1.6;margin-top:16px}
+    .history-note{font-size:.78rem;color:var(--dark-500);text-align:center;margin-top:8px}
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container"><div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div>
+      <div>Gold Price <span>Nepal</span></div>
+    </a>
+    <nav id="navMenu" class="nav-menu" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="index.html#rates">Today's Rate</a>
+      <a href="gold-calculator.html">Calculator</a>
+      <a href="history.html">History</a>
+      <a href="blog/index.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div></div>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span>›</span><span>What-If Gold Calculator</span></nav>
+    <h1>What If I Had Bought Gold in Nepal?</h1>
+    <p>Pick a past date, enter how much you spent, and see your investment's value today</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container"><div class="calc-wrap">
+
+    <div class="calc-card">
+      <h2 style="font-size:1.1rem;font-weight:700;color:var(--dark-900);margin-bottom:6px">Retrospective Gold Return Calculator</h2>
+      <p style="font-size:.86rem;color:var(--dark-600);margin-bottom:20px">Enter a past date and your investment amount to see what you would have earned.</p>
+
+      <div class="quick-btns" id="quickBtns">
+        <span style="font-size:.78rem;color:var(--dark-500);align-self:center">Quick picks:</span>
+        <button class="quick-btn" data-months="1">1 month ago</button>
+        <button class="quick-btn" data-months="3">3 months ago</button>
+        <button class="quick-btn" data-months="6">6 months ago</button>
+        <button class="quick-btn" data-months="12">1 year ago</button>
+        <button class="quick-btn" data-months="24">2 years ago</button>
+        <button class="quick-btn" data-months="60">5 years ago</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="buyDate">Date of Purchase</label>
+          <input type="date" id="buyDate" min="2020-01-01"/>
+        </div>
+        <div class="form-group">
+          <label for="goldPurity">Gold Purity</label>
+          <select id="goldPurity">
+            <option value="24">24K Fine Gold (99.9%)</option>
+            <option value="22" selected>22K Tejabi (91.7%)</option>
+            <option value="18">18K Gold (75%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="buyUnit">Unit Purchased</label>
+          <select id="buyUnit">
+            <option value="tola">Tola</option>
+            <option value="gram">Grams</option>
+            <option value="npr">NPR Amount Spent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="buyQty" id="buyQtyLabel">Quantity</label>
+          <input type="number" id="buyQty" min="0.01" step="0.01" placeholder="e.g. 2" value="2"/>
+        </div>
+      </div>
+
+      <button id="calcBtn" class="btn btn-gold" style="width:100%;padding:13px;font-size:1rem">Calculate My Return →</button>
+      <p class="history-note">Uses historical FENEGOSIDA rate estimates. <a href="history.html">View full price history chart →</a></p>
+    </div>
+
+    <!-- Result -->
+    <div class="result-banner gain" id="resultBanner">
+      <div id="resultEmoji" style="font-size:2rem">📈</div>
+      <div class="result-label" id="resultLabel">Your investment value today</div>
+      <div class="result-amount" id="resultAmount">NPR 0</div>
+      <div class="result-meta">
+        <div class="result-meta-item">
+          <div class="val" id="metaInvested">—</div>
+          <div class="lbl">You Invested</div>
+        </div>
+        <div class="result-meta-item">
+          <div class="val" id="metaGain">—</div>
+          <div class="lbl">Gain / Loss</div>
+        </div>
+        <div class="result-meta-item">
+          <div class="val" id="metaReturn">—</div>
+          <div class="lbl">Total Return</div>
+        </div>
+        <div class="result-meta-item">
+          <div class="val" id="metaCAGR">—</div>
+          <div class="lbl">CAGR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail table -->
+    <div class="calc-card" id="detailCard" style="display:none">
+      <h3 style="font-size:.95rem;font-weight:700;color:var(--dark-900);margin-bottom:14px">Calculation Breakdown</h3>
+      <table class="detail-table">
+        <thead><tr><th>Item</th><th>Value</th></tr></thead>
+        <tbody id="detailBody"></tbody>
+      </table>
+      <div class="disclaimer-note">
+        ⚠️ Historical rates are estimates based on reported FENEGOSIDA data and international gold price trends. Actual rates on the purchase date may differ. This tool is for educational purposes only and does not constitute financial advice.
+      </div>
+    </div>
+
+    <!-- Share / CTA -->
+    <div class="calc-card" id="ctaCard" style="display:none;text-align:center">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px">Compare With a Fixed Deposit</h3>
+      <p style="font-size:.86rem;color:var(--dark-600);margin-bottom:14px">Would your money have done better in an FD? Find out with our Gold vs FD calculator.</p>
+      <a href="gold-vs-fd-calculator.html" class="btn btn-gold" style="display:inline-block;margin-right:10px">Gold vs FD Calculator →</a>
+      <a href="history.html" class="btn" style="display:inline-block;background:var(--dark-100);color:var(--dark-800)">View Price History Chart</a>
+    </div>
+
+  </div></div>
+</section>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="logo"><div class="logo-icon"><svg width="18" height="16" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 18.5L8 4L13 11.5L17 2.5L21 18.5H1Z" fill="rgba(228,184,77,0.35)"/><path d="M8 4L13 11.5L17 2.5L20.5 18.5H2L8 4Z" fill="rgba(228,184,77,0.65)"/><path d="M13 11.5L17 2.5L20 18.5H9L13 11.5Z" fill="#E4B84D"/></svg></div><div style="color:#fff">Gold Price <span style="color:var(--gold-400)">Nepal</span></div></a></div>
+    <div class="footer-col"><h4>Tools</h4><ul><li><a href="gold-calculator.html">Calculator</a></li><li><a href="gold-vs-fd-calculator.html">Gold vs FD</a></li><li><a href="gold-what-if-calculator.html" style="color:var(--gold-400)">What-If Calculator</a></li><li><a href="history.html">History</a></li></ul></div>
+    <div class="footer-col"><h4>Blog</h4><ul><li><a href="blog/index.html">All Articles</a></li><li><a href="blog/gold-investment-nepal.html">Investing</a></li><li><a href="blog/how-to-buy-gold-nepal.html">Buying Guide</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="disclaimer.html">Disclaimer</a></li></ul></div>
+  </div>
+  <div style="border-top:1px solid #374151;padding:20px 0;text-align:center;font-size:.78rem;color:#6B7280;">© 2026 goldpricenepal.online · <a href="disclaimer.html" style="color:#6B7280">Disclaimer</a></div>
+</div></footer>
+
+<script>
+// Historical Nepal 24K gold price per tola (NPR) — approximate FENEGOSIDA data
+// Source: reported rates, adjusted for known milestones
+const HISTORY = [
+  // [year, month(0-indexed), price_24k_per_tola]
+  [2020, 0, 85000],[2020, 2, 90000],[2020, 4, 100000],[2020, 6, 115000],[2020, 9, 112000],[2020, 11, 108000],
+  [2021, 0, 110000],[2021, 2, 108000],[2021, 4, 112000],[2021, 6, 108000],[2021, 9, 115000],[2021, 11, 118000],
+  [2022, 0, 122000],[2022, 2, 130000],[2022, 4, 135000],[2022, 6, 138000],[2022, 9, 140000],[2022, 11, 145000],
+  [2023, 0, 150000],[2023, 2, 160000],[2023, 4, 170000],[2023, 6, 175000],[2023, 9, 180000],[2023, 11, 195000],
+  [2024, 0, 200000],[2024, 2, 215000],[2024, 4, 230000],[2024, 6, 240000],[2024, 9, 255000],[2024, 11, 265000],
+  [2025, 0, 270000],[2025, 2, 255000],[2025, 4, 262000],[2025, 6, 268000],[2025, 9, 275000],[2025, 11, 278000],
+  [2026, 0, 279000],[2026, 2, 276000],[2026, 4, 278000],[2026, 5, 280000],[2026, 6, 282100],
+];
+
+function getPriceForDate(date, karat) {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  // find closest data point
+  let best = HISTORY[0], bestDist = Infinity;
+  for (const [hy, hm, hp] of HISTORY) {
+    const dist = Math.abs((y - hy) * 12 + (m - hm));
+    if (dist < bestDist) { bestDist = dist; best = [hy, hm, hp]; }
+  }
+  // interpolate between surrounding points if possible
+  let lower = null, upper = null;
+  for (const pt of HISTORY) {
+    const [hy, hm, hp] = pt;
+    const ptMonths = hy * 12 + hm;
+    const targetMonths = y * 12 + m;
+    if (ptMonths <= targetMonths) lower = pt;
+    if (ptMonths >= targetMonths && upper === null) upper = pt;
+  }
+  let price24k;
+  if (lower && upper && lower !== upper) {
+    const [ly, lm, lp] = lower, [uy, um, up] = upper;
+    const span = (uy * 12 + um) - (ly * 12 + lm);
+    const pos  = (y  * 12 + m)  - (ly * 12 + lm);
+    price24k = lp + (up - lp) * (pos / span);
+  } else {
+    price24k = best[2];
+  }
+  // apply purity
+  const purityFactor = karat === 22 ? (22/24) : karat === 18 ? (18/24) : 1;
+  return Math.round(price24k * purityFactor);
+}
+
+function fmtNPR(n) {
+  return 'NPR ' + Math.round(n).toLocaleString('en-IN');
+}
+
+const TODAY_24K = 282100;
+const TOLA_GRAMS = 11.664;
+
+document.getElementById('buyUnit').addEventListener('change', () => {
+  const u = document.getElementById('buyUnit').value;
+  document.getElementById('buyQtyLabel').textContent = u === 'npr' ? 'Amount Spent (NPR)' : u === 'gram' ? 'Weight (grams)' : 'Weight (tola)';
+  document.getElementById('buyQty').placeholder = u === 'npr' ? 'e.g. 500000' : u === 'gram' ? 'e.g. 12' : 'e.g. 2';
+});
+
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const d = new Date();
+    d.setMonth(d.getMonth() - parseInt(btn.dataset.months));
+    document.getElementById('buyDate').value = d.toISOString().split('T')[0];
+  });
+});
+
+// set default date to 1 year ago
+(function(){
+  const d = new Date(); d.setFullYear(d.getFullYear()-1);
+  document.getElementById('buyDate').value = d.toISOString().split('T')[0];
+  document.getElementById('buyDate').max = new Date().toISOString().split('T')[0];
+})();
+
+document.getElementById('calcBtn').addEventListener('click', () => {
+  const dateVal = document.getElementById('buyDate').value;
+  if (!dateVal) return alert('Please select a purchase date.');
+  const buyDate = new Date(dateVal);
+  const today = new Date();
+  if (buyDate >= today) return alert('Purchase date must be in the past.');
+  if (buyDate < new Date('2019-01-01')) return alert('We have data from 2020 onwards. Please enter a date from 2020.');
+
+  const karat = parseInt(document.getElementById('goldPurity').value);
+  const unit = document.getElementById('buyUnit').value;
+  const qty = parseFloat(document.getElementById('buyQty').value);
+  if (!qty || qty <= 0) return alert('Please enter a valid quantity.');
+
+  const buyPriceTola = getPriceForDate(buyDate, karat);
+  const purityFactor = karat === 22 ? (22/24) : karat === 18 ? (18/24) : 1;
+  const todayPriceTola = Math.round(TODAY_24K * purityFactor);
+
+  let tolasBought, investedNPR;
+  if (unit === 'tola') {
+    tolasBought = qty;
+    investedNPR = qty * buyPriceTola;
+  } else if (unit === 'gram') {
+    tolasBought = qty / TOLA_GRAMS;
+    investedNPR = tolasBought * buyPriceTola;
+  } else {
+    investedNPR = qty;
+    tolasBought = qty / buyPriceTola;
+  }
+
+  const currentValue = tolasBought * todayPriceTola;
+  const gain = currentValue - investedNPR;
+  const returnPct = (gain / investedNPR) * 100;
+  const years = (today - buyDate) / (365.25 * 24 * 3600 * 1000);
+  const cagr = (Math.pow(currentValue / investedNPR, 1 / years) - 1) * 100;
+  const isGain = gain >= 0;
+
+  const banner = document.getElementById('resultBanner');
+  banner.className = 'result-banner ' + (isGain ? 'gain' : 'loss');
+  banner.style.display = 'block';
+  document.getElementById('resultEmoji').textContent = isGain ? '📈' : '📉';
+  document.getElementById('resultLabel').textContent = 'Your investment value today';
+  document.getElementById('resultAmount').textContent = fmtNPR(currentValue);
+  document.getElementById('metaInvested').textContent = fmtNPR(investedNPR);
+  document.getElementById('metaGain').textContent = (isGain ? '+' : '') + fmtNPR(gain);
+  document.getElementById('metaReturn').textContent = (isGain ? '+' : '') + returnPct.toFixed(1) + '%';
+  document.getElementById('metaCAGR').textContent = (isGain ? '+' : '') + cagr.toFixed(1) + '% / yr';
+
+  // Detail table
+  const grams = tolasBought * TOLA_GRAMS;
+  const rows = [
+    ['Purchase Date', buyDate.toLocaleDateString('en-NP', {year:'numeric',month:'long',day:'numeric'})],
+    ['Purity', karat + 'K gold'],
+    ['Est. Price on Purchase Date', fmtNPR(buyPriceTola) + ' / tola'],
+    ['Gold Acquired', tolasBought.toFixed(4) + ' tola (' + grams.toFixed(3) + ' grams)'],
+    ['Amount Invested', fmtNPR(investedNPR)],
+    ['Today\'s Rate (' + karat + 'K)', fmtNPR(todayPriceTola) + ' / tola'],
+    ['Current Value', fmtNPR(currentValue)],
+    ['Profit / Loss', (isGain ? '+' : '') + fmtNPR(gain)],
+    ['Return', (isGain ? '+' : '') + returnPct.toFixed(2) + '%'],
+    ['Holding Period', years.toFixed(1) + ' years'],
+    ['CAGR', (isGain ? '+' : '') + cagr.toFixed(2) + '% per year'],
+  ];
+  document.getElementById('detailBody').innerHTML = rows.map(([k,v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join('');
+  document.getElementById('detailCard').style.display = 'block';
+  document.getElementById('ctaCard').style.display = 'block';
+  banner.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+</script>
+<script src="js/main.js?v=2.4.0"></script>
+</body>
+</html>
