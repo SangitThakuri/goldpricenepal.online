@@ -12,6 +12,9 @@ on:
         default: 'false'
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   post:
     runs-on: ubuntu-latest
@@ -31,14 +34,7 @@ jobs:
         working-directory: social-automation
         run: npm install
 
-      - name: Post daily graphic (live)
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        working-directory: social-automation
-        env:
-          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
-          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
-        run: node index.js
-
+      # ── DRY RUN ─────────────────────────────────────────────────────────
       - name: Post daily graphic (dry run)
         if: ${{ github.event.inputs.dry_run == 'true' }}
         working-directory: social-automation
@@ -51,3 +47,42 @@ jobs:
           name: preview-graphic
           path: social-automation/preview-*.png
           retention-days: 3
+
+      # ── LIVE: Step 1 — Post to Facebook & save preview PNG ──────────────
+      - name: Post to Facebook & save preview image
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: social-automation
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+        run: node index.js --save-preview
+
+      # ── LIVE: Step 2 — Commit preview PNG so Instagram can use the URL ──
+      - name: Commit social preview image
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        id: commit_preview
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add data/social-preview.png
+          if git diff --staged --quiet; then
+            echo "Preview unchanged, skipping commit"
+          else
+            git commit -m "chore: update social preview [skip ci]"
+            git pull --rebase origin main
+            git push
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      # ── LIVE: Step 3 — Post to Instagram ────────────────────────────────
+      # Add IG_USER_ID as a GitHub secret to enable Instagram posting.
+      # Uses the same FB_PAGE_ACCESS_TOKEN — no separate Instagram token needed.
+      # Image served from raw.githubusercontent.com (immediately available after push).
+      - name: Post to Instagram
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: social-automation
+        env:
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_IMAGE_URL: "https://raw.githubusercontent.com/SangitThakuri/goldpricenepal.online/${{ steps.commit_preview.outputs.sha }}/data/social-preview.png"
+        run: node index.js --instagram-only

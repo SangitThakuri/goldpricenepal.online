@@ -5,19 +5,26 @@
  *   1. Fetch live prices from goldpricenepal.online/data/prices.json
  *   2. Render a 1080×1080 PNG graphic via @napi-rs/canvas
  *   3. POST to Facebook Page via Graph API v24.0
+ *   4. POST to Instagram Business Account via Graph API v24.0
  *
  * Usage:
- *   node index.js             → full run (post to Facebook)
+ *   node index.js             → full run (post to Facebook + Instagram)
  *   node index.js --dry-run   → render only, save PNG locally
  *
  * Required env vars (set in .env or GitHub Actions secrets):
  *   FB_PAGE_ID
  *   FB_PAGE_ACCESS_TOKEN
+ *   IG_USER_ID            (Instagram Business Account ID — optional, skip if not set)
+ *   IG_IMAGE_URL          (public URL of saved PNG — set by workflow after git push)
  */
 
 import 'dotenv/config';
 import { createCanvas } from '@napi-rs/canvas';
 import { writeFile } from 'fs/promises';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /* ─────────────────────────────────────────
    Config
@@ -25,7 +32,10 @@ import { writeFile } from 'fs/promises';
 const PRICES_URL   = 'https://goldpricenepal.online/data/prices.json';
 const FB_API_BASE  = 'https://graph.facebook.com/v24.0';
 const CANVAS_SIZE  = 1080;
-const DRY_RUN      = process.argv.includes('--dry-run');
+const DRY_RUN        = process.argv.includes('--dry-run');
+const SAVE_PREVIEW   = process.argv.includes('--save-preview');
+const INSTAGRAM_ONLY = process.argv.includes('--instagram-only');
+const PREVIEW_PATH   = resolve(__dirname, '../data/social-preview.png');
 
 /* ─────────────────────────────────────────
    Helpers
@@ -442,18 +452,97 @@ async function postToFacebook(imageBuffer, prices) {
 }
 
 /* ─────────────────────────────────────────
+   Stage 4 — Save preview PNG for Instagram
+───────────────────────────────────────── */
+async function savePreview(imageBuffer) {
+  await writeFile(PREVIEW_PATH, imageBuffer);
+  console.log(`\n[preview] Saved → ${PREVIEW_PATH}`);
+}
+
+/* ─────────────────────────────────────────
+   Stage 5 — Post to Instagram Graph API
+   Requires the image at a public URL first
+   (workflow commits social-preview.png then
+    passes the raw.githubusercontent.com URL
+    via IG_IMAGE_URL env var)
+───────────────────────────────────────── */
+function buildInstagramCaption(prices) {
+  const { gold24k, gold22k, silver } = prices;
+  const today = nepaliDate();
+  return [
+    `🏅 Today's Gold Price in Nepal — ${today}`,
+    '',
+    `🥇 24K Fine Gold:   Rs. ${fmt(gold24k)} / tola`,
+    `🥈 22K Tejabi Gold: Rs. ${fmt(gold22k)} / tola`,
+    `⚪ Silver (Chandi): Rs. ${fmt(silver)} / tola`,
+    '',
+    `Official FENEGOSIDA rates. Free calculator & history at goldpricenepal.online`,
+    '',
+    `#GoldPriceNepal #SunaKoBhaau #सुनकोभाउ #NepalGold #FENEGOSIDA #GoldRateNepal`,
+    `#SilverNepal #NepalJewellery #GoldInvestment #NepalFinance #TodayGoldRate`,
+    `#सुनकोभाउआज #nepalese #kathmandu #pokhara #nepal`,
+  ].join('\n');
+}
+
+async function postToInstagram(prices) {
+  const { IG_USER_ID, FB_PAGE_ACCESS_TOKEN, IG_IMAGE_URL } = process.env;
+
+  if (!IG_USER_ID) { console.log('\n[Instagram] IG_USER_ID not set — skipping.'); return; }
+  if (!IG_IMAGE_URL) { console.log('\n[Instagram] IG_IMAGE_URL not set — skipping.'); return; }
+  if (!FB_PAGE_ACCESS_TOKEN) throw new Error('FB_PAGE_ACCESS_TOKEN not set');
+
+  const caption = buildInstagramCaption(prices);
+
+  console.log('\n[4/4] Publishing to Instagram…');
+  console.log(`     Account : ${IG_USER_ID}`);
+  console.log(`     Image   : ${IG_IMAGE_URL}`);
+
+  // Step 1 — create media container
+  const containerUrl = new URL(`${FB_API_BASE}/${IG_USER_ID}/media`);
+  containerUrl.searchParams.set('image_url', IG_IMAGE_URL);
+  containerUrl.searchParams.set('caption', caption);
+  containerUrl.searchParams.set('access_token', FB_PAGE_ACCESS_TOKEN);
+
+  const containerRes = await fetchRetry(containerUrl.toString(), { method: 'POST' });
+  const { id: creationId } = await containerRes.json();
+  if (!creationId) throw new Error('Instagram container creation returned no id');
+  console.log(`     Container ID : ${creationId}`);
+
+  // Instagram recommends a short wait before publishing
+  await sleep(3000);
+
+  // Step 2 — publish container
+  const publishUrl = new URL(`${FB_API_BASE}/${IG_USER_ID}/media_publish`);
+  publishUrl.searchParams.set('creation_id', creationId);
+  publishUrl.searchParams.set('access_token', FB_PAGE_ACCESS_TOKEN);
+
+  const publishRes = await fetchRetry(publishUrl.toString(), { method: 'POST' });
+  const { id: postId } = await publishRes.json();
+
+  console.log(`\n✅  Instagram published!`);
+  console.log(`     Post ID : ${postId}`);
+}
+
+/* ─────────────────────────────────────────
    Main
 ───────────────────────────────────────── */
 async function main() {
   console.log('══════════════════════════════════════════════');
-  console.log('  GoldPriceNepal — Social Automation  v1.0.0 ');
+  console.log('  GoldPriceNepal — Social Automation  v2.0.0 ');
   console.log('══════════════════════════════════════════════');
-  if (DRY_RUN) {
-    console.log('  Mode: DRY RUN — graphic saved locally, no post');
-  }
+  if (DRY_RUN)        console.log('  Mode: DRY RUN — graphic saved locally, no post');
+  if (SAVE_PREVIEW)   console.log('  Mode: SAVE PREVIEW — will save PNG for Instagram');
+  if (INSTAGRAM_ONLY) console.log('  Mode: INSTAGRAM ONLY — skip Facebook, post to Instagram');
 
   try {
-    const prices      = await fetchPrices();
+    const prices = await fetchPrices();
+
+    // Instagram-only mode: no graphic render needed, just post
+    if (INSTAGRAM_ONLY) {
+      await postToInstagram(prices);
+      return;
+    }
+
     const imageBuffer = await renderGraphic(prices);
 
     if (DRY_RUN) {
@@ -464,7 +553,13 @@ async function main() {
       return;
     }
 
+    // Post to Facebook
     await postToFacebook(imageBuffer, prices);
+
+    // Save preview PNG so the workflow can commit it for Instagram
+    if (SAVE_PREVIEW) {
+      await savePreview(imageBuffer);
+    }
 
   } catch (err) {
     console.error(`\n❌ Fatal: ${err.message}`);
