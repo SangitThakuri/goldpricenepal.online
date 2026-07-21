@@ -455,8 +455,9 @@ async function postToFacebook(imageBuffer, prices) {
    Stage 4 — Save preview PNG for Instagram
 ───────────────────────────────────────── */
 async function savePreview(imageBuffer) {
+  console.log(`\n[preview] Writing ${(imageBuffer.length / 1024).toFixed(1)} KB → ${PREVIEW_PATH}`);
   await writeFile(PREVIEW_PATH, imageBuffer);
-  console.log(`\n[preview] Saved → ${PREVIEW_PATH}`);
+  console.log(`[preview] ✅ Saved successfully`);
 }
 
 /* ─────────────────────────────────────────
@@ -556,9 +557,16 @@ async function main() {
     // Post to Facebook
     await postToFacebook(imageBuffer, prices);
 
-    // Save preview PNG so the workflow can commit it for Instagram
+    // Save preview PNG so the workflow can commit it for Instagram.
+    // Wrapped in its own try-catch — a save failure must NOT abort the FB post.
     if (SAVE_PREVIEW) {
-      await savePreview(imageBuffer);
+      try {
+        await savePreview(imageBuffer);
+      } catch (previewErr) {
+        console.warn(`\n[preview] ⚠️  Could not save preview PNG: ${previewErr.message}`);
+        console.warn(`           Path attempted: ${PREVIEW_PATH}`);
+        console.warn('           Facebook post succeeded. Instagram will be skipped this run.');
+      }
     }
 
   } catch (err) {
