@@ -48,6 +48,30 @@ jobs:
           path: social-automation/preview-*.png
           retention-days: 3
 
+      # ── LIVE: Step 0 — Validate Facebook token ──────────────────────────
+      - name: Validate Facebook token
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+        run: |
+          echo "=== Checking FB_PAGE_ID and FB_PAGE_ACCESS_TOKEN are set ==="
+          if [ -z "$FB_PAGE_ID" ]; then echo "❌ FB_PAGE_ID secret is EMPTY"; exit 1; fi
+          if [ -z "$FB_PAGE_ACCESS_TOKEN" ]; then echo "❌ FB_PAGE_ACCESS_TOKEN secret is EMPTY"; exit 1; fi
+          echo "✅ Both secrets are set (PAGE_ID=$FB_PAGE_ID)"
+          echo ""
+          echo "=== Calling Graph API to validate token ==="
+          RESULT=$(curl -s "https://graph.facebook.com/v24.0/${FB_PAGE_ID}?fields=id,name&access_token=${FB_PAGE_ACCESS_TOKEN}")
+          echo "$RESULT"
+          if echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if 'id' in d else 1)"; then
+            echo ""
+            echo "✅ Token is VALID — page is accessible"
+          else
+            echo ""
+            echo "❌ Token appears INVALID — see error above"
+            exit 1
+          fi
+
       # ── LIVE: Step 1 — Post to Facebook & save preview PNG ──────────────
       - name: Post to Facebook & save preview image
         if: ${{ github.event.inputs.dry_run != 'true' }}
