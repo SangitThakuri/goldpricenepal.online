@@ -55,6 +55,9 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
         run: |
+          # Strip accidental whitespace/newlines from secrets
+          FB_PAGE_ID=$(echo "$FB_PAGE_ID" | tr -d '[:space:]')
+          FB_PAGE_ACCESS_TOKEN=$(echo "$FB_PAGE_ACCESS_TOKEN" | tr -d '[:space:]')
           echo "=== Checking FB_PAGE_ID and FB_PAGE_ACCESS_TOKEN are set ==="
           if [ -z "$FB_PAGE_ID" ]; then echo "❌ FB_PAGE_ID secret is EMPTY"; exit 1; fi
           if [ -z "$FB_PAGE_ACCESS_TOKEN" ]; then echo "❌ FB_PAGE_ACCESS_TOKEN secret is EMPTY"; exit 1; fi

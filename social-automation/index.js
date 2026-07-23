@@ -396,7 +396,8 @@ function buildCaption(prices) {
 }
 
 async function postToFacebook(imageBuffer, prices) {
-  const { FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN } = process.env;
+  const FB_PAGE_ID           = (process.env.FB_PAGE_ID || '').trim();
+  const FB_PAGE_ACCESS_TOKEN = (process.env.FB_PAGE_ACCESS_TOKEN || '').trim();
 
   if (!FB_PAGE_ID)            throw new Error('FB_PAGE_ID env var is not set');
   if (!FB_PAGE_ACCESS_TOKEN)  throw new Error('FB_PAGE_ACCESS_TOKEN env var is not set');
