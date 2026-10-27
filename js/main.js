@@ -1382,10 +1382,14 @@ const BS_MONTHS_EN = ['Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','K
 const BS_MONTHS_NP = ['बैशाख','जेठ','असार','श्रावण','भाद्र','आश्विन','कार्तिक','मंसिर','पुष','माघ','फाल्गुन','चैत्र'];
 
 function adToBS(date) {
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  // Use UTC midnights for both dates so the result is an exact day count.
+  // Mixing local `new Date(y,m,d)` with `new Date('YYYY-MM-DD')` (UTC) made
+  // Nepal (UTC+5:45) fall one day behind — e.g. Kartik 10 shown as 9.
+  const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   const entries = Object.entries(BS_DATA).sort((a, b) => b[0] - a[0]);
   for (const [yr, { start, days }] of entries) {
-    const s = new Date(start);
+    const [sy, sm, sd] = start.split('-').map(Number);
+    const s = Date.UTC(sy, sm - 1, sd);
     if (d >= s) {
       const diff = Math.floor((d - s) / 86400000);
       let rem = diff;
