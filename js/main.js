@@ -1413,8 +1413,8 @@ function renderBSDate() {
 const NEPAL_HOLIDAYS = new Set([
   '2026-01-11','2026-01-15','2026-02-19','2026-03-08','2026-04-14',
   '2026-05-12','2026-08-27','2026-09-17','2026-10-02','2026-10-09',
-  '2026-10-10','2026-10-11','2026-10-12','2026-10-15','2026-10-26',
-  '2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-11-28',
+  '2026-10-10','2026-10-11','2026-10-12','2026-10-15','2026-11-08',
+  '2026-11-09','2026-11-10','2026-11-11','2026-11-12','2026-11-15',
   '2027-01-11','2027-01-14','2027-03-10','2027-04-14','2027-05-11',
 ]);
 
@@ -1526,8 +1526,8 @@ function renderGoldUSD() {
 const FESTIVALS = [
   { name:'Teej',         nameNP:'तीज',           date:'2026-08-27', desc:'Gold demand rises sharply',      descNP:'सुनको माग बढ्छ' },
   { name:'Dashain',      nameNP:'दशैं',           date:'2026-10-12', desc:"Nepal's biggest gold buying season", descNP:'नेपालको सबैभन्दा ठूलो सुन मौसम' },
-  { name:'Tihar',        nameNP:'तिहार',          date:'2026-10-28', desc:'Gold gifting tradition',         descNP:'सुन उपहार दिने परम्परा' },
-  { name:'Chhath',       nameNP:'छठ',             date:'2026-10-30', desc:'Gold ornament demand rises',     descNP:'सुन गहनाको माग बढ्छ' },
+  { name:'Tihar',        nameNP:'तिहार',          date:'2026-11-08', desc:'Gold gifting tradition',         descNP:'सुन उपहार दिने परम्परा' },
+  { name:'Chhath',       nameNP:'छठ',             date:'2026-11-15', desc:'Gold ornament demand rises',     descNP:'सुन गहनाको माग बढ्छ' },
   { name:'Baisakh 1',    nameNP:'बैशाख १',        date:'2027-04-14', desc:'New Year — auspicious for gold', descNP:'नयाँ वर्ष — सुन किन्न शुभ' },
   { name:'Buddha Jayanti', nameNP:'बुद्ध जयन्ती', date:'2027-05-11', desc:'Gold gifting occasion',         descNP:'सुन दिने अवसर' },
 ];
@@ -1550,7 +1550,7 @@ function renderFestivalCountdown() {
     const dc   = currentLang === 'np' ? f.descNP : f.desc;
     const hot  = days <= 14 ? ' festival-hot' : days <= 45 ? ' festival-warm' : '';
     return `<div class="festival-card${hot}">
-      <div class="festival-days-wrap"><div class="festival-days">${days}</div><div class="festival-days-label">${currentLang === 'np' ? 'दिन' : 'days'}</div></div>
+      <div class="festival-days-wrap"><div class="festival-days">${days}</div><div class="festival-days-label">${currentLang === 'np' ? 'दिन' : (days === 1 ? 'day' : 'days')}</div></div>
       <div class="festival-info"><div class="festival-name">${nm}</div><div class="festival-desc">${dc}</div></div>
     </div>`;
   }).join('');
