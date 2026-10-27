@@ -4,13 +4,13 @@
 
 // importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE    = 'gnp-v6';   // bump to force full reinstall on all devices
+const CACHE    = 'gnp-v7';   // bump to force full reinstall on all devices
 const PRECACHE = [
   './',
   './index.html',
   './history.html',
   './css/style.css?v=2.0.2',
-  './js/main.js?v=2.2.0',   // versioned — forces fresh fetch on SW update
+  './js/main.js?v=2.4.1',   // versioned — forces fresh fetch on SW update
   './js/history.js',
   './manifest.json',
   './favicon.svg',

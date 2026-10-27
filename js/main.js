@@ -1381,6 +1381,14 @@ const BS_DATA = {
 const BS_MONTHS_EN = ['Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
 const BS_MONTHS_NP = ['बैशाख','जेठ','असार','श्रावण','भाद्र','आश्विन','कार्तिक','मंसिर','पुष','माघ','फाल्गुन','चैत्र'];
 
+function nepalToday() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kathmandu', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const p = Object.fromEntries(parts.filter(x => x.type !== 'literal').map(x => [x.type, x.value]));
+  return new Date(+p.year, +p.month - 1, +p.day);
+}
+
 function adToBS(date) {
   // Use UTC midnights for both dates so the result is an exact day count.
   // Mixing local `new Date(y,m,d)` with `new Date('YYYY-MM-DD')` (UTC) made
@@ -1403,7 +1411,7 @@ function adToBS(date) {
 }
 
 function renderBSDate() {
-  const bs = adToBS(new Date());
+  const bs = adToBS(nepalToday());
   if (!bs) return;
   const enEl = el('bs-date-en');
   const npEl = el('bs-date-np');
@@ -1447,8 +1455,9 @@ function renderMarketStatus() {
 function buildShareText() {
   const p = state.nepal24kTola;
   const s = state.silverTolaNPR;
-  const bs = adToBS(new Date());
-  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const nep = nepalToday();
+  const bs = adToBS(nep);
+  const today = nep.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const bsStr = bs ? ` (${bs.day} ${BS_MONTHS_EN[bs.month - 1]} ${bs.year} BS)` : '';
   return (
     `🏅 Gold Price Nepal — ${today}${bsStr}\n\n` +
